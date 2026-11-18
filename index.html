@@ -473,7 +473,7 @@ function dataNotes(web){
   const dc={}; ITEMS.forEach(i=>{ if(i.doll) dc[i.doll]=(dc[i.doll]||0)+1; });
   const nPh=ITEMS.filter(i=>(i.photos||[]).length).length, nMulti=ITEMS.filter(i=>i.doll&&dc[i.doll]>1&&!PC[i.id]).length;
   const nTmp=ITEMS.filter(i=>/暫定/.test(i.note||'')).length, nFab=ITEMS.filter(i=>!i.fab).length, noCc=ITEMS.filter(i=>!i.cc);
-  const L=[web?'台灣定價待定（確定後更新在本網站，已送出的訂單不受影響）':'台灣定價待定：本訂單本暫附「韓幣 MSRP(₩)」與「韓幣金額(₩)」欄位，僅供下單參考，台灣定價確定後另行通知',
+  const L=[web?'台灣定價待定':'台灣定價待定：本訂單本暫附「韓幣 MSRP(₩)」與「韓幣金額(₩)」欄位，僅供下單參考，台灣定價確定後另行通知',
     '尺寸先參考 DESCENTE 尺寸對照表，待原廠更新：男款 S～4XL（上身 90～120／下身 80～110）、女款 W-XS～W-2XL（上身 80～105／下身 65～90）、中性款 W-XS～W-L（女版）＋M～4XL；配件 F；鞋款 220～300（女款限定色 220～260）。尺寸下方數字是上身／下身尺寸（上衣看上身、褲子看下身）',
     '各色開放尺寸原廠未附，暫依性別全段開放，實際以原廠確認為準',
     `實體圖待更新：目前以款式圖為主，僅 ${nPh} 款色（鞋款）附配色圖`,
