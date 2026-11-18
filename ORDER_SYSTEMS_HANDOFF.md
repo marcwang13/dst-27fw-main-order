@@ -38,6 +38,7 @@ Marc 同時用 Claude 和 Grok Bot 維護這四套系統，一次只會有一邊
 |---|---|---|
 | SDR | https://script.google.com/macros/s/AKfycbzJ_l8ZTP4zOzK1WKJmpcfBKnd9N05hL8rUMr5lVLTGMHsGIYpq2udV0DXDecC-Q1dX/exec | https://docs.google.com/spreadsheets/d/1MD9-FCwtUrQM6K79bi6HDbZpdlpNj9qLk5dAu_pBRic/edit |
 | DST | https://script.google.com/macros/s/AKfycbxxlmSXignxS5EE7Bd2vpPw3Z7HRcg9bb9BeN5tlCDfLMYUDFugMGcS4rv4rJydck_bcw/exec | https://docs.google.com/spreadsheets/d/1dWV3TyPOV__bduxdHDoBe-FieMdV02vr9-qjQrgkbpU/edit |
+| DSTC | https://script.google.com/macros/s/AKfycbxB0UJsidqu5pUYZYVBSn6T5_3TNEJDHr-A_3kl0nr3CDxHoBfzaxWbehj4BZaKimMZ7Q/exec | https://docs.google.com/spreadsheets/d/1AxRynMT4epskokwGXxdMJA3yetaPdNnN4FuudK_zPiE/edit |
 | BYS | https://script.google.com/macros/s/AKfycbwBKPi33bXNrIS7rdRpSJegQRBtljhtXKfEU-oBY0vMHUpBSzSNCfgaxdkttTdwETbT/exec | https://docs.google.com/spreadsheets/d/1elXDIBFt4J-eMZOjU8NhwVbCh2-8_u0o2RBk4c21_sE/edit |
 | BYF | https://script.google.com/macros/s/AKfycbwob2mjChGVJGGnlyVB-Vd9eEeXhcEOMb7IQUO4udmiKlLHLi3R7QNZPimVoFE3ozf2/exec | https://docs.google.com/spreadsheets/d/1IhJqFN5_V9B45q0lNpt9ZKe2ByYbM8C9YhaYwGP6JUo/edit |
 
