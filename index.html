@@ -459,7 +459,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
 })();
 </script>
 <script src="data.js?v=20261118c"></script>
-<script src="imgs.js?v=20261118c"></script>
+<script src="imgs.js?v=20261118e"></script>
 <script src="pc.js?v=20261118d"></script>
 <script>
 (function(){
@@ -468,6 +468,7 @@ const IMG = window.SDR_IMG || {};
 const BY = Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 // 單色款式圖：有裁切框的款色，款式圖（卡片、放大、Excel）只顯示該色。it.photos 只放實體圖（配色照），沒有就顯示「實體圖待更新」
 const PC = window.DSTC_PC || {};
+const big = h=>`big/${h}.jpg`;
 // 資料待更新說明：網頁頂端與 Excel 訂單本「總表」共用同一份清單（數字依目前資料即時計算）。web=true 時不出現任何韓幣字樣
 function dataNotes(web){
   const dc={}; ITEMS.forEach(i=>{ if(i.doll) dc[i.doll]=(dc[i.doll]||0)+1; });
@@ -490,7 +491,8 @@ function pcCrop(src,b){ const key=(src.length>300?src.length+src.slice(40,120):s
   PCC.set(key,pr); return pr; }
 function applyPC(root){ (root||document).querySelectorAll('img[data-pc]:not([data-pcd])').forEach(img=>{ img.dataset.pcd='1'; const b=PC[img.dataset.pc]; if(!b) return; img.style.visibility='hidden'; pcCrop(img.getAttribute('src'),b).then(u=>{ if(u) img.src=u; img.style.visibility=''; }); }); }
 { const mo=new MutationObserver(()=>{ applyPC(document.getElementById('list')); applyPC(document.getElementById('overlay')); }); const go=()=>['list','overlay'].forEach(id=>{ const el=document.getElementById(id); if(el){ mo.observe(el,{childList:true,subtree:true}); applyPC(el); } }); if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go(); }
-async function pcImg(it,h){ const d=IMG[h]; if(!d) return null; if(h===it.doll&&PC[it.id]){ const u=await pcCrop(d,PC[it.id]); if(u) return {k:h+'|'+it.id,d:u.split(',')[1]?u:d}; } return {k:h,d}; }
+async function loadImgData(h){ try{ const r=await fetch(big(h)); if(r.ok){ const buf=await r.arrayBuffer(); const b=new Uint8Array(buf); let s=''; const n=0x8000; for(let i=0;i<b.length;i+=n) s+=String.fromCharCode(...b.subarray(i,i+n)); return 'data:image/jpeg;base64,'+btoa(s);} }catch(e){} return IMG[h]||null; }
+async function pcImg(it,h){ const d=await loadImgData(h); if(!d) return null; if(h===it.doll&&PC[it.id]){ const u=await pcCrop(d,PC[it.id]); if(u) return {k:h+'|'+it.id,d:u.split(',')[1]?u:d}; } return {k:h,d}; }
 const SHEETS = ['NEO-ARCHIVE','TRAINING','RUNNING','INSPIRED','SNOW','WOMENS SNOW','PREMIUM TECH ESSENTIAL','WOMENS','ACC 配件','FTW RUNNING','FTW MOVEWEAR'];
 const MONTH_ORDER = ['5月','6月','7月','8月','9月','10月','11月','12月'];
 const CG_ORDER=['上身','下身','配件','鞋類']; const GEN_ORDER=['男','女','中性'];
@@ -549,9 +551,11 @@ function picHTML(it){
   const h = it.doll||ph[0];
   const src = h && IMG[h];
   const sw = `<div class="sw">${it.doll?'<button data-pic="doll">款式圖</button>':''}<button data-pic="photo"${ph.length?'':' disabled title="實體圖待更新"'}>實體圖${ph.length>1?' '+ph.length:''}</button></div>`;
-  return src ? `<img src="${src}" alt="${esc(it.en+' '+it.color)}" data-zoom loading="lazy"${(PC[it.id]&&h===it.doll)?` data-pc="${esc(it.id)}"`:''}>${sw}` : `<span class="none">圖片待補</span>`;
+  if(!h&&!src) return `<span class="none">圖片待補</span>`;
+  const pc=(PC[it.id]&&h&&h===it.doll)?` data-pc="${esc(it.id)}"`:'';
+  const fb=src?` onerror="this.onerror=null;this.src='${src}'"`:'';
+  return `<img src="${h?big(h):src}" alt="${esc(it.en+' '+it.color)}" data-zoom loading="lazy" decoding="async"${fb}${pc}>${sw}`;
 }
-const big = h=>`big/${h}.jpg`;
 let LB=null;
 function openLB(id,kind,ev){ const it=BY[id]; const ph=it.photos||[]; if(kind==='photo'&&!ph.length) kind='doll'; if(kind==='doll'&&!it.doll) kind='photo'; LB={id,kind,i:0,ox:ev?ev.clientX:null,oy:ev?ev.clientY:null}; renderLB(true); }
 function renderLB(anim){
