@@ -288,3 +288,4 @@ Marc 要把四套系統（含後台、管理頁）串進另一個入口網站。
 | 2026-11-02 | Grok Bot | SDR、BY27SS、BY27FW | 一鍵統整交單：先重抓最新訂單並跑 handoffCheck，件數對不上就警告、不匯出 | b43842b／d0a4f4b／f791e22 |
 | 2026-11-02 | Grok Bot | 四套 | 本文件放進四個 repo，新增同步規則（0.5 節）與變更紀錄 | （本次） |
 | 2026-11-18 | Claude | DSTC | 新建 DESCENTE 27FW 正式訂貨（27Q3Q4）：APP／ACC／FTW 1,114 款色、詳細中文商品說明、FTW 分色圖、韓幣參考價、Early Buy 重複款標示 | （本次） |
+| 2026-11-18 | Grok | DSTC | 原廠日期拿掉（data.js 刪 eta／launch、mon +1 月，只顯示「ETA X月」）；新增大類（上身／下身／配件／鞋類）與性別篩選；桌機分頁列換行；網頁不顯示韓國參考價與金額（Excel／CSV 保留）；掛進 WHL 內部站（dst-27fw-main，權限 pre.dstc） | （本次） |

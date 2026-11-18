@@ -116,6 +116,7 @@ button{cursor:pointer}
 .btn.danger{border-color:var(--red);color:var(--red)}
 .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
+@media (min-width:761px){.tabs{flex-wrap:wrap;overflow:visible}}
 .tab{flex:none;border:1.5px solid color-mix(in srgb,var(--acc) 45%,var(--line));background:var(--surface);border-radius:999px;padding:6px 14px;font-weight:500;display:flex;gap:6px;align-items:center;transition:border-color .15s,background .15s}
 .tab:hover{border-color:var(--acc)}
 .tab small{font-family:var(--f-mono);color:var(--muted);font-size:11px}
@@ -351,15 +352,16 @@ tfoot td{font-weight:700;background:var(--sunk)}
       <input type="file" id="x-file" accept=".xlsx" hidden>
       <span class="xlhint" id="x-msg"></span>
     </div>
-    <p class="sznote"><b>價格</b>目前顯示<b style="margin:0 2px">韓國參考售價（韓幣 ₩）</b>，金額合計也是韓幣，僅供下單參考；台幣建議售價確定後會更新在這個網站，已送出的訂單不受影響。</p>
-    <p class="sznote"><b>尺寸</b><b style="margin:0 2px">先參考 DESCENTE 尺寸對照表，待原廠更新</b>：男款 S～4XL（上身 90～120／下身 80～110）、女款 W-XS～W-2XL（上身 80～105／下身 65～90）、中性款 W-XS～W-L（女版）＋M～4XL；配件 F；鞋款 220～300（女款限定色 220～260）。各色實際開放尺寸以韓國原廠確認為準。尺寸下方數字是上身／下身尺寸（上衣看上身、褲子看下身）。</p>
+    <p class="sznote"><b>尺寸</b><b style="margin:0 2px">尺寸待原廠更新，目前參考之前的尺寸（DESCENTE 尺寸對照表）</b>：男款 S～4XL（上身 90～120／下身 80～110）、女款 W-XS～W-2XL（上身 80～105／下身 65～90）、中性款 W-XS～W-L（女版）＋M～4XL；配件 F；鞋款 220～300（女款限定色 220～260）。各色實際開放尺寸以韓國原廠確認為準。尺寸下方數字是上身／下身尺寸（上衣看上身、褲子看下身）。</p>
   </div>
   <div class="rail">
     <div class="wrap">
       <div class="brbar" id="brbar" hidden></div>
       <div class="tabs" id="tabs" role="toolbar" aria-label="分頁"></div>
       <div class="row2">
-        <div class="chips" id="months" aria-label="月份"></div>
+        <div class="chips" id="months" aria-label="ETA 月份"></div>
+        <div class="chips" id="cgs" aria-label="大類"></div>
+        <div class="chips" id="gens" aria-label="性別"></div>
         <input class="search" id="q" type="search" placeholder="搜尋品名、款號、色碼、顏色">
         <label class="toggle"><input type="checkbox" id="only"> 只看已下單</label>
       </div>
@@ -375,7 +377,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
   <div class="wrap">
     <div class="stat"><small>款色</small><b class="num" id="t-sty">0</b></div>
     <div class="stat"><small id="t-qtyl">件數</small><b class="num" id="t-qty">0</b></div>
-    <div class="stat"><small>參考金額 KRW</small><b class="num" id="t-amt">0</b></div>
+    <div class="stat" hidden><small>參考金額 KRW</small><b class="num" id="t-amt">0</b></div>
     <div class="stat" id="t-br" hidden><small id="t-brn">本店</small><b class="num" id="t-brq">0</b></div>
     <div class="stat" id="t-edit" hidden><small>編輯中</small><b class="num" id="t-eid" style="font-size:13px"></b></div>
     <div class="act">
@@ -461,14 +463,16 @@ const ITEMS = window.SDR_ITEMS || [];
 const IMG = window.SDR_IMG || {};
 const BY = Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const SHEETS = ['NEO-ARCHIVE','TRAINING','RUNNING','INSPIRED','SNOW','WOMENS SNOW','PREMIUM TECH ESSENTIAL','WOMENS','ACC 配件','FTW RUNNING','FTW MOVEWEAR'];
-const MONTH_ORDER = ['4月','5月','6月','7月','8月','9月','10月','11月'];
+const MONTH_ORDER = ['5月','6月','7月','8月','9月','10月','11月','12月'];
+const CG_ORDER=['上身','下身','配件','鞋類']; const GEN_ORDER=['男','女','中性'];
+function cgOf(i){ return i.div==='FTW'?'鞋類':i.div==='ACC'?'配件':i.part==='bottom'?'下身':'上身'; }
 const $ = s=>document.querySelector(s);
 const fmt = n=>Math.round(n||0).toLocaleString('en-US');
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ---------- state ----------
 const DRAFT_KEY='dstc-27fw-draft-v1';
-let S = {sheet:'NEO-ARCHIVE', months:new Set(), q:'', only:false, qty:{}, dealer:{store:'',contact:'',phone:'',email:'',note:''}, editing:null, admin:null, open:new Set(), pic:{}, chain:false, br:[], bq:{}, cur:null};
+let S = {sheet:'NEO-ARCHIVE', months:new Set(), cgs:new Set(), gens:new Set(), q:'', only:false, qty:{}, dealer:{store:'',contact:'',phone:'',email:'',note:''}, editing:null, admin:null, open:new Set(), pic:{}, chain:false, br:[], bq:{}, cur:null};
 try{ const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null'); if(d){ S.qty=d.qty||{}; S.dealer=Object.assign(S.dealer,d.dealer||{}); S.editing=d.editing||null; S.admin=d.admin||null; if(d.chain&&Array.isArray(d.br)&&d.br.length){ S.chain=true; S.br=d.br; S.bq=d.bq||{}; S.cur=S.br.some(b=>b.id===d.cur)?d.cur:S.br[0].id; } } }catch(e){}
 let saveT=null;
 function adminEditing(){ return !!(S.admin&&S.editing&&S.admin.oid===S.editing&&window.SDR_ADMIN?.on); }
@@ -480,7 +484,7 @@ function recalcAgg(){ if(!S.chain) return; const a={}; for(const b of S.br){ con
 function curQ(){ return S.chain?(S.bq[S.cur]=S.bq[S.cur]||{}):S.qty; }
 function brId(){ return 'b'+Math.random().toString(36).slice(2,8); }
 function brStats(b){ const m=S.bq[b.id]||{}; let sty=0,qty=0,amt=0; for(const id in m){ let q=0; for(const z in m[id]) q+=m[id][z]||0; if(q){ sty++; qty+=q; amt+=q*((BY[id]&&BY[id].price)||0); } } return {sty,qty,amt}; }
-function branchTableHTML(){ if(!S.chain||!S.br.length) return ''; const rows=S.br.map(b=>{ const t=brStats(b); return `<tr><td>${esc(b.name)}</td><td class="r num">${t.sty}</td><td class="r num">${fmt(t.qty)}</td><td class="r num">${fmt(t.amt)}</td></tr>`; }).join(''); const T=totals(); return `<div class="tbl"><table><thead><tr><th>分店</th><th class="r">款色</th><th class="r">件數</th><th class="r">參考金額(₩)</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td>合計</td><td class="r num">${T.sty}</td><td class="r num">${fmt(T.qty)}</td><td class="r num">${fmt(T.amt)}</td></tr></tfoot></table></div>`; }
+function branchTableHTML(){ if(!S.chain||!S.br.length) return ''; const rows=S.br.map(b=>{ const t=brStats(b); return `<tr><td>${esc(b.name)}</td><td class="r num">${t.sty}</td><td class="r num">${fmt(t.qty)}</td></tr>`; }).join(''); const T=totals(); return `<div class="tbl"><table><thead><tr><th>分店</th><th class="r">款色</th><th class="r">件數</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td>合計</td><td class="r num">${T.sty}</td><td class="r num">${fmt(T.qty)}</td></tr></tfoot></table></div>`; }
 function branchesForExport(){ return (S.chain&&S.br.length)?S.br.map(b=>({name:b.name,qty:S.bq[b.id]||{}})):null; }
 function branchesFromOrder(o){ return (o.branches&&o.branches.length)?o.branches.map(b=>({name:b.name,qty:qtyFromLines(b.lines)})):null; }
 function itemQty(id){ const m=S.qty[id]; if(!m) return 0; let t=0; for(const k in m) t+=m[k]||0; return t; }
@@ -494,10 +498,15 @@ function renderTabs(){
   const t=totals();
   $('#tabs').innerHTML = SHEETS.map(s=>{ const n=ITEMS.filter(i=>i.sheet===s).length; const d=t.bySheet[s]; return `<button class="tab" data-s="${s}" aria-pressed="${S.sheet===s}">${s}<small>${n}</small>${d?`<span class="dot">${d}</span>`:''}</button>`; }).join('');
   const ms = MONTH_ORDER.filter(m=>ITEMS.some(i=>i.sheet===S.sheet && i.mon===m));
-  $('#months').innerHTML = `<button class="chip" data-m="" aria-pressed="${S.months.size===0}">全部</button>` + ms.map(m=>`<button class="chip" data-m="${m}" aria-pressed="${S.months.has(m)}">${m}</button>`).join('');
+  $('#months').innerHTML = `<button class="chip" data-m="" aria-pressed="${S.months.size===0}">全部</button>` + ms.map(m=>`<button class="chip" data-m="${m}" aria-pressed="${S.months.has(m)}">ETA ${m}</button>`).join('');
+  const inSheet=ITEMS.filter(i=>S.only||i.sheet===S.sheet);
+  const cgs=CG_ORDER.filter(g=>inSheet.some(i=>cgOf(i)===g)); const gns=GEN_ORDER.filter(g=>inSheet.some(i=>i.gen===g));
+  $('#cgs').innerHTML = cgs.length>1?`<button class="chip" data-cg="" aria-pressed="${S.cgs.size===0}">全部大類</button>`+cgs.map(g=>`<button class="chip" data-cg="${g}" aria-pressed="${S.cgs.has(g)}">${g}</button>`).join(''):'';
+  $('#gens').innerHTML = gns.length>1?`<button class="chip" data-gn="" aria-pressed="${S.gens.size===0}">全部性別</button>`+gns.map(g=>`<button class="chip" data-gn="${g}" aria-pressed="${S.gens.has(g)}">${g}</button>`).join(''):'';
 }
-$('#tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-s]'); if(!b) return; S.sheet=b.dataset.s; S.months.clear(); renderTabs(); renderList(); window.scrollTo({top:$('.rail').offsetTop-1}); });
+$('#tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-s]'); if(!b) return; S.sheet=b.dataset.s; S.months.clear(); S.cgs.clear(); S.gens.clear(); renderTabs(); renderList(); window.scrollTo({top:$('.rail').offsetTop-1}); });
 $('#months').addEventListener('click',e=>{ const b=e.target.closest('[data-m]'); if(!b) return; const m=b.dataset.m; if(!m) S.months.clear(); else S.months.has(m)?S.months.delete(m):S.months.add(m); renderTabs(); renderList(); });
+['cg','gn'].forEach(k=>{ const box=$(k==='cg'?'#cgs':'#gens'), set=k==='cg'?S.cgs:S.gens; box.addEventListener('click',e=>{ const b=e.target.closest('[data-'+k+']'); if(!b) return; const v=b.dataset[k]; if(!v) set.clear(); else set.has(v)?set.delete(v):set.add(v); renderTabs(); renderList(); }); });
 let qT=null; $('#q').addEventListener('input',e=>{ clearTimeout(qT); qT=setTimeout(()=>{ S.q=e.target.value.trim().toLowerCase(); renderList(); },150); });
 $('#only').addEventListener('change',e=>{ S.only=e.target.checked; renderList(); });
 
@@ -544,7 +553,7 @@ function matrixHTML(it,sh){
   const colT=fullSizes(it).map(z=>{ let t=0; S.br.forEach(b=>{ t+=(((S.bq[b.id]||{})[it.id]||{})[z])||0; }); return `<td data-ct="${esc(z)}">${t||''}</td>`; }).join('');
   return `<div class="mx-wrap"><table class="mx"><thead><tr><th class="bn">分店</th>${head}<th>合計</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><th class="bn">合計</th>${colT}<td data-ctt>${itemQty(it.id)||''}</td></tr></tfoot></table></div>`;
 }
-function subHTML(it){ const tq=itemQty(it.id); if(!tq) return '&nbsp;'; let s=`${S.chain?'全部分店 ':'小計 '}<b>${tq}</b> 件 · <b>${fmt(tq*(it.price||0))}</b>`; return s; }
+function subHTML(it){ const tq=itemQty(it.id); if(!tq) return '&nbsp;'; let s=`${S.chain?'全部分店 ':'小計 '}<b>${tq}</b> 件`; return s; }
 function itemHTML(it){
   const q=curQ()[it.id]||{}; const tq=itemQty(it.id);
   const open=S.open.has(it.id);
@@ -555,7 +564,7 @@ function itemHTML(it){
     <div class="pic">${picHTML(it)}</div>
     <div class="info">
       <div class="t1"><h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
-      <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span><span class="tag m">${esc(it.mon)}到貨${it.eta?' · 交期 '+esc(it.eta):''}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}</div>
+      <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span><span class="tag m">ETA ${esc(it.mon)}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}</div>
       <div class="code">${esc(it.style||'')}${it.sku?' ／ '+esc(it.sku):''}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}</div>
       ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
       ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
@@ -563,7 +572,8 @@ function itemHTML(it){
       ${open?`<div class="detail">${it.ov?`<div><h4>商品概述</h4><p>${esc(it.ov)}</p></div>`:''}${it.dt?`<div><h4>商品特色與機能</h4><p>${esc(it.dt)}</p></div>`:''}${it.tech?`<div><h4>系列故事</h4><p>${esc(it.tech)}</p></div>`:''}${it.fab?`<div><h4>材質與版型</h4><p>${esc(it.fab)}</p></div>`:''}</div>`:''}
     </div>
     <div class="order">
-      <div class="ordtop"><div class="price">${it.price?`<small>韓國參考價 ₩</small>${fmt(it.price)}`:'<small>售價待確認</small>'}</div><div class="sub" data-sub>${subHTML(it)}</div></div>
+      <div class="ordtop"><div class="price"></div><div class="sub" data-sub>${subHTML(it)}</div></div>
+      <div class="share">尺寸待更新（目前參考前季）</div>
       ${sizesBlock}
       ${sh?`<div class="share">上季 尺寸銷售佔比參考・<b>${esc(sh.k)}</b>${it.cat==="短褲"?"（依長褲腰圍）":""}</div>`:""}
     </div>
@@ -574,6 +584,8 @@ function filtered(){
     if(S.only){ if(!itemQty(i.id)) return false; }
     else if(i.sheet!==S.sheet) return false;
     if(S.months.size && !S.months.has(i.mon)) return false;
+    if(S.cgs.size && !S.cgs.has(cgOf(i))) return false;
+    if(S.gens.size && !S.gens.has(i.gen)) return false;
     if(S.q){ const hay=[i.zh,i.en,i.ko,i.style,i.sku,i.color,i.cc,i.cat,i.theme].join(' ').toLowerCase(); if(!hay.includes(S.q)) return false; }
     return true;
   });
@@ -582,7 +594,7 @@ function renderList(){
   const arr=filtered();
   if(!arr.length){ $('#list').innerHTML=`<div class="empty">${S.only?'還沒有下單的商品。在各分頁的尺寸格輸入數量即可。':'沒有符合條件的商品。'}</div>`; return; }
   const groups=[]; let key=null;
-  for(const it of arr){ const k=(S.only?it.sheet+' · ':'')+it.mon; if(k!==key){ groups.push({k,mon:it.mon,sheet:it.sheet,items:[]}); key=k; } groups[groups.length-1].items.push(it); }
+  for(const it of arr){ const k=(S.only?it.sheet+' · ':'')+'ETA '+it.mon; if(k!==key){ groups.push({k,mon:it.mon,sheet:it.sheet,items:[]}); key=k; } groups[groups.length-1].items.push(it); }
   $('#list').innerHTML = groups.map(g=>{ const themes=[...new Set(g.items.map(i=>i.theme).filter(t=>t&&t!=='CORE'))]; return `<section class="group"><div class="ghead"><h2>${esc(g.k)}</h2><span>${g.items.length} 款色${themes.length?' ・ '+esc(themes.join('、')):''}</span></div><div class="list">${g.items.map(itemHTML).join('')}</div></section>`; }).join('');
 }
 function renderTally(){
@@ -633,7 +645,7 @@ $('#b-clear').addEventListener('click',()=>{
 
 // ---------- lines / CSV ----------
 function lines(qty){ const out=[]; for(const it of ITEMS){ const m=qty[it.id]; if(!m) continue; for(const sz of it.sizes){ const q=m[sz]; if(q>0) out.push({k:it.id,sheet:it.sheet,mon:it.mon,style:it.style||'',sku:it.sku||'',en:it.en,zh:it.zh||'',color:it.color,size:sz,qty:q,price:it.price||0}); } } return out; }
-const CSV_HEAD=['經銷商','聯絡人','訂單編號','送出時間','分頁','月份','款號','色碼 SKU','英文品名','中文品名','顏色','尺寸','數量','韓國參考價(₩)','參考金額(₩)'];
+const CSV_HEAD=['經銷商','聯絡人','訂單編號','送出時間','分頁','ETA','款號','色碼 SKU','英文品名','中文品名','顏色','尺寸','數量','韓國參考價(₩)','參考金額(₩)'];
 function csvRows(o){ return (o.lines||[]).map(l=>[o.store,o.contact,o.oid,fmtTime(o.submittedAt),l.sheet,l.mon,l.style,l.sku,l.en,l.zh,l.color,l.size,l.qty,l.price,l.qty*l.price]); }
 function toCSV(rows){ return '﻿'+rows.map(r=>r.map(v=>{ v=String(v??''); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(',')).join('\r\n'); }
 function fmtTime(t){ if(!t) return ''; const d=new Date(t); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
@@ -679,8 +691,8 @@ function ovCard(rows,key,title,colors){ const rs=colors?rows:topN(rows,key); con
 const OVSTORE={}; let ovN=0;
 function ovInner(lines,g){ const gr=genRows(lines); const sub=g==='all'?lines:lines.filter(l=>genOf(l)===g); const cr=catRows(sub);
   const tabs=`<div class="zm-tabs ov-g">${[['all','全部'],...gr.map(r=>[r.cat,r.cat])].map(([k,n])=>`<button data-ovg="${k}" aria-pressed="${k===g}">${n}</button>`).join('')}</div>`;
-  return `<div class="ov-sec">依性別</div><div class="ov-wrap">${ovCard(gr,'qty','性別件數佔比',GEN_COL)}${ovCard(gr,'amt','性別金額佔比（零售）',GEN_COL)}</div>
-  <div class="ov-sec">依品類 ${tabs}</div>${cr.length?`<div class="ov-wrap">${ovCard(cr,'qty',(g==='all'?'':g+'・')+'品類件數佔比')}${ovCard(cr,'amt',(g==='all'?'':g+'・')+'品類金額佔比（零售）')}</div>`:'<div class="ov-empty">這個性別沒有下單。</div>'}`; }
+  return `<div class="ov-sec">依性別</div><div class="ov-wrap">${ovCard(gr,'qty','性別件數佔比',GEN_COL)}</div>
+  <div class="ov-sec">依品類 ${tabs}</div>${cr.length?`<div class="ov-wrap">${ovCard(cr,'qty',(g==='all'?'':g+'・')+'品類件數佔比')}</div>`:'<div class="ov-empty">這個性別沒有下單。</div>'}`; }
 function overviewHTML(lines){
   if(!lines.length) return '<div class="ov-empty">還沒有數量。填了尺寸數量後，這裡會依性別和品類顯示件數和金額佔比。</div>';
   const k='ov'+(++ovN); OVSTORE[k]=lines; return `<div class="ov" data-ovk="${k}">${ovInner(lines,'all')}</div>`; }
@@ -688,20 +700,20 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-ovg]'); i
 function openOverview(){
   const L=lines(S.qty); const t=totals();
   $('#overlay').innerHTML=`<div class="scrim"><div class="panel" role="dialog" aria-label="下單總覽"><div class="phead"><h2>下單總覽</h2><button class="btn sm x" data-close>關閉</button></div>
-  <div class="kpis"><div class="kpi"><small>款色</small><b>${t.sty}</b></div><div class="kpi"><small>件數</small><b>${fmt(t.qty)}</b></div><div class="kpi"><small>參考金額 KRW</small><b>${fmt(t.amt)}</b></div><div class="kpi"><small>品類數</small><b>${catRows(L).length}</b></div></div>
+  <div class="kpis"><div class="kpi"><small>款色</small><b>${t.sty}</b></div><div class="kpi"><small>件數</small><b>${fmt(t.qty)}</b></div><div class="kpi"><small>品類數</small><b>${catRows(L).length}</b></div></div>
   ${overviewHTML(L)}${branchTableHTML()}</div></div>`;
 }
 $('#b-review').addEventListener('click',openReview);
 $('#b-ov').addEventListener('click',openOverview);
 function openReview(){
   const L=lines(S.qty); const t=totals();
-  const rows=L.map(l=>`<tr><td>${esc(l.zh||l.en)}<div class="code">${esc(l.style)} ／ ${esc(l.sku)}</div></td><td>${esc(l.color)}</td><td>${esc(l.size)}</td><td class="r num">${l.qty}</td><td class="r num">${fmt(l.qty*l.price)}</td></tr>`).join('');
+  const rows=L.map(l=>`<tr><td>${esc(l.zh||l.en)}<div class="code">${esc(l.style)} ／ ${esc(l.sku)}</div></td><td>${esc(l.color)}</td><td>${esc(l.size)}</td><td class="r num">${l.qty}</td></tr>`).join('');
   $('#overlay').innerHTML=`<div class="scrim"><div class="panel" role="dialog" aria-label="檢視訂單">
     <div class="phead"><h2>${adminEditing()?'業務編輯訂單':S.editing?'更新訂單':'檢視訂單'}</h2><button class="btn sm x" data-close>關閉</button></div>
-    <div class="kpis"><div class="kpi"><small>款色</small><b>${t.sty}</b></div><div class="kpi"><small>件數</small><b>${fmt(t.qty)}</b></div><div class="kpi"><small>參考金額 KRW</small><b>${fmt(t.amt)}</b></div><div class="kpi"><small>經銷商</small><b style="font-family:var(--f-body);font-size:15px">${esc(S.dealer.store||'—')}</b></div></div>
+    <div class="kpis"><div class="kpi"><small>款色</small><b>${t.sty}</b></div><div class="kpi"><small>件數</small><b>${fmt(t.qty)}</b></div><div class="kpi"><small>經銷商</small><b style="font-family:var(--f-body);font-size:15px">${esc(S.dealer.store||'—')}</b></div></div>
     ${overviewHTML(L)}
     ${branchTableHTML()}
-    <div class="tbl"><table><thead><tr><th>品名</th><th>顏色</th><th>尺寸</th><th class="r">數量</th><th class="r">參考金額(₩)</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="3">合計</td><td class="r num">${fmt(t.qty)}</td><td class="r num">${fmt(t.amt)}</td></tr></tfoot></table></div>
+    <div class="tbl"><table><thead><tr><th>品名</th><th>顏色</th><th>尺寸</th><th class="r">數量</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="3">合計</td><td class="r num">${fmt(t.qty)}</td></tr></tfoot></table></div>
     ${adminEditing()?`<label class="chk"><input type="checkbox" id="ae-notify" checked><span>寄「訂單已由業務調整」通知和新的 Excel 訂單本給客人${S.admin.account?'（'+esc(S.admin.account)+'）':''}。不勾就只更新試算表，通知信只寄給你。</span></label>`:''}
     <div id="sub-msg"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
@@ -721,13 +733,13 @@ async function offlineDownload(){
   try{ ok=await exportBook(S.qty,{...S.dealer,oid:null,branches:branchesForExport()}); }catch(e){ btn.disabled=false; btn.textContent='下載 Excel 訂單本'; if(e?.code!=='declined'&&e?.code!=='cancelled') msg('#sub-msg','err',e.message||'下載未完成'); return; }
   btn.disabled=false; btn.textContent='下載 Excel 訂單本';
   if(ok){ const t=totals();
-    $('#overlay').innerHTML=`<div class="scrim"><div class="panel" style="height:auto;margin:auto;max-width:440px;border-radius:8px"><h2>訂單本已下載</h2><div class="msg ok">${esc(S.dealer.store)}：${t.sty} 款色、${fmt(t.qty)} 件，參考金額(₩) ${fmt(t.amt)}。</div><p style="margin:0">請把剛下載的 Excel 檔用 <b>LINE 或 Email</b> 傳給 DESCENTE 業務，業務收到後會幫你登錄訂單。</p><p style="margin:0;color:var(--muted);font-size:12px">頁面上的數量會保留在這台裝置，之後要修改可以直接改完再下載一次。</p><div style="display:flex;justify-content:flex-end"><button class="btn pri" data-close>好</button></div></div></div>`; }
+    $('#overlay').innerHTML=`<div class="scrim"><div class="panel" style="height:auto;margin:auto;max-width:440px;border-radius:8px"><h2>訂單本已下載</h2><div class="msg ok">${esc(S.dealer.store)}：${t.sty} 款色、${fmt(t.qty)} 件。</div><p style="margin:0">請把剛下載的 Excel 檔用 <b>LINE 或 Email</b> 傳給 DESCENTE 業務，業務收到後會幫你登錄訂單。</p><p style="margin:0;color:var(--muted);font-size:12px">頁面上的數量會保留在這台裝置，之後要修改可以直接改完再下載一次。</p><div style="display:flex;justify-content:flex-end"><button class="btn pri" data-close>好</button></div></div></div>`; }
 }
 function brList(qty,meta){ return (meta&&meta.branches&&meta.branches.length)?meta.branches:[{name:'',qty}]; }
 function orderText(qty,meta){ const L=[]; let sty=0,tq=0,ta=0; const agg=lines(qty); const ks=new Set(); agg.forEach(l=>{ ks.add(l.k); tq+=l.qty; ta+=l.qty*l.price; }); sty=ks.size;
   L.push(`【DESCENTE 27Q3Q4 訂單】${meta.store||''}｜${meta.contact||''}${meta.phone?'｜'+meta.phone:''}${meta.oid?'｜'+meta.oid:''}`); if(meta.note) L.push('備註：'+meta.note);
   for(const b of brList(qty,meta)){ if(b.name) L.push('',`■ ${b.name}`); let cur=null; for(const l of lines(b.qty)){ if(l.k!==cur){ L.push(`${l.style} ${l.sku} ${l.zh||l.en} ${l.color}`); cur=l.k; } L[L.length-1]+=` ${l.size}×${l.qty}`; } }
-  L.push('',`合計 ${sty} 款色、${tq} 件、參考金額(₩) ${fmt(ta)}`); return L.join('\n'); }
+  L.push('',`合計 ${sty} 款色、${tq} 件`); return L.join('\n'); }
 function orderTSV(qty,meta){ const R=[['經銷商／店名',meta.store||''],['聯絡人',meta.contact||''],['電話',meta.phone||''],['訂單備註',meta.note||''],[]];
   R.push(['分店','分頁','款號','色碼 SKU','英文品名','中文品名','顏色','尺寸','數量','韓國參考價(₩)','參考金額(₩)']);
   for(const b of brList(qty,meta)) for(const l of lines(b.qty)) R.push([b.name||(meta.store||''),l.sheet,l.style,l.sku,l.en,l.zh,l.color,l.size,l.qty,l.price,l.qty*l.price]);
@@ -794,7 +806,7 @@ async function submit(){
     await db.doc(`orders/${uid}`).set({uid,store:body.store,contact:body.contact,updatedAt:body.submittedAt});
     const doneQty=S.qty, doneDealer={...S.dealer}, doneBr=branchesForExport();
     S.qty={}; S.bq={}; S.editing=null; saveDraft(); renderAll();
-    $('#overlay').innerHTML=`<div class="scrim"><div class="panel" style="height:auto;margin:auto;max-width:440px;border-radius:8px"><h2>訂單已送出</h2><div class="msg ok">訂單編號 <b class="num">${esc(oid)}</b>：${t.sty} 款色、${fmt(t.qty)} 件，參考金額(₩) ${fmt(t.amt)}。</div><p style="margin:0;color:var(--muted)">${AUTH?'訂單確認信和 Excel 訂單本已寄到 <b>'+esc(AUTH.get()?.email||'')+'</b>（沒看到請檢查垃圾郵件匣）。':''}之後要改或刪除，到上方「我的訂單」操作即可。</p><div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn" id="b-done-xls">下載 Excel 訂單本</button><button class="btn pri" data-close>好</button></div><div id="done-msg"></div></div></div>`;
+    $('#overlay').innerHTML=`<div class="scrim"><div class="panel" style="height:auto;margin:auto;max-width:440px;border-radius:8px"><h2>訂單已送出</h2><div class="msg ok">訂單編號 <b class="num">${esc(oid)}</b>：${t.sty} 款色、${fmt(t.qty)} 件。</div><p style="margin:0;color:var(--muted)">${AUTH?'訂單確認信和 Excel 訂單本已寄到 <b>'+esc(AUTH.get()?.email||'')+'</b>（沒看到請檢查垃圾郵件匣）。':''}之後要改或刪除，到上方「我的訂單」操作即可。</p><div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn" id="b-done-xls">下載 Excel 訂單本</button><button class="btn pri" data-close>好</button></div><div id="done-msg"></div></div></div>`;
     $('#b-done-xls').onclick=async()=>{ try{ await exportBook(doneQty,{...doneDealer,oid,branches:doneBr}); }catch(e){ if(e?.code!=='declined'&&e?.code!=='cancelled') msg('#done-msg','err',e.message||'下載未完成'); } };
   }catch(e){
     if(e?.code==='order_closed'){ const old=S.editing; S.editing=null; saveDraft(); renderTally(); msg('#sub-msg','err',`這張訂單（${old||''}）已被 DESCENTE 業務刪除或作廢，無法再修改。已改成新訂單，請再按一次送出；如有疑問請聯絡業務。`); const b=$('#b-submit'); if(b){ b.disabled=false; b.textContent='送出訂單'; } return; }
@@ -836,7 +848,7 @@ async function adminSubmit(){
   try{
     await window.SDR_ADMIN.save(body);
     const acc=S.admin&&S.admin.account; exitAdminEdit();
-    $('#overlay').innerHTML=`<div class="scrim"><div class="panel" style="height:auto;margin:auto;max-width:440px;border-radius:8px"><h2>修改已儲存</h2><div class="msg ok">訂單 <b class="num">${esc(oid)}</b>：${t.sty} 款色、${fmt(t.qty)} 件，參考金額(₩) ${fmt(t.amt)}。</div><p style="margin:0;color:var(--muted)">試算表的訂單、明細和店名分頁都已更新。${notifyCustomer&&acc?'調整通知和 Excel 已寄給 <b>'+esc(acc)+'</b>。':'這次沒有通知客人。'}</p><div style="display:flex;justify-content:flex-end"><button class="btn pri" data-close>回訂單彙整</button></div></div></div>`;
+    $('#overlay').innerHTML=`<div class="scrim"><div class="panel" style="height:auto;margin:auto;max-width:440px;border-radius:8px"><h2>修改已儲存</h2><div class="msg ok">訂單 <b class="num">${esc(oid)}</b>：${t.sty} 款色、${fmt(t.qty)} 件。</div><p style="margin:0;color:var(--muted)">試算表的訂單、明細和店名分頁都已更新。${notifyCustomer&&acc?'調整通知和 Excel 已寄給 <b>'+esc(acc)+'</b>。':'這次沒有通知客人。'}</p><div style="display:flex;justify-content:flex-end"><button class="btn pri" data-close>回訂單彙整</button></div></div></div>`;
     reloadAdmin();
   }catch(e){ msg('#sub-msg','err','儲存沒有成功（'+(e?.message||e?.code||'未知錯誤')+'）。改好的數量都還在，請稍後再試。'); btn.disabled=false; btn.textContent='儲存修改'; }
 }
@@ -859,7 +871,7 @@ function renderMine(){
   const box=$('#mine');
   const lg=(AUTH&&!AUTH.get())?'<div class="msg info" style="margin-bottom:10px">在「下單」頁上方用 Email 登入後，換手機或電腦也看得到同一個 Email 下的所有訂單。</div>':'';
   if(!mineDocs.length){ box.innerHTML='<div class="section-title">我的訂單</div>'+lg+'<div class="msg info">還沒有送出的訂單。到「下單」填好數量後按「檢視並送出」。</div><div id="mine-msg" style="margin-top:10px"></div>'; return; }
-  box.innerHTML='<div class="section-title">我的訂單</div>'+lg+'<div class="cards">'+mineDocs.map(o=>`<div class="oc"><h3>${esc(o.store)} <span class="num" style="font-weight:400;color:var(--muted);font-size:13px">${esc(o.oid)}</span><span class="pill ${o.status==='已確認'?'ok':''}">${esc(o.status||'已送出')}</span>${o.branches&&o.branches.length?`<span class="pill">連鎖 ${o.branches.length} 店</span>`:''}</h3><div class="sub">${fmtTime(o.submittedAt)} ・ ${o.styles} 款色 ・ <b>${fmt(o.qty)}</b> 件 ・ 零售 <b>${fmt(o.amount)}</b></div><div class="acts"><button class="btn sm" data-xls="${esc(o.oid)}">Excel</button><button class="btn sm" data-csv="${esc(o.oid)}">CSV</button><button class="btn sm" data-del="${esc(o.oid)}">刪除</button><button class="btn sm pri" data-edit="${esc(o.oid)}">修改</button></div></div>`).join('')+'</div><div id="mine-msg" style="margin-top:10px"></div>';
+  box.innerHTML='<div class="section-title">我的訂單</div>'+lg+'<div class="cards">'+mineDocs.map(o=>`<div class="oc"><h3>${esc(o.store)} <span class="num" style="font-weight:400;color:var(--muted);font-size:13px">${esc(o.oid)}</span><span class="pill ${o.status==='已確認'?'ok':''}">${esc(o.status||'已送出')}</span>${o.branches&&o.branches.length?`<span class="pill">連鎖 ${o.branches.length} 店</span>`:''}</h3><div class="sub">${fmtTime(o.submittedAt)} ・ ${o.styles} 款色 ・ <b>${fmt(o.qty)}</b> 件</div><div class="acts"><button class="btn sm" data-xls="${esc(o.oid)}">Excel</button><button class="btn sm" data-csv="${esc(o.oid)}">CSV</button><button class="btn sm" data-del="${esc(o.oid)}">刪除</button><button class="btn sm pri" data-edit="${esc(o.oid)}">修改</button></div></div>`).join('')+'</div><div id="mine-msg" style="margin-top:10px"></div>';
 }
 $('#mine').addEventListener('click',async e=>{
   const ed=e.target.closest('[data-edit]'); const cv=e.target.closest('[data-csv]'); const xv=e.target.closest('[data-xls]');
@@ -952,8 +964,8 @@ function anSheetRows(a){
 function anSeriesRows(a){ return [...a.bySeries.values()].sort((x,y)=>y.amt-x.amt||y.qty-x.qty||String(x.key).localeCompare(String(y.key),'zh-Hant')); }
 function anTable(title,label,rows,tot,note){
   if(!rows.length) return '';
-  const body=rows.map(r=>`<tr><td>${esc(r.key)}</td><td class="r num">${fmt(r.colors)}</td><td class="r num">${fmt(r.sizes)}</td><td class="r num">${fmt(r.qty)}</td><td class="r num">${fmt(r.amt)}</td><td class="r num">${anPct(r.qty,tot.qty)}</td><td class="r num">${anPct(r.amt,tot.amt)}</td></tr>`).join('');
-  return `<div><h3>${esc(title)}</h3><div class="tbl"><table><thead><tr><th>${esc(label)}</th><th class="r">款色數</th><th class="r">尺寸數</th><th class="r">件數</th><th class="r">參考金額(₩)</th><th class="r">件數佔比</th><th class="r">金額佔比</th></tr></thead><tbody>${body}</tbody><tfoot><tr><td>合計</td><td class="r num">${fmt(tot.colors)}</td><td class="r num">${fmt(tot.sizes)}</td><td class="r num">${fmt(tot.qty)}</td><td class="r num">${fmt(tot.amt)}</td><td class="r num">100%</td><td class="r num">100%</td></tr></tfoot></table></div>${note?`<p class="subnote">${note}</p>`:''}</div>`;
+  const body=rows.map(r=>`<tr><td>${esc(r.key)}</td><td class="r num">${fmt(r.colors)}</td><td class="r num">${fmt(r.sizes)}</td><td class="r num">${fmt(r.qty)}</td><td class="r num">${anPct(r.qty,tot.qty)}</td></tr>`).join('');
+  return `<div><h3>${esc(title)}</h3><div class="tbl"><table><thead><tr><th>${esc(label)}</th><th class="r">款色數</th><th class="r">尺寸數</th><th class="r">件數</th><th class="r">件數佔比</th></tr></thead><tbody>${body}</tbody><tfoot><tr><td>合計</td><td class="r num">${fmt(tot.colors)}</td><td class="r num">${fmt(tot.sizes)}</td><td class="r num">${fmt(tot.qty)}</td><td class="r num">100%</td></tr></tfoot></table></div>${note?`<p class="subnote">${note}</p>`:''}</div>`;
 }
 function anTables(a,notes){
   if(!a.tot.qty) return '';
@@ -973,7 +985,7 @@ function anAdminHTML(os){
   for(const o of live){ const n=storeName(o); if(!byStore.has(n)) byStore.set(n,[]); byStore.get(n).push(o); }
   const cust=[...byStore.entries()].map(([name,list])=>{ const x=analyzeLines(list.flatMap(o=>o.lines||[])); return {key:name,n:list.length,...x.tot}; }).sort((x,y)=>y.amt-x.amt||y.qty-x.qty||x.key.localeCompare(y.key,'zh-Hant'));
   const qty=cust.reduce((t,r)=>t+r.qty,0), amt=cust.reduce((t,r)=>t+r.amt,0);
-  const custHTML=cust.length?`<div><h3>依經銷商</h3><div class="tbl"><table><thead><tr><th>經銷商</th><th class="r">訂單</th><th class="r">款色數</th><th class="r">尺寸數</th><th class="r">件數</th><th class="r">參考金額(₩)</th><th class="r">件數佔比</th><th class="r">金額佔比</th></tr></thead><tbody>${cust.map(r=>`<tr><td>${esc(r.key)}</td><td class="r num">${r.n}</td><td class="r num">${fmt(r.colors)}</td><td class="r num">${fmt(r.sizes)}</td><td class="r num">${fmt(r.qty)}</td><td class="r num">${fmt(r.amt)}</td><td class="r num">${anPct(r.qty,qty)}</td><td class="r num">${anPct(r.amt,amt)}</td></tr>`).join('')}</tbody><tfoot><tr><td>合計</td><td class="r num">${cust.reduce((t,r)=>t+r.n,0)}</td><td class="r num">–</td><td class="r num">–</td><td class="r num">${fmt(qty)}</td><td class="r num">${fmt(amt)}</td><td class="r num">100%</td><td class="r num">100%</td></tr></tfoot></table></div><p class="subnote">同一款色若好幾家都有下，各家各算 1，所以款色數和尺寸數不能把各家相加。要看全部一共幾款，把上面的範圍改回「全部」。</p></div>`:'';
+  const custHTML=cust.length?`<div><h3>依經銷商</h3><div class="tbl"><table><thead><tr><th>經銷商</th><th class="r">訂單</th><th class="r">款色數</th><th class="r">尺寸數</th><th class="r">件數</th><th class="r">件數佔比</th></tr></thead><tbody>${cust.map(r=>`<tr><td>${esc(r.key)}</td><td class="r num">${r.n}</td><td class="r num">${fmt(r.colors)}</td><td class="r num">${fmt(r.sizes)}</td><td class="r num">${fmt(r.qty)}</td><td class="r num">${anPct(r.qty,qty)}</td></tr>`).join('')}</tbody><tfoot><tr><td>合計</td><td class="r num">${cust.reduce((t,r)=>t+r.n,0)}</td><td class="r num">–</td><td class="r num">–</td><td class="r num">${fmt(qty)}</td><td class="r num">100%</td></tr></tfoot></table></div><p class="subnote">同一款色若好幾家都有下，各家各算 1，所以款色數和尺寸數不能把各家相加。要看全部一共幾款，把上面的範圍改回「全部」。</p></div>`:'';
   const note=`款色數是有下單的款號加顏色，同一個色碼算 1。尺寸數是再把有填數量的尺寸分開算，同一款色下了三個尺寸就計 3。上面的圓餅圖仍是性別和品類的件數、金額；這裡補的是下了幾款，並依大類、分頁和系列分開。對不到商品的明細，大類和系列標成「找不到商品」。作廢訂單不計入。${voidN?`這次有 ${voidN} 張作廢，已排除。`:''}`;
   const empty=!a.tot.qty?'<div class="ov-empty">這個範圍還沒有可計算的數量。</div>':'';
   return `<p class="an-note">${note}</p><div class="an-bar"><label for="an-scope">看哪一家</label><select id="an-scope">${['all',...stores].map(s=>`<option value="${esc(s)}"${s===anScope?' selected':''}>${s==='all'?'全部':esc(s)}</option>`).join('')}</select><span class="sub">${scoped.length} 張訂單</span></div><div class="an">${empty}${anTables(a,true)}${custHTML}</div>`;
@@ -1009,8 +1021,8 @@ function orderDetailHTML(o){
     ord.sort((a,b)=>SHEETS.indexOf(g[a].l.sheet)-SHEETS.indexOf(g[b].l.sheet));
     const tq=ord.reduce((t,k)=>t+g[k].qty,0), ta=ord.reduce((t,k)=>t+g[k].qty*(g[k].l.price||0),0);
     const ba=bk.name?analyzeLines(bk.lines):null;
-    const head=bk.name?`<div style="font-weight:700;margin:12px 0 6px">分店：${esc(bk.name)}<span class="sub" style="font-weight:400">　${fmt(ba.tot.colors)} 款色、${fmt(ba.tot.sizes)} 尺寸、${fmt(ba.tot.qty)} 件、零售 ${fmt(ba.tot.amt)}</span></div>`:'';
-    return `${head}<div class="tbl" style="margin-top:10px"><table><thead><tr><th>分頁</th><th>品名</th><th>顏色</th>${sizes.map(z=>`<th class="r">${esc(z)}</th>`).join('')}<th class="r">件數</th><th class="r">參考金額(₩)</th></tr></thead><tbody>${ord.map(k=>{ const x=g[k], l=x.l; return `<tr><td>${esc(l.sheet)}</td><td>${esc(l.zh||l.en)}<div class="code">${esc(l.style)} ／ ${esc(l.sku)}</div></td><td>${esc(l.color)}</td>${sizes.map(z=>`<td class="r num">${x.q[z]||''}</td>`).join('')}<td class="r num"><b>${x.qty}</b></td><td class="r num">${fmt(x.qty*(l.price||0))}</td></tr>`; }).join('')}<tr><td colspan="3"><b>合計</b></td>${sizes.map(z=>`<td class="r num">${ord.reduce((t,k)=>t+(g[k].q[z]||0),0)||''}</td>`).join('')}<td class="r num"><b>${tq}</b></td><td class="r num"><b>${fmt(ta)}</b></td></tr></tbody></table></div>`;
+    const head=bk.name?`<div style="font-weight:700;margin:12px 0 6px">分店：${esc(bk.name)}<span class="sub" style="font-weight:400">　${fmt(ba.tot.colors)} 款色、${fmt(ba.tot.sizes)} 尺寸、${fmt(ba.tot.qty)} 件</span></div>`:'';
+    return `${head}<div class="tbl" style="margin-top:10px"><table><thead><tr><th>分頁</th><th>品名</th><th>顏色</th>${sizes.map(z=>`<th class="r">${esc(z)}</th>`).join('')}<th class="r">件數</th></tr></thead><tbody>${ord.map(k=>{ const x=g[k], l=x.l; return `<tr><td>${esc(l.sheet)}</td><td>${esc(l.zh||l.en)}<div class="code">${esc(l.style)} ／ ${esc(l.sku)}</div></td><td>${esc(l.color)}</td>${sizes.map(z=>`<td class="r num">${x.q[z]||''}</td>`).join('')}<td class="r num"><b>${x.qty}</b></td></tr>`; }).join('')}<tr><td colspan="3"><b>合計</b></td>${sizes.map(z=>`<td class="r num">${ord.reduce((t,k)=>t+(g[k].q[z]||0),0)||''}</td>`).join('')}<td class="r num"><b>${tq}</b></td></tr></tbody></table></div>`;
   }).join('');
   return `<div class="det">${orderAnalysisHTML(o)}${body}</div>`;
 }
@@ -1022,18 +1034,18 @@ function renderAdmin(){
   for(const o of os){ T.qty+=o.qty||0; T.amt+=o.amount||0; for(const l of o.lines||[]){ const k=l.k; const a=agg[k]=agg[k]||{l,qty:0,stores:new Set(),sz:{}}; a.qty+=l.qty; a.stores.add(o.store); a.sz[l.size]=(a.sz[l.size]||0)+l.qty; } }
   const aggRows=Object.values(agg).sort((x,y)=>SHEETS.indexOf(x.l.sheet)-SHEETS.indexOf(y.l.sheet)||y.qty-x.qty);
   box.innerHTML=`<div class="section-title" style="margin-top:0">訂單彙整</div>
-  <div class="kpis"><div class="kpi"><small>訂單</small><b>${T.orders}</b></div><div class="kpi"><small>經銷商</small><b>${T.stores}</b></div><div class="kpi"><small>總件數</small><b>${fmt(T.qty)}</b></div><div class="kpi"><small>參考金額 KRW</small><b>${fmt(T.amt)}</b></div></div>
+  <div class="kpis"><div class="kpi"><small>訂單</small><b>${T.orders}</b></div><div class="kpi"><small>經銷商</small><b>${T.stores}</b></div><div class="kpi"><small>總件數</small><b>${fmt(T.qty)}</b></div></div>
   <div style="margin-top:12px">${overviewHTML(os.flatMap(o=>o.lines||[]))}</div>
   <div class="section-title">下單分析</div>
   ${anAdminHTML(os)}
   <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn pri" id="a-handoff" ${os.length?'':'disabled'}>一鍵統整交單</button><button class="btn" id="a-csv-all" ${os.length?'':'disabled'}>下載全部明細 CSV</button><button class="btn" id="a-csv-sku" ${os.length?'':'disabled'}>下載款色彙總 CSV</button></div>
   <div id="admin-msg" style="margin-top:10px"></div>
   <div class="section-title">各經銷商訂單</div>
-  ${os.length?'<div class="cards">'+os.map(o=>`<div class="oc"><h3>${esc(o.store)} <span class="num" style="font-weight:400;color:var(--muted);font-size:13px">${esc(o.oid)}</span><span class="pill ${o.status==='已確認'?'ok':''}">${esc(o.status||'已送出')}</span>${o.branches&&o.branches.length?`<span class="pill">連鎖 ${o.branches.length} 店</span>`:''}</h3><div class="sub">${esc(o.contact)}${o.phone?' ・ '+esc(o.phone):''}${o.email?' ・ '+esc(o.email):''} ・ ${fmtTime(o.submittedAt)} ・ ${o.styles} 款色 ・ <b>${fmt(o.qty)}</b> 件 ・ 零售 <b>${fmt(o.amount)}</b>${o.note?`<br>備註：${esc(o.note)}`:''}${o.edited?`<br><span style="color:var(--muted)">最後修改：${esc(o.edited)}</span>`:''}</div><div class="acts"><button class="btn sm" data-aedit="${esc(o.uid)}|${esc(o.oid)}">編輯訂單</button><button class="btn sm" data-adet="${esc(o.uid)}|${esc(o.oid)}">${ADET.has(o.oid)?'收起明細':'看明細'}</button><button class="btn sm" data-axls="${esc(o.uid)}|${esc(o.oid)}">Excel</button><button class="btn sm" data-acsv="${esc(o.uid)}|${esc(o.oid)}">CSV</button><button class="btn sm danger" data-adel="${esc(o.uid)}|${esc(o.oid)}">刪除訂單</button>${o.status==='已確認'?'':`<button class="btn sm pri" data-ok="${esc(o.uid)}|${esc(o.oid)}">標記已確認</button>`}</div>${ADET.has(o.oid)?orderDetailHTML(o):''}</div>`).join('')+'</div>':'<div class="msg info">經銷商送出的訂單會即時出現在這裡。把頁面分享給經銷商（Contributor 權限）就能開始收單。</div>'}
-  ${aggRows.length?`<div class="section-title">款色彙總</div><div class="tbl"><table><thead><tr><th>分頁</th><th>品名</th><th>顏色</th><th>尺寸分布</th><th class="r">店數</th><th class="r">件數</th><th class="r">參考金額(₩)</th></tr></thead><tbody>${aggRows.map(a=>`<tr><td>${esc(a.l.sheet)}</td><td>${esc(a.l.zh||a.l.en)}<div class="code">${esc(a.l.style)} ／ ${esc(a.l.sku)}</div></td><td>${esc(a.l.color)}</td><td class="num" style="font-size:12px">${Object.entries(a.sz).map(([k,v])=>esc(k)+':'+v).join(' ')}</td><td class="r num">${a.stores.size}</td><td class="r num">${a.qty}</td><td class="r num">${fmt(a.qty*a.l.price)}</td></tr>`).join('')}</tbody></table></div>`:''}`;
+  ${os.length?'<div class="cards">'+os.map(o=>`<div class="oc"><h3>${esc(o.store)} <span class="num" style="font-weight:400;color:var(--muted);font-size:13px">${esc(o.oid)}</span><span class="pill ${o.status==='已確認'?'ok':''}">${esc(o.status||'已送出')}</span>${o.branches&&o.branches.length?`<span class="pill">連鎖 ${o.branches.length} 店</span>`:''}</h3><div class="sub">${esc(o.contact)}${o.phone?' ・ '+esc(o.phone):''}${o.email?' ・ '+esc(o.email):''} ・ ${fmtTime(o.submittedAt)} ・ ${o.styles} 款色 ・ <b>${fmt(o.qty)}</b> 件${o.note?`<br>備註：${esc(o.note)}`:''}${o.edited?`<br><span style="color:var(--muted)">最後修改：${esc(o.edited)}</span>`:''}</div><div class="acts"><button class="btn sm" data-aedit="${esc(o.uid)}|${esc(o.oid)}">編輯訂單</button><button class="btn sm" data-adet="${esc(o.uid)}|${esc(o.oid)}">${ADET.has(o.oid)?'收起明細':'看明細'}</button><button class="btn sm" data-axls="${esc(o.uid)}|${esc(o.oid)}">Excel</button><button class="btn sm" data-acsv="${esc(o.uid)}|${esc(o.oid)}">CSV</button><button class="btn sm danger" data-adel="${esc(o.uid)}|${esc(o.oid)}">刪除訂單</button>${o.status==='已確認'?'':`<button class="btn sm pri" data-ok="${esc(o.uid)}|${esc(o.oid)}">標記已確認</button>`}</div>${ADET.has(o.oid)?orderDetailHTML(o):''}</div>`).join('')+'</div>':'<div class="msg info">經銷商送出的訂單會即時出現在這裡。把頁面分享給經銷商（Contributor 權限）就能開始收單。</div>'}
+  ${aggRows.length?`<div class="section-title">款色彙總</div><div class="tbl"><table><thead><tr><th>分頁</th><th>品名</th><th>顏色</th><th>尺寸分布</th><th class="r">店數</th><th class="r">件數</th></tr></thead><tbody>${aggRows.map(a=>`<tr><td>${esc(a.l.sheet)}</td><td>${esc(a.l.zh||a.l.en)}<div class="code">${esc(a.l.style)} ／ ${esc(a.l.sku)}</div></td><td>${esc(a.l.color)}</td><td class="num" style="font-size:12px">${Object.entries(a.sz).map(([k,v])=>esc(k)+':'+v).join(' ')}</td><td class="r num">${a.stores.size}</td><td class="r num">${a.qty}</td></tr>`).join('')}</tbody></table></div>`:''}`;
   $('#a-handoff').onclick=async()=>{ const b=$('#a-handoff'); b.disabled=true; b.textContent='讀取最新訂單…'; try{ let use=os; if(window.SDR_ADMIN&&window.SDR_ADMIN.list){ use=await window.SDR_ADMIN.list(); } const bad=handoffCheck(use); if(bad.length){ throw new Error('有訂單的明細還沒完整寫進試算表，交單檔先不產生，請等 1～2 分鐘後再按一次：'+bad.join('、')); } b.textContent='整理中…'; const out=await exportHandoff(use); if(out) msg('#admin-msg','ok','交單檔已下載：'+out.map(([t,q,n])=>`${t} ${fmt(q)} 件${n?'（'+n+' 店）':''}`).join('、')+'。'); }catch(e){ msg('#admin-msg','err',e.message||'交單檔產生失敗'); } b.disabled=false; b.textContent='一鍵統整交單'; };
   $('#a-csv-all').onclick=async()=>{ try{ await saveCSV('DESCENTE_27Q3Q4_全部訂單明細.csv',[CSV_HEAD,...os.flatMap(csvRows)]); }catch(e){ if(e?.code!=='declined'&&e?.code!=='cancelled') msg('#admin-msg','err',e.message||'下載未完成'); } };
-  $('#a-csv-sku').onclick=async()=>{ const sizesAll=[]; aggRows.forEach(a=>Object.keys(a.sz).forEach(s=>{ if(!sizesAll.includes(s)) sizesAll.push(s); })); try{ await saveCSV('DESCENTE_27Q3Q4_款色彙總.csv',[['分頁','月份','款號','色碼 SKU','英文品名','中文品名','顏色','店數','件數','韓國參考價(₩)','參考金額(₩)',...sizesAll],...aggRows.map(a=>[a.l.sheet,a.l.mon,a.l.style,a.l.sku,a.l.en,a.l.zh,a.l.color,a.stores.size,a.qty,a.l.price,a.qty*a.l.price,...sizesAll.map(s=>a.sz[s]||'')])]); }catch(e){ if(e?.code!=='declined'&&e?.code!=='cancelled') msg('#admin-msg','err',e.message||'下載未完成'); } };
+  $('#a-csv-sku').onclick=async()=>{ const sizesAll=[]; aggRows.forEach(a=>Object.keys(a.sz).forEach(s=>{ if(!sizesAll.includes(s)) sizesAll.push(s); })); try{ await saveCSV('DESCENTE_27Q3Q4_款色彙總.csv',[['分頁','ETA','款號','色碼 SKU','英文品名','中文品名','顏色','店數','件數','韓國參考價(₩)','參考金額(₩)',...sizesAll],...aggRows.map(a=>[a.l.sheet,a.l.mon,a.l.style,a.l.sku,a.l.en,a.l.zh,a.l.color,a.stores.size,a.qty,a.l.price,a.qty*a.l.price,...sizesAll.map(s=>a.sz[s]||'')])]); }catch(e){ if(e?.code!=='declined'&&e?.code!=='cancelled') msg('#admin-msg','err',e.message||'下載未完成'); } };
   const scope=$('#an-scope'); if(scope) scope.onchange=()=>{ anScope=scope.value; renderAdmin(); };
 }
 $('#admin').addEventListener('click',async e=>{
@@ -1075,7 +1087,7 @@ let ejP=null;
 function loadExcelJS(){ if(window.ExcelJS) return Promise.resolve(window.ExcelJS); if(!ejP) ejP=new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'; s.onload=()=>res(window.ExcelJS); s.onerror=()=>{ ejP=null; rej(new Error('Excel 元件載入失敗，請檢查網路後再試一次。')); }; document.head.appendChild(s); }); return ejP; }
 const imgDims=src=>new Promise(r=>{ const im=new Image(); im.onload=()=>r([im.naturalWidth,im.naturalHeight]); im.onerror=()=>r([1,1]); im.src=src; });
 const colL=n=>{ let s=''; while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); } return s; };
-const FIXED=['KEY','No.','款式圖','全部配色','月份','主題','Drop','品類','性別','款號','中文品名','英文品名','顏色','色號','色碼 SKU','Icon','布料','系列／尺寸','商品概述','商品細節','材質與科技','備註','預計上市','韓國參考價(₩)'];
+const FIXED=['KEY','No.','款式圖','全部配色','月份','主題','Drop','品類','性別','款號','中文品名','英文品名','顏色','色號','色碼 SKU','Icon','布料','系列／尺寸','商品概述','商品細節','材質與科技','備註','ETA','韓國參考價(₩)'];
 async function buildBook(qty, meta){
   const EJ=await loadExcelJS();
   const wb=new EJ.Workbook(); wb.creator='DESCENTE 27Q3Q4'; wb.created=new Date();
@@ -1092,9 +1104,9 @@ async function buildBook(qty, meta){
     const head=[...FIXED,...sizes,'訂購總數','參考金額 KRW'];
     const cTot=FIXED.length+sizes.length+1, cAmt=cTot+1, cPrice=FIXED.indexOf('韓國參考價(₩)')+1, cS0=FIXED.length+1, cS1=FIXED.length+sizes.length, cGrp=cAmt+1, cSer=cAmt+2, cSzN=cAmt+3;
     ws.getCell('B1').value=`DESCENTE 27Q3Q4 訂單本｜${sh}`; ws.getCell('B1').font={name:'Arial',size:16,bold:true,color:{argb:'FF0A3F94'}};
-    ws.getCell('B2').value='黃色格填訂購數量，灰色為無此尺寸。請勿更動欄位順序與隱藏的 A 欄（KEY），以便重新匯入下單頁。'; ws.getCell('B2').font={...F,color:{argb:'FF6B6B70'}};
+    ws.getCell('B2').value='黃色格填訂購數量，灰色為無此尺寸。請勿更動欄位順序與隱藏的 A 欄（KEY），以便重新匯入下單頁。｜尺寸待原廠更新，目前參考之前的尺寸。'; ws.getCell('B2').font={...F,color:{argb:'FF6B6B70'}};
     const hr=ws.getRow(4); head.forEach((h,k)=>{ const c=hr.getCell(k+1); c.value=h; c.font={name:'Arial',size:10,bold:true,color:{argb:'FFFFFFFF'}}; c.fill=fill('FF0A3F94'); c.alignment={horizontal:'center',vertical:'middle',wrapText:true}; c.border=border; }); hr.height=30;
-    const widths={'KEY':10,'No.':5,'款式圖':14,'全部配色':14,'月份':7,'主題':16,'Drop':9,'品類':11,'性別':6,'款號':12,'中文品名':22,'英文品名':24,'顏色':16,'色號':7,'色碼 SKU':10,'Icon':12,'布料':22,'系列／尺寸':22,'商品概述':34,'商品細節':40,'材質與科技':26,'備註':18,'預計上市':10,'韓國參考價(₩)':10};
+    const widths={'KEY':10,'No.':5,'款式圖':14,'全部配色':14,'月份':7,'主題':16,'Drop':9,'品類':11,'性別':6,'款號':12,'中文品名':22,'英文品名':24,'顏色':16,'色號':7,'色碼 SKU':10,'Icon':12,'布料':22,'系列／尺寸':22,'商品概述':34,'商品細節':40,'材質與科技':26,'備註':18,'ETA':10,'韓國參考價(₩)':10};
     head.forEach((h,k)=>{ ws.getColumn(k+1).width = widths[h] || (k+1===cTot?9:k+1===cAmt?13:6.5); });
     ws.getColumn(1).hidden=true; ws.getColumn(cGrp).hidden=true; ws.getColumn(cSer).hidden=true; ws.getColumn(cSzN).hidden=true;
     const hGrp=hr.getCell(cGrp), hSer=hr.getCell(cSer), hSz=hr.getCell(cSzN);
@@ -1103,7 +1115,7 @@ async function buildBook(qty, meta){
     let r=5;
     for(const it of its){
       const row=ws.getRow(r); const q=qty[it.id]||{};
-      const vals=[it.id,it.no||'',null,null,it.mon||'',it.theme||'',it.drop||'',it.cat||'',it.gen||'',it.style||'',it.zh||'',it.en,it.color,it.cc||'',it.sku||'',it.icon||'',it.fab||'',it.series||'',it.ov||'',it.dt||'',it.tech||'',it.note||'',it.launch||'',it.price||null];
+      const vals=[it.id,it.no||'',null,null,it.mon||'',it.theme||'',it.drop||'',it.cat||'',it.gen||'',it.style||'',it.zh||'',it.en,it.color,it.cc||'',it.sku||'',it.icon||'',it.fab||'',it.series||'',it.ov||'',it.dt||'',it.tech||'',it.note||'',it.mon||'',it.price||null];
       vals.forEach((v,k)=>{ const c=row.getCell(k+1); c.value=v; c.font=F; c.border=border; c.alignment={vertical:k>=16&&k<=21?'top':'middle',wrapText:k>=5}; });
       row.getCell(cPrice).numFmt='#,##0';
       sizes.forEach((z,j)=>{ const c=row.getCell(cS0+j); c.border=border; c.alignment={horizontal:'center',vertical:'middle'}; c.font={...F,bold:true};
@@ -1133,7 +1145,7 @@ async function buildBook(qty, meta){
     const head=['KEY','分頁','款號','色碼 SKU','英文品名','中文品名','顏色','尺寸',...B.map(b=>b.name),'合計','韓國參考價(₩)','參考金額 KRW'];
     const c0=9, c1=8+B.length, cT=c1+1, cP=cT+1, cA=cP+1;
     ws.getCell('B1').value='DESCENTE 27Q3Q4 分店配貨'; ws.getCell('B1').font={name:'Arial',size:16,bold:true,color:{argb:'FF0A3F94'}};
-    ws.getCell('B2').value='每列一個款色尺寸，各分店一欄。請勿更動隱藏的 A 欄（KEY）與欄位順序，以便重新匯入。'; ws.getCell('B2').font={...F,color:{argb:'FF6B6B70'}};
+    ws.getCell('B2').value='每列一個款色尺寸，各分店一欄。請勿更動隱藏的 A 欄（KEY）與欄位順序，以便重新匯入。｜尺寸待原廠更新，目前參考之前的尺寸。'; ws.getCell('B2').font={...F,color:{argb:'FF6B6B70'}};
     const hr=ws.getRow(4); head.forEach((h,k)=>{ const c=hr.getCell(k+1); c.value=h; c.font={name:'Arial',size:10,bold:true,color:{argb:'FFFFFFFF'}}; c.fill=fill('FF0A3F94'); c.alignment={horizontal:'center',vertical:'middle',wrapText:true}; c.border=border; }); hr.height=30;
     [10,9,12,10,26,24,16,8].forEach((w,k)=>ws.getColumn(k+1).width=w); for(let c=c0;c<=c1;c++) ws.getColumn(c).width=11; ws.getColumn(cT).width=8; ws.getColumn(cP).width=11; ws.getColumn(cA).width=13; ws.getColumn(1).hidden=true;
     let r=5;
@@ -1227,7 +1239,7 @@ async function buildHandoff(os){
   const NUM='#,##0;-#,##0;;@', L=colL;
   const sum=wb.addWorksheet('總表',{views:[{showGridLines:false}]}); sum.pageSetup={orientation:'landscape',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0};
   const DISC=`'總表'!$B$4`;
-  const INFO=[['STYLE NO.',13,'style'],['STYLE & COLOR',21,'sku'],['COLOR',8,'cc'],['顏色',12,'color'],['CATEGORY',12,'cat'],['IMAGE',13,null],['STYLE NAME',34,'en'],['中文品名',22,'zh'],['GENDER',8,'gen'],['月份',7,'mon'],['TW-SRP\n(KRW)',11,'price']];
+  const INFO=[['STYLE NO.',13,'style'],['STYLE & COLOR',21,'sku'],['COLOR',8,'cc'],['顏色',12,'color'],['CATEGORY',12,'cat'],['IMAGE',13,null],['STYLE NAME',34,'en'],['中文品名',22,'zh'],['GENDER',8,'gen'],['ETA',7,'mon'],['TW-SRP\n(KRW)',11,'price']];
   const imgCache={}; const out=[]; const refs={};   // refs[tab][label]=SRP TTL 儲存格
   for(const [dv,tab] of HO_DIVS){
     refs[tab]={};
@@ -1359,7 +1371,7 @@ async function importBook(file){
     rowsOf('總表').forEach(row=>{ (row||[]).forEach((v,col)=>{ const k=txt(v); if(L[k]){ for(let j=col+1;j<=col+4;j++){ const x=row[j]; if(x!=null&&String(x).trim()){ dealer[L[k]]=String(x).trim(); break; } } } }); }); }
   const byEnColor={}, bySku={};
   ITEMS.forEach(i=>{ byEnColor[norm(i.en)+'|'+norm(i.color)]=i; if(i.sku&&!/待確認/.test(i.sku)) bySku[i.sku.toUpperCase()]=i; });
-  const SKIP=/訂購|零售|下單|售價|金額|合計|品名|顏色|款號|色碼|色號|月份|主題|Drop|品類|大類|性別|Icon|布料|尺寸|系列|商品|材質|備註|上市|圖|No\.|PAR|KEY/i;
+  const SKIP=/訂購|零售|下單|售價|金額|合計|品名|顏色|款號|色碼|色號|月份|主題|Drop|品類|大類|性別|Icon|布料|尺寸|系列|商品|材質|備註|上市|ETA|圖|No\.|PAR|KEY/i;
   let branches=null;
   if(wb.Sheets['分店配貨']){ const rows=rowsOf('分店配貨'); let h=-1,hdr=[]; for(let r=0;r<Math.min(rows.length,12);r++){ const t=(rows[r]||[]).map(txt); if(t.includes('KEY')&&t.includes('尺寸')){ h=r; hdr=t; break; } }
     if(h>=0){ const iK=hdr.indexOf('KEY'), iZ=hdr.indexOf('尺寸'), iT=hdr.indexOf('合計'), iE=hdr.indexOf('英文品名'), iC=hdr.indexOf('顏色'); const names=hdr.slice(iZ+1,iT>iZ?iT:undefined).filter(Boolean);
