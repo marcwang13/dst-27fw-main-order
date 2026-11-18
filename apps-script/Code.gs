@@ -45,8 +45,21 @@ function adminOk_(key) {
 // 會員票券（內部站核發）。密鑰只在指令碼屬性 PREORDER_SSO_SECRET，與帳號後台同一組，不寫在這裡。
 function ssoPad_(s){ const m = s.length % 4; return m ? s + '===='.slice(m) : s; }
 function ssoB64_(data){ return Utilities.base64EncodeWebSafe(data).replace(/=+$/, ''); }
+// 沒設 PREORDER_SSO_SECRET 時，改請 Early Buy 收單程式（同一組密鑰）代為驗票，密鑰不用複製到這裡
+const SSO_PROXY_URL = 'https://script.google.com/macros/s/AKfycbzsqRbmJYu8EsA6bD4E7uGDt8gIIdAiMv0ifNaPvfeZN_iuPxt4hNYyo0M0y-_UGbK_ng/exec';
+function memberViaProxy_(ticket){
+  const c = CacheService.getScriptCache(), ck = 'sso:' + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, ticket));
+  if (c.get(ck) === '1') return true;
+  try {
+    const r = UrlFetchApp.fetch(SSO_PROXY_URL, { method: 'post', contentType: 'text/plain;charset=utf-8', payload: JSON.stringify({ action: 'member', ticket: ticket }), muteHttpExceptions: true, followRedirects: true });
+    const ok = !!(JSON.parse(r.getContentText()) || {}).ok;
+    if (ok) c.put(ck, '1', 300);
+    return ok;
+  } catch (err) { return false; }
+}
 function memberOk_(ticket){
   const secret = PropertiesService.getScriptProperties().getProperty('PREORDER_SSO_SECRET');
+  if (!secret && ticket) return memberViaProxy_(String(ticket));
   ticket = String(ticket || '');
   const i = ticket.lastIndexOf('.');
   if (!secret || i < 1) return false;
