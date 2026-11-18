@@ -1,7 +1,7 @@
 # 經銷線上訂貨系統：AI 交接文件
 
 > 給接手的 AI：這份文件描述艾盟仕（EMERS GROUP）批發事業處四套經銷線上訂貨系統的完整現況。讀完這份，再讀範本 repo 的程式碼，就能接手維護、修改或複製新品牌。
-> 文件更新：2026-11-02 11:00（Asia/Taipei，Grok Bot 依 repo 實際程式碼校正）。以 GitHub repo 最新 commit 為準；文件和程式碼衝突時，相信程式碼，並回報差異。
+> 文件更新：2026-11-18 18:20（Asia/Taipei，Grok Bot；DSTC 現況見第 9 節）。以 GitHub repo 最新 commit 為準；文件和程式碼衝突時，相信程式碼，並回報差異。
 
 ## 0. 先知道這些
 
@@ -28,7 +28,7 @@ Marc 同時用 Claude 和 Grok Bot 維護這四套系統，一次只會有一邊
 |---|---|---|---|---|---|---|---|---|
 | SDR | SUN DAY RED FW27 | 上線收單中（範本） | https://marcwang13.github.io/sdr-fw27-order/ | marcwang13/sdr-fw27-order | 207／105 | `FW27-` | `#610e0e` 酒紅 | `sdr-` |
 | DST | DESCENTE 27FW Early Buy | 上線收單中 | https://marcwang13.github.io/dst-27fw-order/ | marcwang13/dst-27fw-order | 69／23 | `DST27-` | `#0a3f94` 藍 | `dst-` |
-| DSTC | DESCENTE 27FW 正式訂貨（27Q3Q4 Convention） | 建置中（價格暫用韓幣參考價） | https://marcwang13.github.io/dst-27fw-main-order/ | marcwang13/dst-27fw-main-order | 1,114／456 | `DSTC27-` | `#0a3f94` 藍 | `dstc-` |
+| DSTC | DESCENTE 27FW 正式訂貨（27Q3Q4 Convention） | 建置中（台灣定價待定；網頁不顯示價格，Excel 附韓幣 MSRP） | https://marcwang13.github.io/dst-27fw-main-order/ | marcwang13/dst-27fw-main-order | 1,114／456 | `DSTC27-` | `#0a3f94` 藍 | `dstc-` |
 | BYS | BLACK YAK 27SS | 未完成（已上線，未正式開放） | https://marcwang13.github.io/by-27ss-order/ | marcwang13/by-27ss-order | 747／349 | `BYS27-` | `#141414` 黑 | `bys-` |
 | BYF | BLACK YAK 27FW | 未完成（已上線，未正式開放） | https://marcwang13.github.io/by-27fw-order/ | marcwang13/by-27fw-order | 150／148 | `BYF27-` | `#141414` 黑 | `byf-` |
 
@@ -248,6 +248,26 @@ Excel 訂單本「總表」有同樣的分頁、大類、系列（款色數、�
 - [ ] 客戶版「快速上手」文件、經銷商通知信還沒做。
 - 前季尺寸銷售佔比：剛代理沒有資料，已關閉。DST、BYS、BYF 的 `shareFor()` 要 `window.DST_SHARE_ON` 為真才顯示，目前沒設；`SHARE` 表是從 SDR 複製過來的殘留資料，之後有真資料再換掉並打開開關。只有 SDR 有開。
 
+### DESCENTE 27FW 正式訂貨（DSTC，`dst-27fw-main-order`）現況與 2026-11-18 改動（Grok）
+
+**網頁（`index.html`）**
+- **原廠日期全拿掉**：data.js 已刪 eta／launch／etd 欄位；`mon` 欄位還在（已 +1 個月），只供內部用，網頁、CSV、Excel 都不顯示。卡片沒有 ETA 標籤、沒有月份篩選；清單改依大類（上身／下身／配件／鞋類）分組，「只看已下單」時標題是「分頁 · 大類」。也沒有交期。
+- **價格**：網頁完全不顯示韓幣或任何金額，卡片價格位置固定顯示「台灣定價待定」；`#t-amt` 金額格隱藏。韓幣只出現在下載的 Excel／CSV（欄名「韓幣 MSRP(₩)」「韓幣金額(₩)」）。台灣定價確定後：把 data.js 每筆 `price` 換成台幣，卡片 `.price` 改回顯示價格、打開 `#t-amt`，Excel／CSV 欄名改回「台灣建議售價／零售金額」，並從 `dataNotes()` 拿掉第一條。
+- **篩選列（上方三排膠囊，同樣式）**：第一排 性別（全部／男／女／中性）→ 第二排 大類（全部／上身／下身／配件／鞋類）→ 第三排 系列分頁。三者交集，下排數字依上排選擇計算；0 筆的膠囊變淡不能按；選了之後目前分頁沒東西會自動跳到第一個有的分頁（`fixSel()`）。桌機分頁列換行、手機橫滑並自動捲到選中的分頁。資料 `gen` 只有 男 246／女 246／中性 622（配件 153、鞋 156 都算中性；女配件 41）。大類由 `cgOf()` 算：div FTW＝鞋類、ACC＝配件、part bottom＝下身、其他＝上身。
+- **資料待更新說明**：頁首一個條列區（`#dnote`，由 `dataNotes(true)` 產生，數字即時計算）：台灣定價待定、尺寸參考 DESCENTE 尺寸對照表待原廠更新（含各性別尺寸段）、各色開放尺寸原廠未附暫依性別全段開放、實體圖待更新、部分款式圖為多色合圖、到貨月份待確認、18 款色原廠暫定品名、157 款色材質待提供（多為鞋）、5 款色顏色／色號待確認。同一份清單（`dataNotes(false)`，第一條改寫成附韓幣 MSRP）放在 Excel 訂單本「總表」G 欄；各分頁 B2 提示見總表。每張卡片尺寸區上方小字「尺寸待更新（目前參考前季）」，沒有實體圖的再加「・實體圖待更新」。
+- **單色款式圖**：`pc.js`（`window.DSTC_PC={品號色:[左,上,右,下] 比例]}`）告訴前端怎麼從多色款式圖 `big/<hash>.jpg` 裁出單一配色；`applyPC()` 用 canvas 在瀏覽器裁（卡片、放大、Excel 款式圖欄都用裁好的）。目前 897／926 個多色圖款色已單色（自動 418＋人工目視 479），剩 29 款色仍是多色合圖。產生工具與人工指派紀錄在 emers-whl-system `tools/dstc_percolor/`（README 有步驟；注意 review.py 會 import match2 而重寫 crops.json）。
+- **按鈕**：卡片圖片下「款式圖」（單色裁切）＋「實體圖」。`it.photos` 只放實體圖：目前 141 款色（全是鞋，實際是原廠多色配色渲染圖，43 張共用）有，其他款色「實體圖」按鈕灰掉。原本「全部配色」按鈕已拿掉。Excel 第 4 欄改名「實體圖」。
+- **其他**：WHL logo 在標題左邊；沒有管理入口（訂單彙整按鈕只有管理者看得到）；不放任何會員 Email。
+
+**Excel／CSV**
+- 訂單本各分頁欄位：KEY、No.、款式圖、實體圖、主題、Drop、品類、性別、款號、中文品名、英文品名、顏色、色號、色碼 SKU、Icon、布料、系列／尺寸、商品概述、商品細節、材質與科技、備註、韓幣 MSRP(₩)、各尺寸、訂購總數、韓幣金額(₩)（後面是隱藏的分析鍵）。沒有月份／ETA。
+- 匯入是依表頭名稱讀，`SKIP` 正規式含 月份／ETA／MSRP／韓幣／₩，所以舊檔（有 ETA、月份、韓國參考價欄）照樣能匯入。2026-11-18 測過：下載→填數量→匯入→套用 OK。
+- **還沒改的後端**：`apps-script/Code.gs` 的訂單明細表頭仍有「月份」、通知信合計寫「參考金額 ₩」。要改的話先改 repo 再貼 Apps Script、部署新版本（需要 Marc 授權），本輪沒動。
+
+**內部網站串接**：emers-whl-system 內部站已把這套列進預訂單系統（key `dst-27fw-main`，頁面 `pre.dstc`），比照 ftw 做法。DSTC 後台試算表沒有開「知道連結的人可檢視」，內部站讀不到，所以筆數顯示「筆數待更新」；要 Marc 開共用或改用系統帳號讀取。
+
+**部署方式**：這個 repo 用 GH_TOKEN_WHL `git push` 會 403，所以改檔後放在 box 的 `/workspace/upl2/`、`/workspace/upl3/dst-27fw-main-order/`，由 Marc（或 Grok 的瀏覽器）在 GitHub 網頁「Add file → Upload files」上傳。已上線：ac245f3（pc.js 418 款色）；之後本機 commit fa2d052（pc.js 897）、c01980d 與本輪（拿掉 ETA、三排篩選、實體圖、待更新說明、韓幣 MSRP 欄）待上傳。
+
 ### 入口網站串接（規劃中）
 Marc 要把四套系統（含後台、管理頁）串進另一個入口網站。可行做法：
 
@@ -289,3 +309,5 @@ Marc 要把四套系統（含後台、管理頁）串進另一個入口網站。
 | 2026-11-02 | Grok Bot | 四套 | 本文件放進四個 repo，新增同步規則（0.5 節）與變更紀錄 | （本次） |
 | 2026-11-18 | Claude | DSTC | 新建 DESCENTE 27FW 正式訂貨（27Q3Q4）：APP／ACC／FTW 1,114 款色、詳細中文商品說明、FTW 分色圖、韓幣參考價、Early Buy 重複款標示 | （本次） |
 | 2026-11-18 | Grok | DSTC | 原廠日期拿掉（data.js 刪 eta／launch、mon +1 月，只顯示「ETA X月」）；新增大類（上身／下身／配件／鞋類）與性別篩選；桌機分頁列換行；網頁不顯示韓國參考價與金額（Excel／CSV 保留）；掛進 WHL 內部站（dst-27fw-main，權限 pre.dstc） | （本次） |
+| 2026-11-18 | Grok | DSTC | 單色款式圖 pc.js 擴充到 897／926（人工目視 479，工具在 emers-whl-system tools/dstc_percolor） | fa2d052 |
+| 2026-11-18 | Grok | DSTC | ETA 全拿掉（卡片、篩選、分組、CSV／Excel）；上方三排篩選 性別／大類／系列（交集、0 筆變淡、自動跳分頁）；「全部配色」改「實體圖」按鈕（無圖灰掉＋實體圖待更新）；卡片「台灣定價待定」；頁首與 Excel 總表「資料待更新說明」條列；Excel 欄名「韓幣 MSRP(₩)」「韓幣金額(₩)」 | c01980d＋（本次） |

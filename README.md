@@ -7,8 +7,16 @@ APP 衣 316 款／ACC 配件 86 款／FTW 鞋 54 款，共 456 款、1,114 個�
 - `apps-script/Code.gs`：貼到 Google 試算表的 Apps Script，部署成網頁應用程式後即可收單。
 
 ## 價格
-目前 `data.js` 的 `price` 是**韓國參考售價（韓幣）**，畫面與 Excel 都標「韓國參考價 ₩」。價格取自 Monthly Map 總覽頁（明細頁有 73 款價格是占位數字，已以總覽頁為準）。
-台幣定價出來後：把每筆 `price` 換成台幣，並把 `index.html`、`Code.gs` 裡的「韓國參考價／參考金額(₩)／₩／KRW」改回「台灣建議售價／零售金額／NT$／TWD」，再拿掉頁首的價格說明。
+台灣定價待定。網頁不顯示任何價格或韓幣，卡片顯示「台灣定價待定」。`data.js` 的 `price`（＝`krw`）是韓國 MSRP（韓幣，取自 Monthly Map 總覽頁），只出現在下載的 Excel／CSV「韓幣 MSRP(₩)」「韓幣金額(₩)」欄。
+台灣定價出來後：把每筆 `price` 換成台幣，卡片 `.price` 改回顯示價格、打開金額格，Excel／CSV 欄名改回「台灣建議售價／零售金額」，`dataNotes()` 拿掉第一條；`apps-script/Code.gs` 的「參考金額 ₩」也要改。
+
+## 資料待更新說明
+頁首條列與 Excel 總表 G 欄共用 `dataNotes()`：台灣定價、尺寸（參考 DESCENTE 尺寸對照表）、各色開放尺寸、實體圖、多色合圖、到貨月份、暫定品名、材質、色號待確認。資料補齊後從 `dataNotes()` 拿掉對應條目。
+
+## 篩選與圖片
+- 上方三排：性別 → 大類（上身／下身／配件／鞋類）→ 系列分頁，交集；不顯示 ETA／月份（`mon` 只留在 data.js 內部）。
+- `pc.js`：多色款式圖裁成單色的比例框（897／926），卡片「款式圖」顯示單色；「實體圖」只在有配色照時可按（目前 141 款色鞋款）。產生工具在 emers-whl-system `tools/dstc_percolor/`。
+- 詳細交接見 `ORDER_SYSTEMS_HANDOFF.md` 第 9 節。
 
 ## 其他
 - 與 Early Buy（`dst-27fw-order`）重複的 21 款保留，卡片標「Early Buy 已開訂」。
