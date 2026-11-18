@@ -555,7 +555,7 @@ function itemHTML(it){
     <div class="pic">${picHTML(it)}</div>
     <div class="info">
       <div class="t1"><h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
-      <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span><span class="tag m">${esc(it.mon)}到貨${it.eta?' · 交期 '+esc(it.eta):''}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">Early Buy 已開訂</span>`:''}</div>
+      <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span><span class="tag m">${esc(it.mon)}到貨${it.eta?' · 交期 '+esc(it.eta):''}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}</div>
       <div class="code">${esc(it.style||'')}${it.sku?' ／ '+esc(it.sku):''}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}</div>
       ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
       ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
