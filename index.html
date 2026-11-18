@@ -457,11 +457,22 @@ tfoot td{font-weight:700;background:var(--sunk)}
 </script>
 <script src="data.js?v=20261118c"></script>
 <script src="imgs.js?v=20261118c"></script>
+<script src="pc.js?v=20261118d"></script>
 <script>
 (function(){
 const ITEMS = window.SDR_ITEMS || [];
 const IMG = window.SDR_IMG || {};
 const BY = Object.fromEntries(ITEMS.map(i=>[i.id,i]));
+// 單色款式圖：有裁切框的款色，款式圖只顯示該色；原本的多色圖放到「全部配色」第一張（Excel 全部配色欄仍用原照片）
+const PC = window.DSTC_PC || {};
+for(const it of ITEMS){ if(PC[it.id]&&it.doll){ it._ph0=it.photos||[]; it.photos=[it.doll,...it._ph0.filter(h=>h!==it.doll)]; } }
+const PCC=new Map();
+function pcCrop(src,b){ const key=(src.length>300?src.length+src.slice(40,120):src)+'|'+b.join(); if(PCC.has(key)) return PCC.get(key);
+  const pr=new Promise(res=>{ const im=new Image(); im.onload=()=>{ try{ const W=im.naturalWidth,H=im.naturalHeight, x=b[0]*W,y=b[1]*H,w=Math.max(1,(b[2]-b[0])*W),h=Math.max(1,(b[3]-b[1])*H); const c=document.createElement('canvas'); c.width=Math.round(w); c.height=Math.round(h); const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,x,y,w,h,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',.92)); }catch(e){ res(null); } }; im.onerror=()=>res(null); im.src=src; });
+  PCC.set(key,pr); return pr; }
+function applyPC(root){ (root||document).querySelectorAll('img[data-pc]:not([data-pcd])').forEach(img=>{ img.dataset.pcd='1'; const b=PC[img.dataset.pc]; if(!b) return; img.style.visibility='hidden'; pcCrop(img.getAttribute('src'),b).then(u=>{ if(u) img.src=u; img.style.visibility=''; }); }); }
+{ const mo=new MutationObserver(()=>{ applyPC(document.getElementById('list')); applyPC(document.getElementById('overlay')); }); const go=()=>['list','overlay'].forEach(id=>{ const el=document.getElementById(id); if(el){ mo.observe(el,{childList:true,subtree:true}); applyPC(el); } }); if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go(); }
+async function pcImg(it,h){ const d=IMG[h]; if(!d) return null; if(h===it.doll&&PC[it.id]){ const u=await pcCrop(d,PC[it.id]); if(u) return {k:h+'|'+it.id,d:u.split(',')[1]?u:d}; } return {k:h,d}; }
 const SHEETS = ['NEO-ARCHIVE','TRAINING','RUNNING','INSPIRED','SNOW','WOMENS SNOW','PREMIUM TECH ESSENTIAL','WOMENS','ACC 配件','FTW RUNNING','FTW MOVEWEAR'];
 const MONTH_ORDER = ['5月','6月','7月','8月','9月','10月','11月','12月'];
 const CG_ORDER=['上身','下身','配件','鞋類']; const GEN_ORDER=['男','女','中性'];
@@ -516,7 +527,7 @@ function picHTML(it){
   const h = it.doll||ph[0];
   const src = h && IMG[h];
   const sw = (it.doll || ph.length) ? `<div class="sw">${it.doll?'<button data-pic="doll">款式圖</button>':''}${ph.length?`<button data-pic="photo">全部配色${ph.length>1?' '+ph.length:''}</button>`:''}</div>` : '';
-  return src ? `<img src="${src}" alt="${esc(it.en+' '+it.color)}" data-zoom loading="lazy">${sw}` : `<span class="none">圖片待補</span>`;
+  return src ? `<img src="${src}" alt="${esc(it.en+' '+it.color)}" data-zoom loading="lazy"${(PC[it.id]&&h===it.doll)?` data-pc="${esc(it.id)}"`:''}>${sw}` : `<span class="none">圖片待補</span>`;
 }
 const big = h=>`big/${h}.jpg`;
 let LB=null;
@@ -524,7 +535,7 @@ function openLB(id,kind,ev){ const it=BY[id]; const ph=it.photos||[]; if(kind===
 function renderLB(anim){
   const it=BY[LB.id]; const ph=it.photos||[]; const isP=LB.kind==='photo';
   const h=isP?ph[LB.i]:it.doll;
-  const img=h?`<img src="${big(h)}" alt="${esc(it.en+' '+it.color)}" onerror="this.onerror=null;this.src='${IMG[h]||''}'">`:'<span class="none">尚無圖片</span>';
+  const img=h?`<img src="${big(h)}" alt="${esc(it.en+' '+it.color)}"${(!isP&&PC[it.id])?` data-pc="${esc(it.id)}"`:''} onerror="this.onerror=null;this.src='${IMG[h]||''}'">`:'<span class="none">尚無圖片</span>';
   const arrows=(isP&&ph.length>1)?`<button class="zm-arrow l" data-lb="-1" aria-label="上一張">‹</button><button class="zm-arrow r" data-lb="1" aria-label="下一張">›</button>`:'';
   const tabs=(it.doll&&ph.length)?`<div class="zm-tabs"><button data-lbk="doll" aria-pressed="${!isP}">款式圖</button><button data-lbk="photo" aria-pressed="${isP}">全部配色</button></div>`:'';
   const cnt=(isP&&ph.length>1)?`<span class="zm-count">${LB.i+1}/${ph.length}</span>`:'';
@@ -1127,10 +1138,10 @@ async function buildBook(qty, meta){
       row.getCell(cSer).value=anSeries(it);
       row.getCell(cSzN).value={formula:`COUNTIF(${colL(cS0)}${r}:${colL(cS1)}${r},">0")`};
       row.height=120;
-      if(meta.images!==false){ for(const [col,h] of [[2,it.doll],[3,(it.photos||[])[0]]]){ if(!h||!IMG[h]) continue;
-        if(!imgCache[h]) imgCache[h]={id:wb.addImage({base64:IMG[h],extension:'jpeg'}),dims:await imgDims(IMG[h])};
-        const [w,hh]=imgCache[h].dims; const BW=103, BH=160; const sc=Math.min((BW-8)/w,(BH-8)/hh); const W=Math.round(w*sc), H=Math.round(hh*sc);
-        ws.addImage(imgCache[h].id,{tl:{col:col+(BW-W)/2/BW,row:r-1+(BH-H)/2/BH},ext:{width:W,height:H},editAs:'oneCell'}); } }
+      if(meta.images!==false){ for(const [col,h] of [[2,it.doll],[3,(it._ph0||it.photos||[])[0]]]){ if(!h||!IMG[h]) continue; const pi=await pcImg(it,h); const ck=pi.k;
+        if(!imgCache[ck]) imgCache[ck]={id:wb.addImage({base64:pi.d,extension:'jpeg'}),dims:await imgDims(pi.d)};
+        const [w,hh]=imgCache[ck].dims; const BW=103, BH=160; const sc=Math.min((BW-8)/w,(BH-8)/hh); const W=Math.round(w*sc), H=Math.round(hh*sc);
+        ws.addImage(imgCache[ck].id,{tl:{col:col+(BW-W)/2/BW,row:r-1+(BH-H)/2/BH},ext:{width:W,height:H},editAs:'oneCell'}); } }
       r++;
     }
     const tr=ws.getRow(r); tr.getCell(8).value='合計'; 
@@ -1292,9 +1303,9 @@ async function buildHandoff(os){
       const s=row.getCell(cS); s.value={formula:`${L(cP)}${r}*${L(cT)}${r}`}; s.numFmt=NUM; s.font=F; s.border=bd; s.alignment={vertical:'middle'};
       const a=row.getCell(cA); a.value={formula:`${L(cS)}${r}*${DISC}`}; a.numFmt=NUM; a.font=F; a.border=bd; a.alignment={vertical:'middle'};
       blk.forEach(b=>{ const c=row.getCell(b.t); c.value={formula:`SUM(${L(b.s)}${r}:${L(b.t-1)}${r})`}; c.numFmt=NUM; c.font={...F,bold:true}; c.border={...bd,right:med}; c.alignment={horizontal:'center',vertical:'middle'}; });
-      const h=it.doll||(it.photos||[])[0]; if(h&&IMG[h]){ if(!imgCache[h]) imgCache[h]={id:wb.addImage({base64:IMG[h],extension:'jpeg'}),dims:await imgDims(IMG[h])};
-        const [iw,ih]=imgCache[h].dims, BW=96, BH=82, sc=Math.min((BW-6)/iw,(BH-6)/ih), W=Math.round(iw*sc), HH=Math.round(ih*sc);
-        ws.addImage(imgCache[h].id,{tl:{col:5+(BW-W)/2/BW,row:r-1+(BH-HH)/2/BH},ext:{width:W,height:HH},editAs:'oneCell'}); }
+      const h=it.doll||(it.photos||[])[0]; if(h&&IMG[h]){ const pi=await pcImg(it,h); const ck=pi.k; if(!imgCache[ck]) imgCache[ck]={id:wb.addImage({base64:pi.d,extension:'jpeg'}),dims:await imgDims(pi.d)};
+        const [iw,ih]=imgCache[ck].dims, BW=96, BH=82, sc=Math.min((BW-6)/iw,(BH-6)/ih), W=Math.round(iw*sc), HH=Math.round(ih*sc);
+        ws.addImage(imgCache[ck].id,{tl:{col:5+(BW-W)/2/BW,row:r-1+(BH-HH)/2/BH},ext:{width:W,height:HH},editAs:'oneCell'}); }
     }
     const tr=ws.getRow(RT); tr.height=24; tr.getCell(1).value='TOTAL';
     const sumCols=[...sizes.map((_,j)=>c0+j),cT,cS,cA,...blk.flatMap(b=>[...sizes.map((_,j)=>b.s+j),b.t])];
