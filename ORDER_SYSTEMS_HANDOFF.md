@@ -1,25 +1,26 @@
 # 經銷線上訂貨系統：AI 交接文件
 
-> 給接手的 AI：這份文件描述艾盟仕（EMERS GROUP）批發事業處四套經銷線上訂貨系統的完整現況。讀完這份，再讀範本 repo 的程式碼，就能接手維護、修改或複製新品牌。
-> 文件更新：2026-11-18 18:20（Asia/Taipei，Grok Bot；DSTC 現況見第 9 節）。以 GitHub repo 最新 commit 為準；文件和程式碼衝突時，相信程式碼，並回報差異。
+> **這份文件是唯一正本**，只維護在 `marcwang13/dst-27fw-main-order` 的 `ORDER_SYSTEMS_HANDOFF.md`。其他訂貨 repo（SDR、DST Early Buy、BY 27SS、BY 27FW，以及後來的 WAAC）裡的同名檔只指向這裡，不要再各寫一份完整副本。
+> 給接手的 AI：這份文件描述艾盟仕（EMERS GROUP）批發事業處各套經銷線上訂貨系統的完整現況。讀完這份，再讀範本 repo 的程式碼，就能接手維護、修改或複製新品牌。
+> 文件更新：2026-11-19（Asia/Taipei，Grok Bot；整併為唯一正本）。以 GitHub 本 repo 最新 commit 為準；文件和程式碼衝突時，相信程式碼，並回報差異。
 
 ## 0. 先知道這些
 
 - 負責人：Marc Wang（王柏棛），批發事業處業務經理。公司帳號 `marc_wang@emers.com`（Google Workspace），GitHub 帳號 `marcwang13`。
 - 溝通：繁體中文（台灣），直接講重點，文字不要有 AI 腔。
-- 四套系統**程式碼幾乎一樣**，只差商品資料、品牌色、名稱字串和 localStorage key。後端 `Code.gs` 四套之間約差 20 行（品牌色、Excel 檔名、寄件名稱，另有健康檢查文字、訂單頁標題、信件主旨與內文中的品牌名）；複製新品牌時以 `diff` 比對範本逐行改。
+- 早期四套系統（SDR、DST Early Buy、BY 27SS、BY 27FW）**程式碼幾乎一樣**，只差商品資料、品牌色、名稱字串和 localStorage key。後來又加了 DSTC、鞋類站、WAAC 現貨站，規則仍以 SDR 範本為準，但各站有自己的例外（見第 9 節）。後端 `Code.gs` 早期四套之間約差 20 行（品牌色、Excel 檔名、寄件名稱，另有健康檢查文字、訂單頁標題、信件主旨與內文中的品牌名）；複製新品牌時以 `diff` 比對範本逐行改。
 - 範本是 SUN DAY RED FW27（`sdr-fw27-order`）。新功能先在範本做，再同步到其他三套。
 - 不要做的事：不輸入任何登入密碼、不幫人建帳號、不在網站或給客戶的檔案放供貨價或外幣價。需要授權、建 repo、驗證碼的步驟交給 Marc 本人。
 
 ## 0.5 多個 AI 輪流維護（同步規則，一定要照做）
 
-Marc 同時用 Claude 和 Grok Bot 維護這四套系統，一次只會有一邊在改。目的是其中一邊額度用完時，另一邊可以直接接手，而且換電腦也一樣。
+Marc 同時用 Claude 和 Grok Bot 維護這些訂貨系統，一次只會有一邊在改。目的是其中一邊額度用完時，另一邊可以直接接手，而且換電腦也一樣。
 
 1. **GitHub repo 是唯一正本。** 本機不留任何非 repo 的修改；開工前一定先 `git pull`（或重新 clone）拿 main 最新版。
 2. **改完一定推回 main。** 不留沒合併的分支或只改在本機的東西。
 3. **後端 `Code.gs` 一律先改 repo 裡的檔案**，commit 之後再貼到 Apps Script，部署用「管理部署作業 → 新版本」。不要只在 Apps Script 編輯器裡改，否則 repo 會落後。
 4. **每次改動都在本文件第 11 節「變更紀錄」加一行**（日期、哪個 AI、哪套系統、改了什麼、commit），跟程式改動放在同一個 commit。
-5. 本文件四個 repo 各放一份，內容相同。改了其中一份，四份都要同步更新。
+5. **本文件只在 `dst-27fw-main-order` 維護一份正本。** 其他訂貨 repo 的 `ORDER_SYSTEMS_HANDOFF.md` 只放指向本檔的一行連結。改交接內容只改這一份，不要再複製到其他 repo。
 6. ADMIN_KEY 等密碼不准寫進 repo。
 
 ## 1. 系統清單
@@ -29,20 +30,24 @@ Marc 同時用 Claude 和 Grok Bot 維護這四套系統，一次只會有一邊
 | SDR | SUN DAY RED FW27 | 上線收單中（範本） | https://marcwang13.github.io/sdr-fw27-order/ | marcwang13/sdr-fw27-order | 207／105 | `FW27-` | `#610e0e` 酒紅 | `sdr-` |
 | DST | DESCENTE 27FW Early Buy | 上線收單中 | https://marcwang13.github.io/dst-27fw-order/ | marcwang13/dst-27fw-order | 69／23 | `DST27-` | `#0a3f94` 藍 | `dst-` |
 | DSTC | DESCENTE 27FW 正式訂貨（27Q3Q4 Convention） | 建置中（台灣定價待定；網頁不顯示價格，Excel 附韓幣 MSRP） | https://marcwang13.github.io/dst-27fw-main-order/ | marcwang13/dst-27fw-main-order | 1,114／456 | `DSTC27-` | `#0a3f94` 藍 | `dstc-` |
+| WAAC | WAAC FW26 現貨（現有庫存接單） | 上線收單中（2026-11-19） | https://marcwang13.github.io/waac-fw26-stock-order/ | marcwang13/waac-fw26-stock-order | 19／11（25 個尺寸 SKU，168 件） | `WAAC26S-` | `#141414` 黑＋`#c8102e` 紅 | `waac-` |
 | BYS | BLACK YAK 27SS | 未完成（已上線，未正式開放） | https://marcwang13.github.io/by-27ss-order/ | marcwang13/by-27ss-order | 747／349 | `BYS27-` | `#141414` 黑 | `bys-` |
-| BYF | BLACK YAK 27FW | 未完成（已上線，未正式開放） | https://marcwang13.github.io/by-27fw-order/ | marcwang13/by-27fw-order | 150／148 | `BYF27-` | `#141414` 黑 | `byf-` |
+| BYF | BLACK YAK 27FW | 未完成（已上線，未正式開放） | https://marcwang13.github.io/by-27fw-order/ | marcwang13/by-27fw-order | 680 款色（2026-11-13 變更紀錄；舊表寫的 150／148 已過時） | `BYF27-` | `#141414` 黑 | `byf-` |
+
+另有 `marcwang13/dst-27fw-ftw-order`（DESCENTE 27FW 鞋類，https://marcwang13.github.io/dst-27fw-ftw-order/），各份交接副本都沒列這套，這裡不另寫完整說明；細節以該 repo 與 `emers-whl-system` 為準。
 
 ### 各系統後端
 
-| 代號 | Apps Script 端點（`config.js` 的 SUBMIT_URL） | 後台試算表 |
+| 代號 | Apps Script 端點（`config.js` 的 SUBMIT_URL，以各 repo 預設分支現況為準） | 後台試算表（2026-11-12 系統信箱搬家後） |
 |---|---|---|
-| SDR | https://script.google.com/macros/s/AKfycbzJ_l8ZTP4zOzK1WKJmpcfBKnd9N05hL8rUMr5lVLTGMHsGIYpq2udV0DXDecC-Q1dX/exec | https://docs.google.com/spreadsheets/d/1MD9-FCwtUrQM6K79bi6HDbZpdlpNj9qLk5dAu_pBRic/edit |
-| DST | https://script.google.com/macros/s/AKfycbxxlmSXignxS5EE7Bd2vpPw3Z7HRcg9bb9BeN5tlCDfLMYUDFugMGcS4rv4rJydck_bcw/exec | https://docs.google.com/spreadsheets/d/1dWV3TyPOV__bduxdHDoBe-FieMdV02vr9-qjQrgkbpU/edit |
+| SDR | https://script.google.com/macros/s/AKfycbxk-oaR5vl4JiY3s6Q65j7OidmNFojFO2NtBIy1hBfQnKPvuJJLclmpbOVgCAoalknxQA/exec | https://docs.google.com/spreadsheets/d/1sRusT6TIYMA2F7CkcHCLHazegNcwWcUjl7jgulOy77U/edit |
+| DST | https://script.google.com/macros/s/AKfycbzsqRbmJYu8EsA6bD4E7uGDt8gIIdAiMv0ifNaPvfeZN_iuPxt4hNYyo0M0y-_UGbK_ng/exec | https://docs.google.com/spreadsheets/d/1neJWTtmfiRUcqILg3QarvxFCghP6jJzXRaCju7HjTXA/edit |
 | DSTC | https://script.google.com/macros/s/AKfycbxvudd7CBJzFcuxFbhq1_huI9BwEY3zXGxW-_ODDJrs2SSTNJmPVLJYULRk_uiDaqzy/exec | https://docs.google.com/spreadsheets/d/1Z3xtNZ-P6mepW-d0DIFg8O96bDfxRFOoU15BjaZko5w/edit |
-| BYS | https://script.google.com/macros/s/AKfycbwBKPi33bXNrIS7rdRpSJegQRBtljhtXKfEU-oBY0vMHUpBSzSNCfgaxdkttTdwETbT/exec | https://docs.google.com/spreadsheets/d/1elXDIBFt4J-eMZOjU8NhwVbCh2-8_u0o2RBk4c21_sE/edit |
-| BYF | https://script.google.com/macros/s/AKfycbwob2mjChGVJGGnlyVB-Vd9eEeXhcEOMb7IQUO4udmiKlLHLi3R7QNZPimVoFE3ozf2/exec | https://docs.google.com/spreadsheets/d/1IhJqFN5_V9B45q0lNpt9ZKe2ByYbM8C9YhaYwGP6JUo/edit |
+| WAAC | https://script.google.com/macros/s/AKfycbyavOzjw-zJrwZqn7JqGYRQYhPsQEF0RHZw8-BAXLYeidJ1qlmDLY7JylstqYQTFQlrNw/exec | https://docs.google.com/spreadsheets/d/11aMcRd0iNLH0lq3qHW3M4-HlRcdExsFNsiOGSNpnx_w/edit （「WAAC FW26 現貨 線上訂單」） |
+| BYS | https://script.google.com/macros/s/AKfycbwP84Djd2jZP7VGq1Gxmd_YoraTY1p0nFPNNVWkcgXPNlISX7Dj7vn3EtISkIPQL61gaQ/exec | https://docs.google.com/spreadsheets/d/1Z2UpiXz4dZZvuXFO7AeLsQTjIH0eY_sEaOt-N6Kx-SE/edit |
+| BYF | https://script.google.com/macros/s/AKfycbzcL9SX9r67Eot15i-06QlKfDT2yf-XXw57AbmKLodejvJ7tseMEUI-2lO5aLYu-t8ILQ/exec | https://docs.google.com/spreadsheets/d/1LpGzpLezmmh1uhZyYBkuGEyXTXDpwKvUxp2XYzygVEA/edit |
 
-試算表與 Apps Script 都在公司帳號 `marc_wang@emers.com` 底下。Apps Script 專案列表：https://script.google.com/home/my
+2026-11-12 起，後台試算表與 Apps Script 改在系統帳號 `emerswhlsystem.marc@gmail.com` 名下（舊表仍可能留在 `marc_wang@emers.com`，不要再用搬家前的表或舊部署網址）。明細見 `emers-whl-system` 的 `docs/SYSTEM_MAILBOX.md`。上面的 SUBMIT_URL 是 2026-11-19 從各 repo GitHub 預設分支 `config.js` 讀到的；試算表 ID 以系統帳號那份與 `tools/preorders_sync.py` 為準。Apps Script 專案列表：https://script.google.com/home/my
 
 ### 收單現況（2026-11-02 10:40 用 list API 讀後台；SDR 12／6,785／40,779,200 不變，DST 已增至 14 張）
 
@@ -241,9 +246,9 @@ Excel 訂單本「總表」有同樣的分頁、大類、系列（款色數、�
 ## 9. 待辦與已知問題
 
 ### BLACK YAK 27SS／27FW（未完成）
-- [ ] 售價暫估：台幣價＝韓國 MSRP × 0.0245（`tools/gen.py` 的 `FX`），四捨五入到十位，沒含關稅運費。要換成正式台灣建議售價。
+- [x] 售價：2026-11-12 起改用公司定案的台灣建議售價（TW-SRP），不再用韓國 MSRP × 0.0245 換算。重產資料時不要把 `price` 洗掉。27FW 仍有部分中國專屬款色價格表沒填（變更紀錄後續有加回／拿掉，以現行程式為準）。
 - [ ] 尺寸對照只是參考（上衣韓國尺碼→字母、褲腰 cm→英吋、鞋 mm→US），不是原廠尺寸表。
-- [ ] 27FW 尺寸全是 `ASSORTED`（只填總量），拿到尺寸段後要改成實際尺寸。
+- [ ] 27FW 服裝尺寸曾在 2026-11-12 依 27SS 相近款補上實際尺寸（不是原廠尺寸表；重跑 `gen_fw2.py` 會洗回 `ASSORTED`，之後要再跑 `fw_sizes_from_ss.py`）。原廠正式尺寸段出來後要改回來。配件／鞋是否仍為 `ASSORTED`，待對現行程式。
 - [ ] 後台沒有任何訂單，全流程測試（登入→下單→通知信→修改→刪除→管理者登入→一鍵統整交單）還沒跑過。
 - [ ] 客戶版「快速上手」文件、經銷商通知信還沒做。
 - 前季尺寸銷售佔比：剛代理沒有資料，已關閉。DST、BYS、BYF 的 `shareFor()` 要 `window.DST_SHARE_ON` 為真才顯示，目前沒設；`SHARE` 表是從 SDR 複製過來的殘留資料，之後有真資料再換掉並打開開關。只有 SDR 有開。
@@ -270,8 +275,21 @@ Excel 訂單本「總表」有同樣的分頁、大類、系列（款色數、�
 
 **過往參考（2026-11-19，Claude）**：`ref.js`（`window.DSTC_REF`）由 `tools/build_ref.py` 從 emers-whl-system 的 `dealer/data/chain_*`、`internal/data/direct_chain_*` 算出。區域：直營依主檔 region；動力新竹巨城、中和環球＝北部，其餘門市＝中部；雷根大甲＝中部、其餘＝南部（天王暫列南部，待 Marc 確認）。雷根、動力目前沒有 25FW 整季資料，中部、南部畫面不顯示資料期間提醒（Marc 11/19 要求拿掉），ref.js 也不放體系名稱與期間。每月 POS 匯入後重跑：`python3 tools/build_ref.py --whl ../emers-whl-system --xlsx 對照表.xlsx`，再更新 index.html 的 `ref.js?v=`。
 
+### WAAC FW26 現貨（`waac-fw26-stock-order`）現況（2026-11-19，Grok）
+- 2026-11-19 15:00 上線：後台在 emerswhlsystem.marc@gmail.com（Apps Script 部署 v1），指令碼屬性未設 PREORDER_SSO_SECRET／ADMIN_KEY，訂單彙整驗票由 Early Buy 收單程式代驗（`SSO_PROXY_URL`）。
+- 用途：手上已到貨的現貨新品接單，不是預訂。以 DST Early Buy 前台為底、Code.gs 以 DSTC（含會員票券 SSO）為底。
+- 商品：WAAC FW26 帽款＋桿頭套 19 款色／11 款，全部 ACC（品類：棒球帽、遮陽帽、漁夫帽、護耳帽、桿頭套）。來源 Excel 分頁 FW26（款號、色號、品號、SRP、Order 欄）。
+- 庫存：每個尺寸有 `stock`（現有庫存）與 `pn`（品號）。來源＝WHL 每日倉庫庫存（emers-whl-system `unmatched_stock_codes.csv`，2026-11-19 的資料；這批品號還不在 WHL 主檔，所以內部站庫存頁看不到），25 個品號全對到，數量跟 Excel 的 Order 欄一致。`window.WAAC_STOCK_DATE` 顯示在頁首。
+- 數量上限（2026-11-19 Marc 決定：只限單張訂單）：卡片每個尺寸顯示「庫存 N」，一張訂單各尺寸（連鎖分店合計）不能超過現有庫存，不扣其他訂單。輸入超過會自動壓回並提示；送單時 Code.gs `stockCheck_` 再擋一次（錯誤 `over_stock:[...]`）。`LIMIT_ACROSS_ORDERS = false`、index.html `USE_AVAIL = false`（不呼叫 `avail`）；要改先送出先占，兩個都改 true。多張單合計超過庫存由業務在款色彙總分配。
+- 卡片直接顯示材質與產地（代碼行下方，手機版上下兩行），沒有「材質與產地」展開按鈕。
+- 更新庫存：改 `tools/build_data.py`（重產 data.js）＋ Code.gs 的 `STOCK`／`STOCK_DATE` 常數（兩邊要一致），Code.gs 改完要部署新版本。
+- 價格：顯示「建議售價」（SRP，NT$2,800／3,800）；HO 分店配貨折數沿用範本 0.5，未確認。
+- 圖片：只有原廠 Excel 內嵌的線稿／實體混合小圖，多色合圖已裁成單色（`tools/crop.py`），沒有放大處理；沒有獨立實體圖。品名、中文顏色為暫定。頁首「資料待更新說明」列出這幾點。
+- 前台沒有任何登入後台的入口；訂單彙整（刪除訂單、一鍵統整交單）只能從內部站 03 卡片「訂單彙整」開（#admin=會員票券，Code.gs 用指令碼屬性 PREORDER_SSO_SECRET 驗證）。
+- 內部站串接（emers-whl-system，已上線）：key `waac-fw26-stock`、權限 `pre.waacs`，試算表 ID 已填進 tools/preorder_counts.py、tools/preorders_sync.py、internal/preorder-view.js 與 03 卡片／首頁後台連結。
+
 ### 入口網站串接（規劃中）
-Marc 要把四套系統（含後台、管理頁）串進另一個入口網站。可行做法：
+內部站（`emers-whl-system`）03 預訂單已經用連結掛上各系統，訂單彙整改走 WHL 會員票券，公開站不要放管理者入口。下面是較早的規劃筆記，仍可供參考：
 
 | 做法 | 怎麼做 | 注意 |
 |---|---|---|
@@ -326,3 +344,49 @@ Marc 要把四套系統（含後台、管理頁）串進另一個入口網站。
 | 2026-11-18 | Grok | DSTC | 單色款式圖 pc.js 擴充到 897／926（人工目視 479，工具在 emers-whl-system tools/dstc_percolor） | fa2d052 |
 | 2026-11-18 | Grok | DSTC | ETA 全拿掉（卡片、篩選、分組、CSV／Excel）；上方三排篩選 性別／大類／系列（交集、0 筆變淡、自動跳分頁）；「全部配色」改「實體圖」按鈕（無圖灰掉＋實體圖待更新）；卡片「台灣定價待定」；頁首與 Excel 總表「資料待更新說明」條列；Excel 欄名「韓幣 MSRP(₩)」「韓幣金額(₩)」 | c01980d＋（本次） |
 | 2026-11-19 | Claude | DSTC | 篩選列改四層四種樣式（性別分段／大類圖示分頁／系列標籤／小類文字，ACC、FTW 歸小類）、加「目前篩選」麵包屑；手機版篩選列可收合（頂端摘要列＋明顯「收合／展開篩選」按鈕，選系列後自動收合） | （本次） |
+
+| 2026-11-10 | Claude | BY27SS | 跟新的 27SS Dashboard（…AKfycbxY7psb9…/exec）逐款核對：747 款色、尺寸、英文品名全部一致，沒有新增或刪除。依 Dashboard 新欄位 included_in_sample 把「展示會有樣品」從 70 擴到 207 個款色（tools/ss_dash_1110.txt）。鞋款加註原廠款號（2TSBY-XOX…）。CAD 仍缺 218 個款色 | （本次） |
+| 2026-11-10 | Claude | BY27SS | 依原廠「KOREA TARGET 27SS APPAREL PACKING LIST」標了「샘플 O」的 74 個款色，在備註加「展示會有樣品」（對到 70 個款色／58 款）。名單在 tools/ss_samples.json | （本次） |
+| 2026-11-10 | Claude | BY27SS、BY27FW | 拿掉價格（韓國 MSRP、台幣換算、零售金額）與韓國入倉日：資料欄位清空、卡片與統計隱藏金額、Excel 訂單本隱藏價格欄（欄位順序不變，匯入照舊）。27SS 拿掉 Sample 選款敘述，改成「台灣主打」標籤與篩選（47 款），沒有台灣市場備註的補上；上市月改成「台灣預計 N 月上市」（韓國入倉月往後一個月）。27FW 配件主打加 4 款。台灣定價公告後要把價格放回來。Apps Script 沒動，通知信的 Excel 金額會是 0 | （本次） |
+| 2026-11-10 | Claude | BY27FW | 讀中國 TAG-ON 清單 xlsx 本體：補 11 個款色的圖（還有 56 個沒圖）；配件 46 款、鞋款 8 款補上「展示會有樣品」，其餘標「無樣品，請看款式圖下單」。對照在 tools/fw_tagon_img.json、fw_tagon_styles.json | （本次） |
+| 2026-11-10 | Claude | BY27SS、BY27FW | 拿掉價格（韓國 MSRP、台幣換算、零售金額）：資料欄位清空、卡片與統計隱藏金額、Excel 訂單本隱藏價格欄（欄位順序不變）。27FW 配件主打加 4 款（共 35 款主打）。台灣定價公告後要把價格放回來；韓國售價仍留在 tools/fw2_src.json。詳見 by-27ss-order 同日紀錄 | （本次） |
+| 2026-11-10 | Claude | BY27FW | 改讀原廠 RAWDATA xlsx 本體：685 款色／271 款（上一版從文字匯出只抓到 660）；款式圖改成每個顏色各一張，618 款色有圖、67 沒圖 | （本次） |
+| 2026-11-10 | Claude | BY27FW | 商品資料改用原廠 11/9 的 27FW RAWDATA：150 筆→660 款色／271 款（新增配件 89、鞋 30）；拆到款色；不放韓國計畫量；韓國入倉批次換成月份後往後一個月當台灣上市月；新增「台灣主打」標籤與篩選（87 款色／31 款）、每款台灣市場備註、有無樣品備註。新款 CAD 還沒有（319 款色無圖）。產生程式 tools/gen_fw2.py | （本次） |
+| 2026-11-11 | Claude | BY27SS | 款式圖（娃娃圖）原廠是整個款號一張總表、各色並排。用 OCR 讀色名標籤把總表切成一色一張（只留該色那一件，同時去掉韓文表頭與韓國計畫量），切不出來的維持原圖。Excel 訂單本與卡片：有樣品的款色備註與色名欄標綠底粗體 | （本次） |
+| 2026-11-11 | Claude | BY27FW | 款式圖（娃娃圖）原廠是整個款號一張總表、各色並排。用 OCR 讀色名標籤把總表切成一色一張（只留該色那一件，同時去掉韓文表頭與韓國計畫量），切不出來的維持原圖。Excel 訂單本與卡片：有樣品的款色備註與色名欄標綠底粗體 | （本次） |
+| 2026-11-12 | Claude | BY27SS、BY27FW | 「此款…樣品」也標綠：卡片與 Excel 訂單本的綠底條件改成備註開頭是「展示會有樣品」或「此款」。27SS 151 款色備註改為「此款號展示會有樣品，樣品是哪個顏色以現場為準」（FW 鞋 30 款色文字不變） | （本次） |
+| 2026-11-12 | Claude | BY27SS、BY27FW | 樣品標註改成照實際寄到的三份樣品清單（北京 Invoice 1109_update1、韓國 27SS 服裝 Packing List、韓國 27SS 鞋 17PCS）。原則：寧可少標不可多標。「展示會有樣品」＝該款色確定有（綠底）；清單沒列顏色的寫「此款展示會有樣品，顏色以現場為準」（不標綠）。27SS：鞋 17 款色「有樣品」，服裝 151 款色「此款有樣品」，品名對不上的 1BYHDMW501、1BYZTMW504 不標。27FW：350 款色「有樣品」（款號＋顏色逐筆對發票），鞋 30 款色「此款有樣品」，27FMGJ030-BU 發票品名錯不標。只動 data.js 的 note 欄 | （本次） |
+| 2026-11-12 | Claude | BY27SS | 鞋款圖改完整：原本是整張 CAD 頁或只剩鞋跟局部，改由 CAD 頁依顏色裁出完整一隻（`tools/shoe_crops.py`，12 款色）；502/908/914 沒有 CAD 頁，借 27FW 同系列完整圖並標 `ref`=3「同系列鞋款（27FW 圖），配色不同，僅供參考」。仍是鞋跟局部：ABYSHXW902-BR／903-BK（YAKLOAD REMASTER），要原廠整隻圖 | （本次） |
+| 2026-11-12 | Claude | BY27SS | 借來的圖加標註：data.js 品項新增 `ref`（1=同款其他色、2=同名另一性別），卡片圖下顯示「同款，顏色不同，僅供參考」／「同款式（另一性別）圖，僅供參考」；fill_images.py 之後會自動寫 ref | （本次） |
+| 2026-11-12 | Claude | BY27SS | Marc 指示「都要有圖最重要」：沒圖的款色依序借 1) 同款號其他顏色的圖 2) 被移除的小圖工藝單（僅 27SS）3) 同品名同品類他性別的圖；借來的圖顏色可能不同。程式 `tools/fill_images.py`（重產後與 `post_1112_fix.py` 一起再跑，順序：先 post_1112_fix 再 fill_images）。仍沒圖：27SS 208 款色（配件 172）、27FW 44 款色，要原廠提供乾淨的圖 | （本次） |
+| 2026-11-12 | Claude | BY27SS | 分類全面檢查：配件分頁裡 11 款（22 款色）其實是衣服，移到上身（排汗衣 5 款、背心 2 款、無袖上衣 3 款、DNS LIMIA 連帽衫 1 款）；3 款「女款」帽子性別改女。上身 352→374、配件 246→224。改寫程式 `tools/post_1112_fix.py`（重產 data.js 後要再跑）。款式圖：原廠整頁工藝單縮成 118 像素寬的小圖（韓文表格、尺寸、設計師欄位，71 張／166 款色）整批移除，這些款色改顯示「尚無圖片」，要補需原廠給乾淨的款式圖。仍留著的：多款拼貼的設計稿（帽子、襪子、背包、鞋款，一張圖含多個商品）與部分只有鞋跟的裁圖 | （本次） |
+| 2026-11-12 | Claude | BY27SS、BY27FW | 所有 Excel／CSV 輸出都加「上市月」欄：下載訂單本（原隱藏的韓國入倉欄改名顯示）、CSV 明細／款色彙總、複製用 TSV、一鍵統整交單（月份後面插一欄）、Apps Script 的「明細」分頁（`LINE_HEAD` 最後新增「上市月」，舊資料為空）與每張訂單分頁。**Code.gs 要貼進編輯器並部署新版本才生效** | （本次） |
+| 2026-11-12 | Claude | BY27SS、BY27FW | 上方分類篩選列（月份／系列 chip，id=`months`）由複選改單選：點一顆會取代前一顆，再點同一顆回到「全部」。只改 index.html 的 `#months` click handler，篩選條件 `S.months` 仍是 Set（最多一個值）| （本次） |
+| 2026-11-12 | Claude | BY27SS、BY27FW | 沒有上市月的款式一律補上相近款的月份：27FW 509 款色（208 款）、27SS 35 款色（26 款）。27FW 依「同品名→同系列＋同品類＋款號最近」找參考款；配件與鞋款（56 款）同季沒有已知款，用全季最多款的 11 月。27SS 依「同品類＋同系列＋同性別＋款號最近」。對照表在 `tools/launch_infer.csv`（改月份只要改 data.js 的 `monTag`／`launch`）；頁面說明文字改成「月份參考相近款推估」| （本次） |
+| 2026-11-12 | Claude | BY27SS、BY27FW | 台灣建議售價定案（公司 TW-SRP 價格表，一款色一價）：data.js 的 `price` 填入（27SS 747 款色全有；27FW 645 款色，40 個中國專屬款色表上沒填，卡片顯示「售價待確認」）；卡片、小計、總計、Excel 訂單本的價格欄與零售金額放回來（韓國入倉、韓國 MSRP 欄仍隱藏、仍是空的）；拿掉 index.html 結尾的 NOPRICE-SWEEP；Apps Script `SHOW_PRICE` 改 true（**要貼進 Apps Script 編輯器並部署新版本才生效**）| （本次） |
+| 2026-11-12 | Claude | BY27FW | 借來的圖加標註：data.js 品項新增 `ref`（1=同款其他色、2=同名另一性別），卡片圖下顯示「同款，顏色不同，僅供參考」／「同款式（另一性別）圖，僅供參考」；fill_images.py 之後會自動寫 ref | （本次） |
+| 2026-11-12 | Claude | BY27FW | Marc 指示「都要有圖最重要」：沒圖的款色依序借 1) 同款號其他顏色的圖 2) 被移除的小圖工藝單（僅 27SS）3) 同品名同品類他性別的圖；借來的圖顏色可能不同。程式 `tools/fill_images.py`（重產後與 `post_1112_fix.py` 一起再跑，順序：先 post_1112_fix 再 fill_images）。仍沒圖：27SS 208 款色（配件 172）、27FW 44 款色，要原廠提供乾淨的圖 | （本次） |
+| 2026-11-12 | Claude | BY27FW | 分類與款式圖檢查：27XWET070 性別改女；其他T恤拆成 POLO衫／襯衫／無袖上衣；27WMPD652、27WWPD653 鋪棉外套→背心；27WUHD309 刷毛外套→連帽衫；「遠征羽絨外套（待原廠）」中性那筆背心→羽絨外套。移除錯的款式圖：Polartec 布料吊牌實拍（8 款色）、27FWRT008-TN 布料吊牌實拍、27UWPA156-HE 空白圖、韓文表頭設計稿（2 款色）、TRICOT 套裝長褲誤用外套圖（3 款色）、模特兒實拍（27WWPA101-DU）。改寫程式 `tools/post_1112_fix.py`（重產後要再跑） | （本次） |
+| 2026-11-12 | Claude | BY27FW | 服裝尺寸段（原廠沒給）改照 27SS 同性別、同類型款式補：原本 ASSORTED「數量」的服裝款色改成實際尺寸（上身 85–130 數字碼、下身腰圍或 XS–XL；對照與規則見 `tools/fw_sizes_from_ss.py`，取 27SS 該類型至少 1/3 款有的尺寸，寧可多不要少）。拿掉備註「尺寸段待原廠提供」與頁面「數量」說明（改成「樣品」一句）；`szOrder` 併入 27SS 的數字尺碼。**原廠正式尺寸段出來後要改回來**；重跑 `gen_fw2.py` 會把尺寸洗回 ASSORTED，之後要再跑 `python3 tools/fw_sizes_from_ss.py data.js <27SS data.js> --write` | （本次） |
+| 2026-11-12 | Claude | BY27FW | 中國專屬款整個拿掉（80 款色／31 款）：data.js 移除、`months` 清單移除該系列、拿掉「售價待確認」說明。原始資料仍在 `tools/fw2_src.json`，重產（gen_fw2.py）時要再排除中國專屬款。 | （本次） |
+| 2026-11-13 | Claude | BY27FW | 與原廠 Dashboard（11/12 版）對齊：拿掉系統有、Dashboard 沒有的 224 款色（上身 185、下身 39；214 款色整個款號 Dashboard 沒有、10 款色是同款號其他色）。這批來自 Rob 11/9 的「KOREA TARGET 27FW_취합_RAWDATA-ACC.xlsx」，Marc 要拿清單問原廠。被拿掉的 id 清單在 `tools/removed_1113_not_in_dashboard.json`，原廠確認要供再從 git 歷史（64660b9）取回。`imgs.js` 沒刪對應圖。現在 456 款色。重產（gen_fw2.py）會把這批加回來，要再刪。 | （本次） |
+| 2026-11-13 | Claude | BY27FW | 中國專屬款再加回 40 款色／15 款（原廠 Dashboard 有、公司價格表沒填價）：`price` 空、備註「中國專屬款；價格原廠待定」，卡片顯示「價格原廠待定」，Excel 價格欄空白。至此 Dashboard 的中國專屬款色除 27WMPD501／27WWPD501（4 色，有價 16,880，Marc 11/12 指示不加）與 27FMRT686-LG（Dashboard 沒有）外都在系統裡。現在 680 款色。 | （本次） |
+| 2026-11-13 | Claude | BY27FW | 對照原廠 Dashboard（11/12 版）：中國專屬款加回 35 款色／13 款（只加價格表有價、且 Dashboard 有的；價格取自 11/12 拿掉前的 data.js）。**不加**：40 個價格表沒填價的款色，以及 27WMPD501／27WWPD501／27WMJK606／27WWJK606／27FWGJ682 這 5 款（Marc 11/12 指示不加）。27FMRT686-LG 原廠 Dashboard 沒有，也不加。備註只寫「中國專屬款」，不宣稱有無樣品；服裝尺寸段照 `fw_sizes_from_ss.py` 補。`BY_CFG.months` 加回「中國專屬款」。重產（gen_fw2.py）會洗掉這批，要再加。 | （本次） |
+| 2026-11-16 | Grok Bot | BYS | 拿掉「展示會有樣品」和「此款號展示會有樣品，樣品是哪個顏色以現場為準」。特價商品等其他備註留著。卡片不再標綠，Excel 訂單本不再把色名和備註塗綠 | （本次） |
+| 2026-11-16 | Grok Bot | BYF | 拿掉「展示會有樣品」：備註只刪這句（中國專屬款、延續款等其他備註留著），卡片不再標綠，Excel 訂單本不再把色名和備註塗綠。頁面說明改成圖片怎麼切換 | （本次） |
+| 2026-11-16 | Grok Bot | BYF | 訂單彙整加下單分析（移植 SDR fe901f0，對齊現在的分頁）：依大類（服裝＝上身＋下身、配件、鞋款）、分頁、系列（主題）、經銷商統計款色數／尺寸數／件數／零售金額／佔比。可切換經銷商，展開訂單看該單。對不到商品標成找不到商品，作廢不計。Excel 總表用公式同步。韓國 MSRP 與零售金額 TWD 保留。另外 112 款色加上實拍（正面、背面；27FWPN071 黑灰實拍併入 G8，27WUPA301 藍綠連帽改掛 UB） | （本次） |
+| 2026-11-17 | Claude | BY27SS、BY27FW | 防舊版快取：index.html 開頭先問 `version.json`（不走快取），發現自己不是最新版就自動換成帶 `?v=` 的新網址並保留 `#` 後面的內容，所以從入口網站、iframe、書籤進來都會拿到最新版；新增 `tools/bump_version.py`。**之後每次改完要 push 前都要跑 `python3 tools/bump_version.py`**（會更新 index.html 的版本號、script 的 `?v=`、version.json）。入口網站如果自己存了一份程式（不是連結或 iframe），不在這個機制內。 | 待填 |
+| 2026-11-17 | Claude | BY27SS | 款卡加「機能素材」標章與中文說明：`tools/add_tech.py` 依 icon（特殊素材）、品名、概述、成分判斷每款用到的 GORE-TEX（PRO 3L／3L／2L／鞋款）、WINDSTOPPER、POLARTEC 各系列、PERTEX、PRIMALOFT、G-LOFT、羽絨（絨種／FP／絨羽比）、CORDURA、DYNEEMA、SCHOELLER、MERINO、VIBRAM，寫入 data.js 的 `tg`（卡片）與 `tech`（Excel「材質與科技」欄）；`fab` 成分加中文翻譯並保留原文。說明文字查自各品牌官方與通路資料；規格沒寫明的款（例如 GORE-TEX 沒寫層數、POLARTEC 沒寫系列、羽絨沒寫絨種）一律借同分頁同品類、最相近款的規格，不寫「原廠未註明」，借用清單在 add_tech.py 執行時印出；BLACK YAK 自家款名（AIR FLY、AIRDOT、HYPER 等）原廠沒給規格，不寫說明。重產 data.js 後要再跑 `python3 tools/add_tech.py data.js`。搜尋框可搜素材名。 | 4ee3848 |
+| 2026-11-17 | Claude | BY27SS | 款卡與 Excel 訂單本加「編號」：data.js 的 `no` 填入訂單目錄（客戶版 A4，27SS 1–349、27FW 350–533）的編號，一個款號一個編號，同款各色同編號；卡片款號列前面顯示「編號 N」，搜尋框可用「編號」或數字找；編號來源是 11/13 版訂單目錄 PDF，依款號對應（本系統 1–349）。 | a5313e8 |
+| 2026-11-17 | Claude | BY27FW | 款卡加「機能素材」標章與中文說明：`tools/add_tech.py` 依 icon（特殊素材）、品名、概述、成分判斷每款用到的 GORE-TEX（PRO 3L／3L／2L／鞋款）、WINDSTOPPER、POLARTEC 各系列、PERTEX、PRIMALOFT、G-LOFT、羽絨（絨種／FP／絨羽比）、CORDURA、DYNEEMA、SCHOELLER、MERINO、VIBRAM，寫入 data.js 的 `tg`（卡片）與 `tech`（Excel「材質與科技」欄）；`fab` 成分加中文翻譯並保留原文。說明文字查自各品牌官方與通路資料；規格沒寫明的款（例如 GORE-TEX 沒寫層數、POLARTEC 沒寫系列、羽絨沒寫絨種）一律借同分頁同品類、最相近款的規格，不寫「原廠未註明」，借用清單在 add_tech.py 執行時印出；BLACK YAK 自家款名（AIR FLY、AIRDOT、HYPER 等）原廠沒給規格，不寫說明。重產 data.js 後要再跑 `python3 tools/add_tech.py data.js`。搜尋框可搜素材名。 | 4cfee30 |
+| 2026-11-17 | Claude | BY27FW | 款卡與 Excel 訂單本加「編號」：data.js 的 `no` 填入訂單目錄（客戶版 A4，27SS 1–349、27FW 350–533）的編號，一個款號一個編號，同款各色同編號；卡片款號列前面顯示「編號 N」，搜尋框可用「編號」或數字找；編號來源是 11/13 版訂單目錄 PDF，依款號對應（本系統 350–533）。 | 05fdf67 |
+| 2026-11-18 | Claude | BY27SS | 把原廠「27SS Visual Strategy ZH」簡報（整合策略，24 頁）整理進訂貨頁：①新增「季節策略」面板（story.js，頁首按鈕）②各系列分組下加「商品資訊」摺疊說明 ③款名對得上的 73 個款色卡片加「商品資訊」欄（data.js 的 info 欄，tools/add_pdf_info.py 產生）④Excel 訂單本新增「商品資訊」欄（在「材質與科技」後、「備註」前，匯入照舊）。不放韓元目標、韓國售價、款數／SKU 計畫、折扣率、內部時程 | （本次） |
+| 2026-11-18 | Claude | BY27SS | 依 Marc 指示，原廠簡報內容只留商品本身資訊（材質、規格、機能、搭配）：拿掉售出率、銷售做法、通路分工、每週銷售數字等；面板改名「季節商品資訊」。全頁不含任何韓國價格 | （本次） |
+| 2026-11-18 | Claude | BY27SS | 系列「商品資訊」改成預設展開 | （本次） |
+| 2026-11-18 | Claude | BY27FW | 把原廠「27FW Visual Strategy ZH」簡報的商品資訊整理進訂貨頁（比照 27SS）：頁首「季節商品資訊」面板（story.js）、各系列「商品資訊」摺疊說明、款名對得上的 149 個款色卡片加「商品資訊」（tools/add_pdf_info.py，gen_fw2.py 重產後要再跑）、Excel 訂單本加「商品資訊」欄（材質與科技後、備註前，匯入照舊）。只放商品本身資訊，不含任何韓國價格、銷售目標與銷售做法 | （本次） |
+| 2026-11-18 | Claude | BY27FW | 系列「商品資訊」改成預設展開 | （本次） |
+| 2026-11-19 | Claude | 手機版篩選列 | 篩選列頂端新增摘要列與明顯的「收合／展開篩選」按鈕，手機版可收合（桌機不變，狀態記在 sessionStorage） | （本次） |
+| 2026-11-19 | Grok | WAAC | 上線：config.js 接系統帳號的 Apps Script，交接文件補後端網址與試算表 | （本次） |
+| 2026-11-19 | Grok | WAAC | 數量上限改為只限單張訂單（LIMIT_ACROSS_ORDERS=false、USE_AVAIL=false，拿掉「可訂」字樣）；材質與產地直接顯示在卡片上，拿掉展開按鈕 | （本次） |
+| 2026-11-19 | Grok | WAAC | 新增 WAAC FW26 現貨訂貨站：每尺寸顯示現有庫存、前後台都擋超過可訂量、現貨標籤、性別／品類篩選、無前台後台入口（只走內部站票券） | （本次） |
+| 2026-11-19 | Grok Bot | 全部 | 將本檔定為唯一正本（只在 dst-27fw-main-order 維護）。補上其他 repo 副本裡仍有效、正本沒有的內容（WAAC 系統與現況、BY 變更紀錄與售價定案、各站手機篩選列等）。搬家前的舊試算表與舊 Apps Script 網址不搬；後端表改列 2026-11-19 核對過的現行網址與系統帳號試算表。其他 repo 的同名檔改成一行指向本檔。 | （本次） |
