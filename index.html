@@ -163,6 +163,21 @@ main{padding-block:12px}
 .tag.c{font-family:var(--f-disp);font-weight:700;letter-spacing:.06em;font-size:13px}
 .tag.m{background:var(--acc-soft);color:var(--acc);font-weight:600}
 .tag.eb{background:#fff1d6;color:#8a5300;font-weight:600}
+.fitB{display:inline-flex;align-items:baseline;gap:5px;align-self:center;background:var(--fg);color:var(--bg);border-radius:4px;padding:2px 9px;font-family:var(--f-body);font-size:14px;font-weight:700;line-height:1.35;letter-spacing:.02em}
+.fitB small{font-size:11px;font-weight:600;opacity:.75;letter-spacing:.04em}
+.sintro{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:var(--r);padding:16px 18px 14px;margin:0 0 20px}
+.sintro h2{margin:0 0 6px;font-family:var(--f-disp);font-weight:700;font-size:26px;letter-spacing:.05em;text-transform:uppercase}
+.sintro h2 span{font-family:var(--f-body);font-size:13px;font-weight:400;letter-spacing:0;color:var(--muted);text-transform:none;margin-left:10px}
+.sintro p{margin:0;font-size:14px;line-height:1.75}
+.skey{display:flex;gap:8px;align-items:baseline;margin-top:8px;font-size:13.5px;line-height:1.6}
+.skey b{flex:none;background:var(--brand);color:var(--brand-ink);border-radius:3px;padding:1px 8px;font-size:12px;font-weight:700;letter-spacing:.06em}
+.sthemes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-top:14px}
+.sintro .sthemes:first-child{margin-top:0}
+.sth{background:var(--sunk);border-radius:4px;padding:10px 12px}
+.sth h3{margin:0 0 4px;font-family:var(--f-disp);font-weight:700;font-size:18px;letter-spacing:.05em;text-transform:uppercase}
+.sth h3 span{font-family:var(--f-body);font-size:12px;font-weight:400;letter-spacing:0;color:var(--muted);text-transform:none;margin-left:8px}
+.sth p{font-size:13px;line-height:1.7}
+.sth .skey{font-size:12.5px;margin-top:6px}
 .code{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .ov{font-size:13px;color:var(--muted);margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .note{font-size:12px;color:var(--warn)}
@@ -600,13 +615,13 @@ function itemHTML(it){
   return `<article class="item ${tq?'has':''}" data-id="${esc(it.id)}">
     <div class="pic">${picHTML(it)}</div>
     <div class="info">
-      <div class="t1"><h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
+      <div class="t1">${fitOf(it)?`<span class="fitB"><small>版型</small>${esc(fitOf(it))}</span>`:''}<h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
       <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}</div>
       <div class="code">${esc(it.style||'')}${it.sku?' ／ '+esc(it.sku):''}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}</div>
       ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
       ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
       ${(it.dt||it.tech||it.fab)?`<button class="more" data-more>${open?'收合':'商品細節與材質'}</button>`:''}
-      ${open?`<div class="detail">${it.ov?`<div><h4>商品概述</h4><p>${esc(it.ov)}</p></div>`:''}${it.dt?`<div><h4>商品特色與機能</h4><p>${esc(it.dt)}</p></div>`:''}${it.tech?`<div><h4>系列故事</h4><p>${esc(it.tech)}</p></div>`:''}${it.fab?`<div><h4>材質與版型</h4><p>${esc(it.fab)}</p></div>`:''}</div>`:''}
+      ${open?`<div class="detail">${it.ov?`<div><h4>商品概述</h4><p>${esc(it.ov)}</p></div>`:''}${it.dt?`<div><h4>商品特色與機能</h4><p>${esc(it.dt)}</p></div>`:''}${it.fab?`<div><h4>材質與版型</h4><p>${esc(it.fab)}</p></div>`:''}</div>`:''}
     </div>
     <div class="order">
       <div class="ordtop"><div class="price"><small>台灣定價待定</small></div><div class="sub" data-sub>${subHTML(it)}</div></div>
@@ -626,13 +641,40 @@ function filtered(){
     return true;
   });
 }
+const SHEET_INTRO={
+ 'TRAINING':{t:'混合訓練系列，從高強度訓練到日常生活都能穿。PERFORMANCE DAY 用依肌肉動作設計的 F-360 人體工學版型，加上提花／網布拼接的通風配置；24/7 ROUTINE 用高機能高級面料，維持運動前後的輪廓與挺度。另有 OVER FIT 寬版系列。',k:'F-360 與通風系列、高機能面料組（涼感、機械彈性、WINDSTOPPER 等）、OVER FIT 寬版系列'},
+ 'RUNNING':{t:'給中高階跑者的跑步系列。Q3 HYPER-ENGINEERED RUN 專攻通風，工程提花網布加上高熱區雷射打孔；Q4 DAWN CHASER V2 是給冬季與清晨訓練的保暖疊穿單品。',k:'經編提花（Tricot JQD）單品、通風外套、冬季輕量外套'},
+ 'SNOW':{t:'DE:LIGHT DOWN 用 10D 超輕量面料與高級填充，做輕量到中量的羽絨系列；POLARTEC® 系列是微刷毛、POWER DRY 等機能針織，換季就能穿；SWISS SKI 以瑞士國家滑雪隊為靈感，把 DESCENTE 雪衣技術結合 GORE-TEX 機能。',k:'DE:LIGHT 羽絨外套、SWISS SKI GORE-TEX 外套'},
+ 'PREMIUM TECH ESSENTIAL':{t:'全新的高級系列，把合身版型、日常舒適和材質技術放在一起。D-TECH 用高機能面料做極簡設計，褲型依身形有多種選擇；D-ESSENTIAL 是整天穿都舒服、好搭配的基本款；TOUGH 是耐用、耐洗、速乾的材質組合。',k:''},
+ 'WOMENS':{t:'女裝系列，主打「每個動作都貼合你的輪廓」。GYM FIT（訓練）強調雕塑支撐與舒適；ALL-DAY FIT（運動休閒）兼顧運動與日常；RUN-FIT（跑步）給喜歡長距離的中階女跑者。',k:'FLEX-SKIN 運動內衣與緊身褲、羅紋針織系列、MICRO MODAL 套裝、撥水套裝'}
+};
+const THEME_KEY={
+ 'PREMIUM TECH ESSENTIAL|D-ESSENTIAL':'針織套裝（FTP／HT／HD／KP）、經典 Puffer 羽絨（DJ／DV）、無內裡梭織套裝（WB／PT／HP）',
+ 'PREMIUM TECH ESSENTIAL|TOUGH':'招牌正規版 T 恤（TS／TL）、機能 POLO（PS／PL）、寬版／女款短版 T 恤（TS）'
+};
+function seriesIntro(){
+  if(S.only) return '';
+  const its=filtered(); if(!its.length) return '';
+  const th=new Map();
+  for(const it of ITEMS){ if(it.sheet!==S.sheet||!it.theme||it.theme==='CORE') continue; if(!th.has(it.theme)) th.set(it.theme,{n:0,tech:it.tech||''}); }
+  its.forEach(it=>{ const o=th.get(it.theme); if(o) o.n++; });
+  const si=SHEET_INTRO[S.sheet];
+  const blocks=[...th.entries()].filter(([k,o])=>o.n).map(([k,o])=>{
+    let body=o.tech.replace(/^[^：]*：/,''), key=THEME_KEY[S.sheet+'|'+k]||'';
+    const m=body.match(/主打：(.*)$/); if(m){ key=key||m[1]; body=body.slice(0,m.index).trim(); }
+    return `<div class="sth"><h3>${esc(k)}<span>${o.n} 款色</span></h3><p>${esc(body)}</p>${key?`<div class="skey"><b>主打</b><span>${esc(key)}</span></div>`:''}</div>`;
+  });
+  if(!si&&!blocks.length) return '';
+  return `<section class="sintro"><h2>${esc(S.sheet)}<span>系列介紹（原廠 27Q3Q4 Convention Sheet）</span></h2>${si?`<p>${esc(si.t)}</p>${si.k?`<div class="skey"><b>主打</b><span>${esc(si.k)}</span></div>`:''}`:''}${blocks.length?`<div class="sthemes">${blocks.join('')}</div>`:''}</section>`;
+}
+function fitOf(it){ const m=String(it.fab||'').match(/版型[：:]\s*([^\n]+)/); return m?m[1].trim():''; }
 function renderList(){
   const arr=filtered();
   if(!arr.length){ $('#list').innerHTML=`<div class="empty">${S.only?'還沒有下單的商品。在各分頁的尺寸格輸入數量即可。':'沒有符合條件的商品。'}</div>`; return; }
   const groups=[]; let key=null;
   const ord=it=>(S.only?SHEETS.indexOf(it.sheet)*10:0)+CG_ORDER.indexOf(cgOf(it)); arr.sort((a,b)=>ord(a)-ord(b));
   for(const it of arr){ const k=(S.only?it.sheet+' · ':'')+cgOf(it); if(k!==key){ groups.push({k,sheet:it.sheet,items:[]}); key=k; } groups[groups.length-1].items.push(it); }
-  $('#list').innerHTML = groups.map(g=>{ const themes=[...new Set(g.items.map(i=>i.theme).filter(t=>t&&t!=='CORE'))]; return `<section class="group"><div class="ghead"><h2>${esc(g.k)}</h2><span>${g.items.length} 款色${themes.length?' ・ '+esc(themes.join('、')):''}</span></div><div class="list">${g.items.map(itemHTML).join('')}</div></section>`; }).join('');
+  $('#list').innerHTML = seriesIntro() + groups.map(g=>{ const themes=[...new Set(g.items.map(i=>i.theme).filter(t=>t&&t!=='CORE'))]; return `<section class="group"><div class="ghead"><h2>${esc(g.k)}</h2><span>${g.items.length} 款色${themes.length?' ・ '+esc(themes.join('、')):''}</span></div><div class="list">${g.items.map(itemHTML).join('')}</div></section>`; }).join('');
 }
 function renderTally(){
   const t=totals();
