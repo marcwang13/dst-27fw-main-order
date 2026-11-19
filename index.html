@@ -773,12 +773,12 @@ function seriesIntro(){
   let si=SHEET_INTRO[S.sheet];
   const hero=SERIES_HERO[S.sheet];
   const tb=(n,cap,alt)=>`<button class="sthi" data-sx="${n}" data-cap="${esc(cap)}"><img src="${sxName(n)}" alt="${esc(alt)}" loading="lazy" decoding="async"></button>`;
-  const thumbs=e=>e.imgs.length?`<div class="sthm">${e.imgs.map((n,i)=>tb(n,S.sheet+'・'+e.k+' 款式總覽'+(e.imgs.length>1?'（'+(i+1)+'/'+e.imgs.length+'）':''),e.k+' 款式總覽')).join('')}<span class="sthcap">款式總覽<br>點圖放大</span></div>`:'';
+  const thumbs=e=>e.imgs.length?`<div class="sthm">${e.imgs.map((n,i)=>tb(n,S.sheet+'・'+e.k+' 款式總覽'+(e.imgs.length>1?'（'+(i+1)+'/'+e.imgs.length+'）':''),e.k+' 款式總覽')).join('')}</div>`:'';
   const keyH=k=>k?`<div class="skey"><b>主打</b><span>${esc(k)}</span></div>`:'';
   let cards=ents, extra=[];
   if(!si && ents.length===1){ const e=ents[0]; si={t:e.body,k:e.key}; extra=e.imgs.map((n,i)=>tb(n,S.sheet+'・'+e.k+' 款式總覽',e.k+' 款式總覽')); cards=[]; }
   const media=(hero?[tb(hero,S.sheet+' 系列形象圖',S.sheet+' 系列形象圖')]:[]).concat(extra);
-  const mediaH=media.length?`<div class="sthm top">${media.join('')}<span class="sthcap">原廠簡報圖<br>點圖放大</span></div>`:'';
+  const mediaH=media.length?`<div class="sthm top">${media.join('')}</div>`:'';
   const head=`<h2>${esc(S.sheet)}<span>系列介紹（原廠 27Q3Q4 Convention Sheet）</span></h2>${si?`<p>${esc(si.t)}</p>${keyH(si.k)}`:''}${mediaH}`;
   const grid=cards.length?`<div class="sthemes">${cards.map(e=>`<div class="sth"><h3>${esc(e.k)}<span>${e.n} 款色</span></h3><p>${esc(e.body)}</p>${keyH(e.key)}${thumbs(e)}</div>`).join('')}</div>`:'';
   return `<section class="sintro">${head}${grid}</section>`;
