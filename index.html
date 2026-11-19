@@ -171,6 +171,7 @@ button{cursor:pointer}
 .xlhint{font-size:12px}
 
 /* filter rail */
+#list{overflow-anchor:none}
 .rail{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
 .rail .wrap{display:flex;flex-direction:column;gap:8px;padding-block:10px}
 .dnote{margin:10px 0 0;font-size:12.5px;color:var(--muted);line-height:1.6}.dnote summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--acc);padding:4px 0}.dnote summary:hover{text-decoration:underline}.dnote ul{margin-top:4px!important}.dnote ul{margin:0;padding-left:1.3em}.dnote li{margin:1px 0}
@@ -745,11 +746,11 @@ function fixSel(){ const inG=i=>!S.gens.size||S.gens.has(i.gen); if(S.cgs.size&&
 const onSheet=e=>{ const b=e.target.closest('[data-s]'); if(!b||b.disabled) return; S.sheet=b.dataset.s; renderTabs(); renderList(); window.scrollTo({top:$('.rail').offsetTop-1}); };
 $('#tabs').addEventListener('click',onSheet); $('#subtabs').addEventListener('click',onSheet);
 // 大類：單選（上方膠囊列），切換後若目前分頁沒有該大類就跳到第一個有的分頁
-$('#cgs').addEventListener('click',e=>{ const b=e.target.closest('[data-cg]'); if(!b||b.disabled) return; const v=b.dataset.cg; S.cgs.clear(); if(v) S.cgs.add(v); fixSel(); renderTabs(); renderList(); });
-$('#gens').addEventListener('click',e=>{ const b=e.target.closest('[data-gn]'); if(!b||b.disabled) return; const v=b.dataset.gn; S.gens.clear(); if(v) S.gens.add(v); fixSel(); renderTabs(); renderList(); });
-$('#hotsort').addEventListener('change',e=>{ S.hot=e.target.checked; renderList(); });
+$('#cgs').addEventListener('click',e=>{ const b=e.target.closest('[data-cg]'); if(!b||b.disabled) return; const v=b.dataset.cg; S.cgs.clear(); if(v) S.cgs.add(v); fixSel(); renderTabs(); renderList(); toListTop(); });
+$('#gens').addEventListener('click',e=>{ const b=e.target.closest('[data-gn]'); if(!b||b.disabled) return; const v=b.dataset.gn; S.gens.clear(); if(v) S.gens.add(v); fixSel(); renderTabs(); renderList(); toListTop(); });
+$('#hotsort').addEventListener('change',e=>{ S.hot=e.target.checked; renderList(); toListTop(); });
 let qT=null; $('#q').addEventListener('input',e=>{ clearTimeout(qT); qT=setTimeout(()=>{ S.q=e.target.value.trim().toLowerCase(); renderList(); },150); });
-$('#only').addEventListener('change',e=>{ S.only=e.target.checked; renderList(); });
+$('#only').addEventListener('change',e=>{ S.only=e.target.checked; renderList(); toListTop(); });
 
 // ---------- product list ----------
 function picHTML(it){
@@ -958,8 +959,19 @@ function refHTML(it){
   }
   return `<div class="ref on"><div class="ref-b" style="border-top:0"><div class="ref-tabs" role="group" aria-label="區域">${tabs}</div><h5 class="ref-h">商品系列 銷售數據對照款式</h5><ul class="ref-l">${refs}</ul>${main}</div></div>`;
 }
+// 重繪時固定畫面位置：記住某張卡（沒給就用畫面上第一張看得到的）在螢幕上的位置，重繪後捲回原位，焦點也還原
+function keepPos(unitEl,fn,focusSel){
+  if(!unitEl){ const r=document.querySelector('.rail'); const top=r&&innerWidth<=760?Math.max(0,r.getBoundingClientRect().bottom):0; unitEl=[...document.querySelectorAll('#list [data-unit]')].find(x=>x.getBoundingClientRect().bottom>top+4); }
+  const key=unitEl&&unitEl.dataset.unit, y0=unitEl?unitEl.getBoundingClientRect().top:0;
+  fn();
+  if(!key) return;
+  const n=document.querySelector(`#list [data-unit="${CSS.escape(key)}"]`); if(!n) return;
+  const d=n.getBoundingClientRect().top-y0; if(Math.abs(d)>0.5) window.scrollBy(0,d);
+  if(focusSel){ const f=n.querySelector(focusSel); if(f) try{ f.focus({preventScroll:true}); }catch(_){} }
+}
+function toListTop(){ const r=document.querySelector('.rail'); if(!r) return; const y=Math.max(0,r.offsetTop-1); if(window.scrollY>y) window.scrollTo({top:y}); }
 function refRerenderAll(){ [...new Set([...document.querySelectorAll('#list [data-unit]')].map(x=>x.dataset.unit))].forEach(rerenderUnit); renderRgs(); }
-function setRefReg(k){ refReg=k; try{ sessionStorage.setItem('dstc-refreg',refReg); }catch(_){} refRerenderAll(); }
+function setRefReg(k,unitEl){ refReg=k; try{ sessionStorage.setItem('dstc-refreg',refReg); }catch(_){} keepPos(unitEl,refRerenderAll,unitEl?`[data-refreg="${k}"]`:null); }
 function renderRgs(){ const el=document.getElementById('rgs'); if(el) el.innerHTML=REF_REG.map(([k,l])=>`<button class="sg" data-rg="${k}" aria-pressed="${k===refReg}">${l}</button>`).join(''); }
 function refRerender(style){ (style?[style]:[...refOpen]).forEach(rerenderUnit); }
 function renderList(){
@@ -997,9 +1009,10 @@ $('#list').addEventListener('click',e=>{
   const sx=e.target.closest('[data-sx]');
   if(sx){ $('#overlay').innerHTML=`<div class="zm-scrim" data-close><div class="zm sxz" role="dialog" aria-label="系列圖片"><button class="zm-x" data-close aria-label="關閉">×</button><img src="${sxName(sx.dataset.sx)}" alt=""><div class="zm-bar"><span class="nm">${esc(sx.dataset.cap||'')}</span></div></div></div>`; return; }
   const card=e.target.closest('.item,.sg-h'); if(!card) return; const id=card.dataset.id;
-  const rg=e.target.closest('[data-refreg]'); if(rg){ setRefReg(rg.dataset.refreg); return; }
-  if(e.target.closest('[data-ref]')){ const st=BY[id].style; refOpen.has(st)?refOpen.delete(st):refOpen.add(st); refRerender(st); return; }
-  if(e.target.closest('[data-more]')){ S.open.has(id)?S.open.delete(id):S.open.add(id); rerenderUnit(BY[id].style); return; }
+  const unit=card.closest('[data-unit]');
+  const rg=e.target.closest('[data-refreg]'); if(rg){ setRefReg(rg.dataset.refreg,unit); return; }
+  if(e.target.closest('[data-ref]')){ const st=BY[id].style; refOpen.has(st)?refOpen.delete(st):refOpen.add(st); keepPos(unit,()=>refRerender(st),'[data-ref]'); return; }
+  if(e.target.closest('[data-more]')){ S.open.has(id)?S.open.delete(id):S.open.add(id); keepPos(unit,()=>rerenderUnit(BY[id].style),`[data-id="${CSS.escape(id)}"] [data-more]`); return; }
   const p=e.target.closest('[data-pic]'); if(p){ openLB(id,p.dataset.pic,e); return; }
   if(e.target.closest('[data-zoom]')){ openLB(id,(BY[id].doll?'doll':'photo'),e); }
 });
@@ -1832,7 +1845,7 @@ $('#chain').addEventListener('change',e=>{
   $('#overlay').innerHTML=`<div class="scrim"><div class="panel" style="height:auto;margin:auto;max-width:420px;border-radius:8px"><h2>取消分店下單？</h2><p style="margin:0">各店的數量會加總成一份單店訂單，分店名稱與各店明細會移除。</p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" data-close>保留分店</button><button class="btn pri" id="chain-off">加總並取消分店</button></div></div></div>`;
   $('#chain-off').onclick=()=>{ recalcAgg(); S.chain=false; S.br=[]; S.bq={}; S.cur=null; saveDraft(); closeOverlay(); renderAll(); };
 });
-$('#brbar').addEventListener('click',e=>{ const b=e.target.closest('[data-br]'); if(b){ S.cur=b.dataset.br; saveDraft(); renderAll(); return; }
+$('#brbar').addEventListener('click',e=>{ const b=e.target.closest('[data-br]'); if(b){ S.cur=b.dataset.br; saveDraft(); keepPos(null,renderAll); return; }
   if(e.target.closest('[data-bradd]')) brDialog('新增店點','',v=>{ const nb={id:brId(),name:v}; S.br.push(nb); S.cur=nb.id; });
   if(e.target.closest('[data-brmng]')) openBranchMgr(); });
 $('#overlay').addEventListener('click',e=>{ const r=e.target.closest('[data-brren]'), d=e.target.closest('[data-brdel]');
