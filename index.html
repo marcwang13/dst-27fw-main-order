@@ -241,6 +241,7 @@ main{padding-block:12px}
 .ref-tabs button{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:4px 12px;font-size:12px;cursor:pointer}
 .ref-tabs button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--acc-ink);font-weight:600}
 .ref-note{margin:0;font-size:12px;color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);border-radius:4px;padding:5px 8px}
+.ref-h{margin:2px 0 -2px;font-size:12px;font-weight:600;color:var(--ink,inherit)}
 .ref-l{margin:0;padding:0;list-style:none;font-size:12px;display:grid;gap:3px}
 .ref-l span{font-family:var(--f-mono);color:var(--muted);margin-right:4px}.ref-l small{color:var(--muted)}
 .ref-m{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
@@ -954,7 +955,7 @@ function refHTML(it){
     const col=d.c?`<div><h5>熱賣色</h5><div class="ref-c">${d.c.slice(0,3).map(([c,p])=>`<div><span>${esc(c)}</span><i><b style="width:${p}%"></b></i><em>${p}%</em></div>`).join('')}</div></div>`:'';
     main=`<div class="ref-m">${m}</div>${(sz||col)?`<div class="ref-g">${sz||'<div></div>'}${col}</div>`:''}<p class="ref-empty">原價售出比＝以 9 折以上賣出的件數比例，越高代表不靠折扣也賣得動。</p>`;
   }
-  return `<div class="ref on"><div class="ref-b" style="border-top:0"><div class="ref-tabs" role="group" aria-label="區域">${tabs}</div><ul class="ref-l">${refs}</ul>${main}</div></div>`;
+  return `<div class="ref on"><div class="ref-b" style="border-top:0"><div class="ref-tabs" role="group" aria-label="區域">${tabs}</div><h5 class="ref-h">商品系列 銷售數據對照款式</h5><ul class="ref-l">${refs}</ul>${main}</div></div>`;
 }
 function refRerenderAll(){ [...new Set([...document.querySelectorAll('#list [data-unit]')].map(x=>x.dataset.unit))].forEach(rerenderUnit); renderRgs(); }
 function setRefReg(k){ refReg=k; try{ sessionStorage.setItem('dstc-refreg',refReg); }catch(_){} refRerenderAll(); }
