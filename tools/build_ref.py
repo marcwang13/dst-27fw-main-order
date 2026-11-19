@@ -7,7 +7,7 @@
 資料來源（emers-whl-system）：
   dealer/data/chain_leigen_*.json、chain_dongli_*.json、internal/data/direct_chain_*.json
 只算 DESCENTE（不含 DESCENTE GOLF），排除 OUTLET、特賣、倉庫。
-對照三層：L1 同款延續（同款號去掉年份碼，或英文品名相同）、L2 同系列同品類（系列碼＋品類碼＋性別，FW）、
+對照三層：L1 同款延續（同款號去掉年份碼，或英文品名相同）、L2 同系列同品類（系列碼＋品類碼＋性別，FW，價格 ±20%）、
 L3 同品類同價格帶（品類碼＋性別，FW，價格 ±10%；男女不互配，只有中性可跟男／女互配）。
 ref_override.json 可人工指定：{"SS321TJK91": ["SQ321TJK91"], "SS999XXX99": []}（空陣列＝無對照）。
 """
@@ -234,7 +234,7 @@ def main():
         line, it2 = s[5], s[6:8]
         c = [o for o in pool if o['fw'] and o['line'] == line and o['it2'] == it2 and gmatch(n, o)]
         if c:
-            return 'L2', closest(n, c, 0.3) or closest(n, c, 0)[:2]
+            return 'L2', closest(n, c, 0.2) or closest(n, c, 0)[:2]  # 價差 ±20%，都沒有才不限價取最接近 2 款
         # L3：同品類、價差 ±10%；性別要一樣，只有中性可以跟男／女互配（男女不互配）
         c = [o for o in pool if o['fw'] and o['it2'] == it2 and gmatch(n, o)]
         r = closest(n, c, 0.1)
