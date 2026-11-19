@@ -148,7 +148,7 @@ def main():
                 continue
             qty = r[4] or 0
             amt, lst = r[5] or 0, r[6] or 0
-            full = qty > 0 and lst > 0 and amt >= lst * 0.95
+            full = qty > 0 and lst > 0 and amt >= lst * 0.9 - 0.5
             sales[st].append((REG_KEY[reg], f'{src}:{r[0]}', r[1][:7], norm_size(r[3], it), qty, full, color_of(key)))
             if qty > 0:
                 stores_by_reg[REG_KEY[reg]].add(f'{src}:{r[0]}')
@@ -342,7 +342,7 @@ def main():
             '資料期間：' + '；'.join(f'{k} {v}' for k, v in meta['periods'].items()),
             '區域：直營依主檔區域；動力新竹巨城、中和環球＝北部，其餘門市＝中部；雷根大甲＝中部，其餘＝南部（天王暫列南部，目前無銷售）。',
             '排除：OUTLET、特賣、倉庫（直營林口三井 OUTLET／特賣、台中三井 OUTLET、雷根 SKM、動力管理處／倉庫）。',
-            '店均月銷＝件數 ÷ 有賣的店數 ÷ 有賣的月數；售罄率＝銷售 ÷（銷售＋目前庫存）；全價比＝以 95 折以上賣出的件數比例。',
+            '店均月銷＝件數 ÷ 有賣的店數 ÷ 有賣的月數；售罄率＝銷售 ÷（銷售＋目前庫存）；原價售出比＝以 9 折以上賣出的件數比例。',
             '要改對照：在 tools/ref_override.json 填 {"27FW款號": ["舊款號", ...]}，空陣列＝無對照，重跑 build_ref.py。',
         ]:
             n2.append([line])

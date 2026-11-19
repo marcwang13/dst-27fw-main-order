@@ -655,7 +655,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
 <script src="data.js?v=20261118c"></script>
 <script src="imgs.js?v=20261118e"></script>
 <script src="pc.js?v=20261118d"></script>
-<script src="ref.js?v=20261119t"></script>
+<script src="ref.js?v=20261119u"></script>
 <script>
 (function(){
 const ITEMS = window.SDR_ITEMS || [];
@@ -944,12 +944,12 @@ function refHTML(it){
   const refs=r.r.map(x=>`<li><span>${esc(x[0])}</span>${esc(x[1])} <small>${esc(x[2])}</small></li>`).join('');
   let main='<p class="ref-empty">這個區域的舊款銷售太少，沒有參考數字。</p>';
   if(d){
-    const m=[['店均月銷',d.m+' 件',''],['售罄率',d.st==null?'–':d.st+'%','賣出件數 ÷（賣出＋目前庫存）'],['原價售出比',d.fp+'%','以 95 折以上（沒打折）賣出的件數比例'],['參考店數',d.k+' 家','']].map(([l,v,t])=>`<div${t?` title="${t}"`:''}><small>${l}</small><b>${v}</b></div>`).join('');
+    const m=[['店均月銷',d.m+' 件',''],['售罄率',d.st==null?'–':d.st+'%','賣出件數 ÷（賣出＋目前庫存）'],['原價售出比',d.fp+'%','以 9 折以上賣出的件數比例'],['參考店數',d.k+' 家','']].map(([l,v,t])=>`<div${t?` title="${t}"`:''}><small>${l}</small><b>${v}</b></div>`).join('');
     let sz='';
     if(d.sz){ const keys=fullSizes(it).filter(z=>d.sz[z]!=null).concat(Object.keys(d.sz).filter(z=>!fullSizes(it).includes(z))); const mx=Math.max(...keys.map(z=>d.sz[z]),1); const many=keys.length>10;
       sz=`<div><h5>尺寸分布${many?'<small>（滑鼠移到長條看比例）</small>':''}</h5><div class="ref-sz">${keys.map((z,i)=>`<div title="${esc(z)}：${d.sz[z]}%"><span>${many?'':d.sz[z]+'%'}</span><i style="height:${Math.max(2,Math.round(d.sz[z]/mx*46))}px"></i><span>${many&&i%2?'&nbsp;':esc(z)}</span></div>`).join('')}</div></div>`; }
     const col=d.c?`<div><h5>熱賣色</h5><div class="ref-c">${d.c.slice(0,3).map(([c,p])=>`<div><span>${esc(c)}</span><i><b style="width:${p}%"></b></i><em>${p}%</em></div>`).join('')}</div></div>`:'';
-    main=`<div class="ref-m">${m}</div>${(sz||col)?`<div class="ref-g">${sz||'<div></div>'}${col}</div>`:''}<p class="ref-empty">原價售出比＝以 95 折以上賣出的件數比例，越高代表不靠折扣也賣得動。</p>`;
+    main=`<div class="ref-m">${m}</div>${(sz||col)?`<div class="ref-g">${sz||'<div></div>'}${col}</div>`:''}<p class="ref-empty">原價售出比＝以 9 折以上賣出的件數比例，越高代表不靠折扣也賣得動。</p>`;
   }
   return `<div class="ref on"><div class="ref-b" style="border-top:0"><div class="ref-tabs" role="group" aria-label="區域">${tabs}</div><ul class="ref-l">${refs}</ul>${main}</div></div>`;
 }
