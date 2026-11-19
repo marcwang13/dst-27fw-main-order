@@ -170,7 +170,7 @@ def main():
         o['line'], o['it2'] = st[5], st[6:8]
         o['nn'] = norm_name(o['en'])
         o['g'] = o['gx'] or '中性'
-    pool = [o for o in old.values() if o['qty'] >= 5]
+    pool = [o for o in old.values() if o['qty'] >= 3]  # 舊款累計賣 3 件以上才拿來對照
 
     # ---------- 27FW 商品 ----------
     t = open(os.path.join(a.repo, 'data.js'), encoding='utf-8').read()
