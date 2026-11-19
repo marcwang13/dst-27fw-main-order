@@ -4,7 +4,65 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}
+/* rail: mobile fold bar (all order sites share this block) */
+.rail-bar{display:none}
+.rail-body{display:flex;flex-direction:column;gap:8px}
+@media (max-width:760px){
+  .rail .wrap{padding-block:0}
+  .rail-bar{display:flex;align-items:center;gap:10px;min-height:54px;padding-block:7px}
+  .rail-sum{flex:1;min-width:0;font-size:12px;line-height:1.4;color:var(--muted);cursor:pointer}
+  .rail-sum b{display:block;font-size:14px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rail-tg{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 16px;border-radius:999px;border:1.5px solid var(--acc,var(--red));background:var(--acc,var(--red));color:var(--acc-ink,var(--red-ink));font-size:14px;font-weight:600}
+  .rail-tg .ar{width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(2px) rotate(-135deg);transition:transform .18s}
+  .rail.folded .rail-tg{background:transparent;color:var(--acc,var(--red));border-color:var(--acc,var(--red))}
+  .rail.folded .rail-tg .ar{transform:translateY(-2px) rotate(45deg)}
+  .rail-body{padding:2px 0 12px}
+  .rail.folded .rail-body{display:none}
+  .rail:not(.folded) .rail-bar{border-bottom:1px solid var(--line);margin-bottom:8px}
+}
+
+/* DSTC filter: four levels, four shapes */
+.lv{display:flex;align-items:center;gap:12px;min-width:0}
+.lv+.lv{border-top:1px solid var(--line);padding-top:8px}
+.lv-l{flex:none;width:32px;font-size:11px;letter-spacing:.08em;color:var(--muted)}
+.lv-sr{align-items:flex-start}.lv-sr .lv-l{padding-top:6px}
+.seg{display:inline-flex;max-width:100%;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg .sg{border:0;border-right:1px solid var(--line);background:transparent;padding:5px 14px;font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:baseline;white-space:nowrap}
+.seg .sg:last-child{border-right:0}
+.seg .sg small{font-family:var(--f-mono);font-size:11px;opacity:.7}
+.seg .sg[aria-pressed="true"]{background:var(--sunk);color:var(--fg);font-weight:600}
+.seg .sg[disabled]{opacity:.4;cursor:default}
+.cgs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.cgs::-webkit-scrollbar{display:none}
+.ct{flex:none;display:flex;align-items:center;gap:8px;border:0;border-bottom:3px solid transparent;background:transparent;padding:7px 14px;font-size:15px;font-weight:600;color:var(--muted)}
+.ct svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ct small{font-family:var(--f-mono);font-size:11px;font-weight:400;opacity:.7}
+.ct:hover{color:var(--fg)}
+.ct[aria-pressed="true"]{color:var(--fg);border-bottom-color:var(--acc)}
+.ct[aria-pressed="true"] svg{color:var(--acc)}
+.ct[disabled]{opacity:.4;cursor:default}
+#tabs.tabs{flex-wrap:wrap;overflow:visible;gap:6px;min-width:0}
+#tabs .tab{border-radius:6px;border-width:1px;padding:4px 11px;font-size:12px;font-weight:600;letter-spacing:.04em}
+#tabs .tab[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.subs{display:flex;flex-wrap:wrap;gap:2px 18px;min-width:0}
+.st{border:0;border-bottom:2px solid transparent;background:transparent;padding:3px 0;font-size:12.5px;color:var(--muted);display:inline-flex;gap:5px;align-items:center}
+.st::before{content:"# ";opacity:.45}
+.st small{font-family:var(--f-mono);font-size:11px;opacity:.7}
+.st:hover{color:var(--fg)}
+.st[aria-pressed="true"]{color:var(--fg);border-bottom-color:var(--acc);font-weight:600}
+.st[disabled]{opacity:.4;cursor:default}
+.st .dot{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--acc);color:var(--acc-ink);font-size:11px;font-family:var(--f-mono);display:inline-grid;place-items:center}
+.crumb{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-left:44px;font-size:12px;color:var(--muted)}
+.crumb button{border:0;background:transparent;color:var(--acc);font-size:12px;padding:2px 0}
+@media (max-width:760px){
+  .lv{gap:8px}.lv-l{width:26px;font-size:10.5px}
+  .seg .sg{padding:6px 11px}
+  .ct{flex-direction:column;gap:1px;padding:6px 10px;font-size:12.5px}
+  .ct small{display:none}
+  .crumb{display:none}
+}
+</style>
 <title>DESCENTE 27FW 正式訂貨（27Q3Q4）</title>
 <link rel="icon" type="image/svg+xml" href="https://emerswhl-restock.surge.sh/favicon.svg"><link rel="icon" type="image/png" sizes="32x32" href="https://emerswhl-restock.surge.sh/brand/favicon-32.png"><link rel="shortcut icon" href="https://emerswhl-restock.surge.sh/brand/favicon.ico"><link rel="apple-touch-icon" href="https://emerswhl-restock.surge.sh/brand/apple-touch-icon.png">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -388,15 +446,23 @@ tfoot td{font-weight:700;background:var(--sunk)}
     </div>
     <div class="dnote" id="dnote"></div>
   </div>
-  <div class="rail">
+  <div class="rail" id="rail">
     <div class="wrap">
+      <div class="rail-bar">
+        <div class="rail-sum" id="railSum"></div>
+        <button type="button" class="rail-tg" id="railTg" aria-expanded="true" aria-controls="railBody"><span class="tx">收合</span><i class="ar" aria-hidden="true"></i></button>
+      </div>
+      <div class="rail-body" id="railBody">
       <div class="brbar" id="brbar" hidden></div>
-      <div class="tabs cgtabs" id="gens" role="toolbar" aria-label="性別"></div>
-      <div class="tabs cgtabs" id="cgs" role="toolbar" aria-label="大類"></div>
-      <div class="tabs" id="tabs" role="toolbar" aria-label="分頁"></div>
+      <div class="lv lv-gen"><span class="lv-l">性別</span><div class="seg" id="gens" role="toolbar" aria-label="性別"></div></div>
+      <div class="lv lv-cg"><span class="lv-l">大類</span><div class="cgs" id="cgs" role="toolbar" aria-label="大類"></div></div>
+      <div class="lv lv-sr"><span class="lv-l">系列</span><div class="tabs" id="tabs" role="toolbar" aria-label="系列"></div></div>
+      <div class="lv lv-sub" id="subLv"><span class="lv-l">小類</span><div class="subs" id="subtabs" role="toolbar" aria-label="小類"></div></div>
       <div class="row2">
         <input class="search" id="q" type="search" placeholder="搜尋品名、款號、色碼、顏色">
         <label class="toggle"><input type="checkbox" id="only"> 只看已下單</label>
+      </div>
+      <div class="crumb"><span id="crumbTx"></span><button type="button" id="crumbX" hidden>清除篩選</button></div>
       </div>
     </div>
   </div>
@@ -556,19 +622,28 @@ function totals(){ let sty=0,qty=0,amt=0; const bySheet={}; for(const id in S.qt
 
 // ---------- tabs & filters ----------
 document.getElementById('dnote').innerHTML='<h4>資料待更新說明</h4><ul>'+dataNotes(true).map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>';
+const CGI={'':'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>',
+ '上身':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l6 2v5h-3v8a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-8H3V6l6-2a3 3 0 0 0 6 0"/></svg>',
+ '下身':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10l1.5 18h-5L12 9.5 10.5 21h-5z"/></svg>',
+ '配件':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l1 12H5z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
+ '鞋類':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17v-5c3 0 4-1 5-3l3 2c1 .6 2 .8 3 .8 2.5 0 5 1.2 6 3.2v3z"/><path d="M3 19.5h18"/></svg>'};
 function renderTabs(){
   const t=totals(); const inG=i=>!S.gens.size||S.gens.has(i.gen), inCg=i=>!S.cgs.size||S.cgs.has(cgOf(i));
-  const pill=(attr,v,l,n,on)=>`<button class="tab" data-${attr}="${v}" aria-pressed="${on}"${n||!v?'':' disabled'}>${l}<small>${n}</small></button>`;
-  $('#gens').innerHTML = pill('gn','','全部',ITEMS.length,S.gens.size===0)+GEN_ORDER.map(g=>pill('gn',g,g,ITEMS.filter(i=>i.gen===g).length,S.gens.has(g))).join('');
+  const seg=(v,l,n,on)=>`<button class="sg" data-gn="${v}" aria-pressed="${on}"${n||!v?'':' disabled'}>${l}<small>${n}</small></button>`;
+  const ct=(v,l,n,on)=>`<button class="ct" data-cg="${v}" aria-pressed="${on}"${n||!v?'':' disabled'}>${CGI[v]}<span>${l}</span><small>${n}</small></button>`;
+  $('#gens').innerHTML = seg('','全部',ITEMS.length,S.gens.size===0)+GEN_ORDER.map(g=>seg(g,g,ITEMS.filter(i=>i.gen===g).length,S.gens.has(g))).join('');
   const gI=ITEMS.filter(inG);
-  $('#cgs').innerHTML = pill('cg','','全部',gI.length,S.cgs.size===0)+CG_ORDER.map(g=>pill('cg',g,g,gI.filter(i=>cgOf(i)===g).length,S.cgs.has(g))).join('');
-  $('#tabs').innerHTML = SHEETS.map(s=>{ const n=gI.filter(i=>i.sheet===s&&inCg(i)).length; const d=t.bySheet[s]; return `<button class="tab" data-s="${s}" aria-pressed="${S.sheet===s}"${n?'':' disabled'}>${s}<small>${n}</small>${d?`<span class="dot">${d}</span>`:''}</button>`; }).join('');
-  { const tb=$('#tabs'), p=tb.querySelector('[aria-pressed="true"]'); if(p&&tb.scrollWidth>tb.clientWidth) tb.scrollLeft=Math.max(0,p.offsetLeft-tb.offsetLeft-16); }
+  $('#cgs').innerHTML = ct('','全部',gI.length,S.cgs.size===0)+CG_ORDER.map(g=>ct(g,g,gI.filter(i=>cgOf(i)===g).length,S.cgs.has(g))).join('');
+  const isSub=s=>/^(ACC|FTW)/.test(s);
+  const btn=(s,cls)=>{ const n=gI.filter(i=>i.sheet===s&&inCg(i)).length; const d=t.bySheet[s]; return `<button class="${cls}" data-s="${s}" aria-pressed="${S.sheet===s}"${n?'':' disabled'}>${s}<small>${n}</small>${d?`<span class="dot">${d}</span>`:''}</button>`; };
+  $('#tabs').innerHTML = SHEETS.filter(s=>!isSub(s)).map(s=>btn(s,'tab')).join('');
+  $('#subtabs').innerHTML = SHEETS.filter(isSub).map(s=>btn(s,'st')).join('');
 }
 // 性別／大類：上方膠囊列，單選；目前大類在新性別下沒有商品就回到全部大類，目前分頁沒有符合的就跳到第一個有的分頁
 function fixSel(){ const inG=i=>!S.gens.size||S.gens.has(i.gen); if(S.cgs.size&&!ITEMS.some(i=>inG(i)&&S.cgs.has(cgOf(i)))) S.cgs.clear();
   const ok=x=>ITEMS.some(i=>i.sheet===x&&inG(i)&&(!S.cgs.size||S.cgs.has(cgOf(i)))); if(!ok(S.sheet)){ const s2=SHEETS.find(ok); if(s2) S.sheet=s2; } }
-$('#tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-s]'); if(!b) return; S.sheet=b.dataset.s; renderTabs(); renderList(); window.scrollTo({top:$('.rail').offsetTop-1}); });
+const onSheet=e=>{ const b=e.target.closest('[data-s]'); if(!b||b.disabled) return; S.sheet=b.dataset.s; renderTabs(); renderList(); window.scrollTo({top:$('.rail').offsetTop-1}); };
+$('#tabs').addEventListener('click',onSheet); $('#subtabs').addEventListener('click',onSheet);
 // 大類：單選（上方膠囊列），切換後若目前分頁沒有該大類就跳到第一個有的分頁
 $('#cgs').addEventListener('click',e=>{ const b=e.target.closest('[data-cg]'); if(!b||b.disabled) return; const v=b.dataset.cg; S.cgs.clear(); if(v) S.cgs.add(v); fixSel(); renderTabs(); renderList(); });
 $('#gens').addEventListener('click',e=>{ const b=e.target.closest('[data-gn]'); if(!b||b.disabled) return; const v=b.dataset.gn; S.gens.clear(); if(v) S.gens.add(v); fixSel(); renderTabs(); renderList(); });
@@ -736,7 +811,7 @@ $('#list').addEventListener('input',e=>{
   if(inp.dataset.brq){ const b=inp.dataset.brq; const m=(S.bq[b]||{})[id]||{}; let t=0; for(const z in m) t+=m[z]; const bt=card.querySelector(`[data-bt="${b}"]`); if(bt) bt.textContent=t||''; let ct=0; S.br.forEach(x=>{ ct+=(((S.bq[x.id]||{})[id]||{})[sz])||0; }); const c=card.querySelector(`[data-ct="${CSS.escape(sz)}"]`); if(c) c.textContent=ct||''; const ctt=card.querySelector('[data-ctt]'); if(ctt) ctt.textContent=tq||''; }
   saveDraft(); renderTally(); renderTabsDots(); renderBranchBar();
 });
-function renderTabsDots(){ const t=totals(); document.querySelectorAll('#tabs .tab').forEach(b=>{ const d=t.bySheet[b.dataset.s]; let dot=b.querySelector('.dot'); if(d){ if(!dot){ dot=document.createElement('span'); dot.className='dot'; b.appendChild(dot);} dot.textContent=d; } else if(dot) dot.remove(); }); }
+function renderTabsDots(){ const t=totals(); document.querySelectorAll('#tabs .tab,#subtabs .st').forEach(b=>{ const d=t.bySheet[b.dataset.s]; let dot=b.querySelector('.dot'); if(d){ if(!dot){ dot=document.createElement('span'); dot.className='dot'; b.appendChild(dot);} dot.textContent=d; } else if(dot) dot.remove(); }); }
 $('#list').addEventListener('click',e=>{
   const sx=e.target.closest('[data-sx]');
   if(sx){ $('#overlay').innerHTML=`<div class="zm-scrim" data-close><div class="zm sxz" role="dialog" aria-label="系列圖片"><button class="zm-x" data-close aria-label="關閉">×</button><img src="${sxName(sx.dataset.sx)}" alt=""><div class="zm-bar"><span class="nm">${esc(sx.dataset.cap||'')}</span></div></div></div>`; return; }
@@ -1578,6 +1653,43 @@ renderAll();
 })();
 </script>
 
+<script>
+(function(){
+  var rail=document.getElementById('rail'), tg=document.getElementById('railTg'), sumEl=document.getElementById('railSum');
+  if(!rail||!tg||!sumEl) return;
+  var crumb=document.getElementById('crumbTx'), crumbX=document.getElementById('crumbX');
+  var mq=window.matchMedia('(max-width:760px)');
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function lab(b){ var c=b.cloneNode(true); c.querySelectorAll('small,.dot,svg').forEach(function(x){x.remove();}); return c.textContent.trim(); }
+  function pressed(sel){ return document.querySelector(sel+' [aria-pressed="true"]'); }
+  function update(){
+    var path=[], filtered=false;
+    ['#gens','#cgs'].forEach(function(id){ var b=pressed(id); if(b){ var t=lab(b); if(t&&t!=='全部'){ path.push(t); filtered=true; } } });
+    var only=document.getElementById('only'), q=document.getElementById('q');
+    if(only&&only.checked){ path.push('只看已下單'); }
+    else { var s=pressed('#tabs')||pressed('#subtabs'); if(s) path.push(lab(s)); }
+    var mo=pressed('#months'); if(mo){ var mt=lab(mo); if(mt&&mt!=='全部') path.push(mt); }
+    var n=document.querySelectorAll('#list .item').length;
+    var qv=q&&q.value.trim(); var l1=path.join(' › ')||'全部', l2=n+' 款色'+(qv?'・搜尋「'+qv+'」':'');
+    sumEl.innerHTML='<b>'+esc(l1)+'</b>'+esc(l2);
+    if(crumb) crumb.textContent='目前：'+l1+'・共 '+n+' 款色'+(qv?'・搜尋「'+qv+'」':'');
+    if(crumbX) crumbX.hidden=!filtered;
+  }
+  var tmr=null; function later(){ clearTimeout(tmr); tmr=setTimeout(update,40); }
+  ['list','tabs','subtabs','gens','cgs'].forEach(function(id){ var el=document.getElementById(id); if(el) new MutationObserver(later).observe(el,{childList:true,subtree:true}); });
+  ['only','q'].forEach(function(id){ var el=document.getElementById(id); if(el){ el.addEventListener('input',later); el.addEventListener('change',later); } });
+  function fold(v,save){ rail.classList.toggle('folded',v); tg.setAttribute('aria-expanded',String(!v)); tg.querySelector('.tx').textContent=v?'展開篩選':'收合'; if(save){ try{ sessionStorage.setItem('railFold',v?'1':'0'); }catch(e){} } }
+  function toggle(){ fold(!rail.classList.contains('folded'),true); }
+  tg.addEventListener('click',toggle); sumEl.addEventListener('click',toggle);
+  var sv=null; try{ sv=sessionStorage.getItem('railFold'); }catch(e){}
+  fold(sv==='1',false);
+  if(document.getElementById('gens')) document.addEventListener('click',function(e){
+    if(!mq.matches) return; var b=e.target.closest&&e.target.closest('#tabs [data-s],#subtabs [data-s]'); if(b&&!b.disabled) fold(true,true);
+  });
+  if(crumbX) crumbX.addEventListener('click',function(){ ['[data-gn=""]','[data-cg=""]'].forEach(function(s){ var b=document.querySelector(s); if(b&&b.getAttribute('aria-pressed')!=='true') b.click(); }); });
+  update();
+})();
+</script>
 <script>
 
 </body>
