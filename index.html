@@ -805,6 +805,8 @@ const REF_REG=[['n','北部'],['c','中部'],['s','南部'],['a','綜合']];
 let refReg='a'; try{ refReg=sessionStorage.getItem('dstc-refreg')||'a'; }catch(e){}
 const refOpen=new Set();
 function shareFor(it){ if(window.DST_SHARE_ON){ const k=SHARE_CAT[it.cat]; if(k) return {k,m:SHARE[k]}; } return refShare(it); }
+// 網頁卡片不顯示「這款在 Early Buy／FTW Pre-order 已下單」（標籤已經標了）；Excel 備註照舊
+function webNote(it){ const n=it.note||''; return /已下單$/.test(n)?'':n; }
 function ebLabel(v){ if(v===1||v==='Early Buy 已開訂') return 'Early Buy 已訂購款'; return String(v); }
 function pctHTML(sh,z){ if(!sh) return ''; const p=sh.m[z]; if(p==null) return '<span class="pct na">–</span>'; const mx=Math.max(...Object.values(sh.m))||1, t=p/mx, mixv=Math.round(12+76*t), fg=t>=.55?'#fff':t>=.25?'var(--fg)':'var(--muted)'; return `<span class="pct heat" style="background:color-mix(in srgb,var(--heat) ${mixv}%,var(--sunk));color:${fg}" title="${sh.ref?'':'上季 '}${esc(sh.k)} 尺寸銷售佔比"><b>${Math.round(p*100)}%</b></span>`; }
 function refRegName(){ return (REF_REG.find(x=>x[0]===refReg)||[,'綜合'])[1]; }
@@ -832,7 +834,7 @@ function itemHTML(it){
       <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">${esc(ebLabel(it.eb))}</span>`:''}${refBadge(it)}${refColorHTML(it)}</div>
       <div class="code">${esc(it.style||'')}${it.sku?' ／ '+esc(it.sku):''}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}</div>
       ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
-      ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
+      ${webNote(it)?`<div class="note">${esc(webNote(it))}</div>`:''}
       <div class="btnrow">${(it.dt||it.tech||it.fab)?`<button class="more${open?' on':''}" data-more>${open?'收合':'看商品細節與材質'}</button>`:''}${refBtnHTML(it)}</div>
       ${open?`<div class="detail">${it.dt?`<div><h4>商品特色與機能</h4><p>${esc(it.dt)}</p></div>`:''}${it.fab?`<div><h4>材質與版型</h4><p>${esc(it.fab)}</p></div>`:''}</div>`:''}
     </div>
@@ -855,7 +857,7 @@ function rowHTML(it){
       <div class="cn">${esc(it.color)}</div>
       <div class="meta"><span class="tag c">${esc(it.cc||'')}</span>${refColorHTML(it)}${it.eb?`<span class="tag eb">${esc(ebLabel(it.eb))}</span>`:''}</div>
       <div class="code">${esc(it.sku||'')}</div>
-      ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
+      ${webNote(it)?`<div class="note">${esc(webNote(it))}</div>`:''}
     </div>
     <div class="order">
       <div class="ordtop"><div class="sub" data-sub>${subHTML(it)}</div></div>
