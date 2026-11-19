@@ -256,7 +256,7 @@ def main():
             rows = [x for st in rs for x in sales.get(st, []) if rk == 'a' or x[0] == rk]
             pos = [x for x in rows if x[4] > 0]
             qty = sum(x[4] for x in rows)
-            if qty < 5:
+            if qty < 3:  # 區域對照款合計 3 件以上才出數字
                 rec['R'][rk] = None
                 continue
             stores = {x[1] for x in pos}
