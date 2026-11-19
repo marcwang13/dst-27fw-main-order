@@ -283,7 +283,7 @@ def main():
                 'fp': round(fp * 100),
                 'k': len(stores),
                 'sz': {z: round(v / szt * 100) for z, v in sz.items()} if szt >= 10 else None,
-                'c': [[c, round(v / colt * 100)] for c, v in col.most_common(3)] if colt >= 10 else None,
+                'c': [[c, round(v / colt * 100)] for c, v in col.most_common() if v / colt >= 0.02] if colt >= 10 else None,
             }
         out[s] = rec
         A = rec['R'].get('a') or {}

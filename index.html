@@ -224,6 +224,7 @@ main{padding-block:12px}
 .tag.m{background:var(--acc-soft);color:var(--acc);font-weight:600}
 .tag.eb{background:#fff1d6;color:#8a5300;font-weight:600}
 .tag.hot{background:var(--acc);color:var(--acc-ink);font-weight:600}
+.tag.rc{background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc);font-weight:600}
 .tag.nref{background:transparent;color:var(--muted);border:1px dashed var(--line)}
 .ref{margin-top:6px;border:1px solid color-mix(in srgb,var(--acc) 35%,var(--line));border-radius:var(--r);background:var(--surface)}
 .ref.none{display:flex;gap:10px;align-items:center;padding:7px 10px;border-style:dashed;border-color:var(--line)}
@@ -604,7 +605,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
 <script src="data.js?v=20261118c"></script>
 <script src="imgs.js?v=20261118e"></script>
 <script src="pc.js?v=20261118d"></script>
-<script src="ref.js?v=20261119s"></script>
+<script src="ref.js?v=20261119t"></script>
 <script>
 (function(){
 const ITEMS = window.SDR_ITEMS || [];
@@ -734,9 +735,19 @@ const SHARE={
   '長褲（腰圍）':{'30':.05,'32':.4,'34':.1,'36':.4,'38':.05}
 };
 const SHARE_CAT={'短袖POLO衫':'POLO','短袖T恤':'T恤','中層／1/4拉鍊衫':'長袖1/4拉鍊','長袖POLO衫':'長袖POLO','長袖T恤':'長袖T恤','連帽衫':'長袖帽T','圓領衫':'長袖無領','針織衫':'長袖無領','外套':'上衣合計','背心':'上衣合計','長褲':'長褲（腰圍）','短褲':'長褲（腰圍）'};
-function shareFor(it){ if(!window.DST_SHARE_ON) return null; const k=SHARE_CAT[it.cat]; return k?{k,m:SHARE[k]}:null; }
+const REF=window.DSTC_REF||{s:{},meta:{}};
+const REF_T={L1:'同款延續',L2:'同系列同品類',L3:'同品類同價格帶','人工指定':'人工指定'};
+const REF_REG=[['n','北部'],['c','中部'],['s','南部'],['a','綜合']];
+let refReg='a'; try{ refReg=sessionStorage.getItem('dstc-refreg')||'a'; }catch(e){}
+const refOpen=new Set();
+function shareFor(it){ if(window.DST_SHARE_ON){ const k=SHARE_CAT[it.cat]; if(k) return {k,m:SHARE[k]}; } return refShare(it); }
+function refRegName(){ return (REF_REG.find(x=>x[0]===refReg)||[,'綜合'])[1]; }
+function refD(it){ const r=window.DSTC_REF&&DSTC_REF.s[it.style]; return r&&r.t!=='none'?r.R[refReg]:null; }
+function refShare(it){ const d=refD(it); if(!d||!d.sz) return null; const m={}; for(const z in d.sz) m[z]=d.sz[z]/100; return {k:'過往'+refRegName(),m,ref:1}; }
+function refColor(it){ const d=refD(it); if(!d||!d.c) return null; const hit=d.c.find(x=>x[0]===it.cc); return hit?hit[1]:null; }
+function refColorHTML(it){ const p=refColor(it); return p==null?'':`<span class="tag rc" title="過往對照款同色的銷售佔比（${refRegName()}）">過往${refRegName()} 此色 ${p}%</span>`; }
 function matrixHTML(it,sh){
-  const head=fullSizes(it).map(z=>{ const p=sh?sh.m[z]:null; return `<th class="${it.sizes.includes(z)?'':'na'}"><span>${SZL(z,it)}</span>${sh?(p!=null?`<span class="pct" title="上季 ${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`:'<span class="pct na">–</span>'):''}</th>`; }).join('');
+  const head=fullSizes(it).map(z=>{ const p=sh?sh.m[z]:null; return `<th class="${it.sizes.includes(z)?'':'na'}"><span>${SZL(z,it)}</span>${sh?(p!=null?`<span class="pct" title="${sh.ref?'':'上季 '}${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`:'<span class="pct na">–</span>'):''}</th>`; }).join('');
   const rows=S.br.map(b=>{ const m=(S.bq[b.id]||{})[it.id]||{}; let t=0; const cells=fullSizes(it).map(z=>{ if(!it.sizes.includes(z)) return `<td><input class="na" disabled tabindex="-1" aria-label="無此尺寸"></td>`; const v=m[z]||''; t+=m[z]||0; return `<td><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(z)}-${b.id}" data-sz="${esc(z)}" data-brq="${b.id}" value="${v}" aria-label="${esc(b.name+' '+it.en+' '+it.color+' '+z)} 數量"></td>`; }).join(''); return `<tr><th class="bn" title="${esc(b.name)}">${esc(b.name)}</th>${cells}<td class="bt" data-bt="${b.id}">${t||''}</td></tr>`; }).join('');
   const colT=fullSizes(it).map(z=>{ let t=0; S.br.forEach(b=>{ t+=(((S.bq[b.id]||{})[it.id]||{})[z])||0; }); return `<td data-ct="${esc(z)}">${t||''}</td>`; }).join('');
   return `<div class="mx-wrap"><table class="mx"><thead><tr><th class="bn">分店</th>${head}<th>合計</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><th class="bn">合計</th>${colT}<td data-ctt>${itemQty(it.id)||''}</td></tr></tfoot></table></div>`;
@@ -746,13 +757,13 @@ function itemHTML(it){
   const q=curQ()[it.id]||{}; const tq=itemQty(it.id);
   const open=S.open.has(it.id);
   const sh=shareFor(it);
-  const sizes = fullSizes(it).map(sz=>{ if(!it.sizes.includes(sz)) return `<label class="sz na"><span>${SZL(sz,it)}</span><input disabled tabindex="-1" aria-label="${esc(sz)} 無此尺寸"></label>`; const v=q[sz]||''; const p=sh?sh.m[sz]:null; const pct=sh?(p!=null?`<span class="pct" title="上季 ${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`:'<span class="pct na">–</span>'):''; return `<label class="sz"><span>${SZL(sz,it)}</span><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(sz)}" data-sz="${esc(sz)}" value="${v}" aria-label="${esc(it.en+' '+it.color+' '+sz)} 數量">${pct}</label>`; }).join('').replace((it.run==='U'?/(<label class="sz[^"]*"><span>M<small)/:/(?!)/),'<span class="szbr"></span>$1');
+  const sizes = fullSizes(it).map(sz=>{ if(!it.sizes.includes(sz)) return `<label class="sz na"><span>${SZL(sz,it)}</span><input disabled tabindex="-1" aria-label="${esc(sz)} 無此尺寸"></label>`; const v=q[sz]||''; const p=sh?sh.m[sz]:null; const pct=sh?(p!=null?`<span class="pct" title="${sh.ref?'':'上季 '}${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`:'<span class="pct na">–</span>'):''; return `<label class="sz"><span>${SZL(sz,it)}</span><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(sz)}" data-sz="${esc(sz)}" value="${v}" aria-label="${esc(it.en+' '+it.color+' '+sz)} 數量">${pct}</label>`; }).join('').replace((it.run==='U'?/(<label class="sz[^"]*"><span>M<small)/:/(?!)/),'<span class="szbr"></span>$1');
   const sizesBlock = S.chain ? matrixHTML(it,sh) : `<div class="sizes">${sizes}</div>`;
   return `<article class="item ${tq?'has':''}" data-id="${esc(it.id)}" data-unit="${esc(it.style)}">
     <div class="pic">${picHTML(it)}</div>
     <div class="info">
       <div class="t1">${fitOf(it)?`<span class="fitB">${esc(fitOf(it))}</span>`:''}${it.theme&&it.theme!=='CORE'?`<span class="thmB">${esc(it.theme)}</span>`:''}<h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
-      <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}${refBadge(it)}</div>
+      <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}${refBadge(it)}${refColorHTML(it)}</div>
       <div class="code">${esc(it.style||'')}${it.sku?' ／ '+esc(it.sku):''}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}</div>
       ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
       ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
@@ -764,19 +775,19 @@ function itemHTML(it){
       <div class="ordtop"><div class="price"><small>台灣定價待定</small></div><div class="sub" data-sub>${subHTML(it)}</div></div>
       <div class="share">尺寸待更新（目前參考前季）${(it.photos||[]).length?'':'・實體圖待更新'}</div>
       ${sizesBlock}
-      ${sh?`<div class="share">上季 尺寸銷售佔比參考・<b>${esc(sh.k)}</b>${it.cat==="短褲"?"（依長褲腰圍）":""}</div>`:""}
+      ${sh?(sh.ref?`<div class="share">格子下方 %＝${esc(sh.k)}尺寸銷售佔比</div>`:`<div class="share">上季 尺寸銷售佔比參考・<b>${esc(sh.k)}</b>${it.cat==="短褲"?"（依長褲腰圍）":""}</div>`):""}
     </div>
   </article>`;
 }
 function rowHTML(it){
   const tq=itemQty(it.id), sh=shareFor(it);
-  const sizes=fullSizes(it).map(sz=>{ if(!it.sizes.includes(sz)) return `<label class="sz na"><span>${SZL(sz,it)}</span><input disabled tabindex="-1" aria-label="${esc(sz)} 無此尺寸"></label>`; const v=(curQ()[it.id]||{})[sz]||''; return `<label class="sz"><span>${SZL(sz,it)}</span><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(sz)}" data-sz="${esc(sz)}" value="${v}" aria-label="${esc(it.en+' '+it.color+' '+sz)} 數量"></label>`; }).join('').replace((it.run==='U'?/(<label class="sz[^"]*"><span>M<small)/:/(?!)/),'<span class="szbr"></span>$1');
+  const sizes=fullSizes(it).map(sz=>{ if(!it.sizes.includes(sz)) return `<label class="sz na"><span>${SZL(sz,it)}</span><input disabled tabindex="-1" aria-label="${esc(sz)} 無此尺寸"></label>`; const v=(curQ()[it.id]||{})[sz]||''; const p=sh?sh.m[sz]:null; const pct=sh?(p!=null?`<span class="pct" title="${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`:'<span class="pct na">–</span>'):''; return `<label class="sz"><span>${SZL(sz,it)}</span><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(sz)}" data-sz="${esc(sz)}" value="${v}" aria-label="${esc(it.en+' '+it.color+' '+sz)} 數量">${pct}</label>`; }).join('').replace((it.run==='U'?/(<label class="sz[^"]*"><span>M<small)/:/(?!)/),'<span class="szbr"></span>$1');
   const sizesBlock=S.chain?matrixHTML(it,sh):`<div class="sizes">${sizes}</div>`;
   return `<article class="item row ${tq?'has':''}" data-id="${esc(it.id)}">
     <div class="pic">${picHTML(it)}</div>
     <div class="info">
       <div class="cn">${esc(it.color)}</div>
-      <div class="meta"><span class="tag c">${esc(it.cc||'')}</span>${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}</div>
+      <div class="meta"><span class="tag c">${esc(it.cc||'')}</span>${refColorHTML(it)}${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}</div>
       <div class="code">${esc(it.sku||'')}</div>
       ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
     </div>
@@ -793,7 +804,7 @@ function groupHTML(its){
     <div class="sg-h" data-id="${esc(it.id)}">
       <div class="t1">${fitOf(it)?`<span class="fitB">${esc(fitOf(it))}</span>`:''}${it.theme&&it.theme!=='CORE'?`<span class="thmB">${esc(it.theme)}</span>`:''}<h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
       <div class="meta"><span class="tag sgn">${cnt}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${refBadge(it)}</div>
-      <div class="code">${esc(it.style||'')}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}・台灣定價待定・尺寸待更新（目前參考前季）${its.some(x=>!(x.photos||[]).length)?'・實體圖待更新':''}</div>
+      <div class="code">${esc(it.style||'')}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}・台灣定價待定・尺寸待更新（目前參考前季）${its.some(x=>!(x.photos||[]).length)?'・實體圖待更新':''}${refShare(it)?`・尺寸格下方 %＝${esc(refShare(it).k)}尺寸銷售佔比`:''}</div>
       ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
       ${(it.dt||it.tech||it.fab)?`<button class="more${open?' on':''}" data-more>${open?'收合':'看商品細節與材質'}</button>`:''}
       ${open?`<div class="detail">${it.dt?`<div><h4>商品特色與機能</h4><p>${esc(it.dt)}</p></div>`:''}${it.fab?`<div><h4>材質與版型</h4><p>${esc(it.fab)}</p></div>`:''}</div>`:''}
@@ -866,11 +877,6 @@ function seriesIntro(){
   return `<section class="sintro">${head}${grid}</section>`;
 }
 function fitOf(it){ const m=String(it.fab||'').match(/版型[：:]\s*([^\n]+)/); return m?m[1].trim():''; }
-const REF=window.DSTC_REF||{s:{},meta:{}};
-const REF_T={L1:'同款延續',L2:'同系列同品類',L3:'同品類同價格帶','人工指定':'人工指定'};
-const REF_REG=[['n','北部'],['c','中部'],['s','南部'],['a','綜合']];
-let refReg='a'; try{ refReg=sessionStorage.getItem('dstc-refreg')||'a'; }catch(e){}
-const refOpen=new Set();
 function refOf(it){ return REF.s[it.style]; }
 function refScore(it){ const r=refOf(it); return r&&r.t!=='none'&&r.R.a?r.R.a.m+(r.hot?100:0):-1; }
 function refBadge(it){ const r=refOf(it); if(!r) return ''; if(r.hot) return '<span class="tag hot">去年熱賣</span>'; if(r.t==='none') return '<span class="tag nref">新款無對照</span>'; return ''; }
@@ -890,7 +896,7 @@ function refHTML(it){
       let sz='';
       if(d.sz){ const keys=fullSizes(it).filter(z=>d.sz[z]!=null).concat(Object.keys(d.sz).filter(z=>!fullSizes(it).includes(z))); const mx=Math.max(...keys.map(z=>d.sz[z]),1);
         const many=keys.length>10; sz=`<div><h5>尺寸分布${many?'<small>（滑鼠移到長條看比例）</small>':''}</h5><div class="ref-sz">${keys.map((z,i)=>`<div title="${esc(z)}：${d.sz[z]}%"><span>${many?'':d.sz[z]+'%'}</span><i style="height:${Math.max(2,Math.round(d.sz[z]/mx*46))}px"></i><span>${many&&i%2?'&nbsp;':esc(z)}</span></div>`).join('')}</div></div>`; }
-      const col=d.c?`<div><h5>熱賣色</h5><div class="ref-c">${d.c.map(([c,p])=>`<div><span>${esc(c)}</span><i><b style="width:${p}%"></b></i><em>${p}%</em></div>`).join('')}</div></div>`:'';
+      const col=d.c?`<div><h5>熱賣色</h5><div class="ref-c">${d.c.slice(0,3).map(([c,p])=>`<div><span>${esc(c)}</span><i><b style="width:${p}%"></b></i><em>${p}%</em></div>`).join('')}</div></div>`:'';
       main=`<div class="ref-m">${m}</div>${(sz||col)?`<div class="ref-g">${sz||'<div></div>'}${col}</div>`:''}`;
     }
     body=`<div class="ref-b"><div class="ref-tabs" role="group" aria-label="區域">${tabs}</div><ul class="ref-l">${refs}</ul>${main}</div>`;
@@ -933,7 +939,7 @@ $('#list').addEventListener('click',e=>{
   const sx=e.target.closest('[data-sx]');
   if(sx){ $('#overlay').innerHTML=`<div class="zm-scrim" data-close><div class="zm sxz" role="dialog" aria-label="系列圖片"><button class="zm-x" data-close aria-label="關閉">×</button><img src="${sxName(sx.dataset.sx)}" alt=""><div class="zm-bar"><span class="nm">${esc(sx.dataset.cap||'')}</span></div></div></div>`; return; }
   const card=e.target.closest('.item,.sg-h'); if(!card) return; const id=card.dataset.id;
-  const rg=e.target.closest('[data-refreg]'); if(rg){ refReg=rg.dataset.refreg; try{ sessionStorage.setItem('dstc-refreg',refReg); }catch(_){} refRerender(); return; }
+  const rg=e.target.closest('[data-refreg]'); if(rg){ refReg=rg.dataset.refreg; try{ sessionStorage.setItem('dstc-refreg',refReg); }catch(_){} [...new Set([...document.querySelectorAll('#list [data-unit]')].map(x=>x.dataset.unit))].forEach(rerenderUnit); return; }
   if(e.target.closest('[data-ref]')){ const st=BY[id].style; refOpen.has(st)?refOpen.delete(st):refOpen.add(st); refRerender(st); return; }
   if(e.target.closest('[data-more]')){ S.open.has(id)?S.open.delete(id):S.open.add(id); rerenderUnit(BY[id].style); return; }
   const p=e.target.closest('[data-pic]'); if(p){ openLB(id,p.dataset.pic,e); return; }
