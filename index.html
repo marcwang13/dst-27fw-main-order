@@ -255,7 +255,16 @@ main{padding-block:12px}
 .ref-c i{display:block;height:7px;border-radius:4px;background:var(--sunk);overflow:hidden}.ref-c i b{display:block;height:100%;background:color-mix(in srgb,var(--acc) 55%,transparent)}
 .ref-c em{font-style:normal;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
 .ref-empty{margin:0;font-size:12px;color:var(--muted)}
-@media (min-width:761px){.item>.pic{grid-row:1/span 2;align-self:start}.item>.order{grid-column:3;grid-row:1/span 2}.item>.ref{grid-column:2;grid-row:2;margin-top:-8px;align-self:start}}
+@media (min-width:761px){.item:not(.row)>.pic{grid-row:1/span 2;align-self:start}.item:not(.row)>.order{grid-column:3;grid-row:1/span 2}.item>.ref{grid-column:2;grid-row:2;margin-top:-8px;align-self:start}}
+.sgrp{border:1.5px solid color-mix(in srgb,var(--acc) 50%,var(--line));border-radius:var(--r);background:var(--surface);overflow:hidden}
+.sg-h{padding:10px 12px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--acc-soft) 45%,var(--surface))}
+.sg-h .ref{margin-top:4px}
+.tag.sgn{background:var(--acc-soft);color:var(--acc);font-weight:600}
+.sgrp .item.row{border:0;border-radius:0;border-bottom:1px solid var(--line);padding:10px 12px}
+.sgrp .item.row:last-child{border-bottom:0}
+.item.row .info{justify-content:center}
+.item.row .cn{font-size:15px;font-weight:700}
+@media (min-width:761px){.sgrp .item.row{grid-template-columns:96px minmax(0,1fr) auto}.sgrp .row .pic{width:96px}}
 @media (max-width:760px){.item>.ref{grid-column:1/-1;margin-top:0}.ref-m{grid-template-columns:repeat(2,minmax(0,1fr))}.ref-g{grid-template-columns:1fr}}
 .fitB{display:inline-flex;align-items:baseline;gap:5px;align-self:center;background:var(--fg);color:var(--bg);border-radius:4px;padding:2px 9px;font-family:var(--f-body);font-size:14px;font-weight:700;line-height:1.35;letter-spacing:.02em}
 .fitB small{font-size:11px;font-weight:600;opacity:.75;letter-spacing:.04em}
@@ -739,7 +748,7 @@ function itemHTML(it){
   const sh=shareFor(it);
   const sizes = fullSizes(it).map(sz=>{ if(!it.sizes.includes(sz)) return `<label class="sz na"><span>${SZL(sz,it)}</span><input disabled tabindex="-1" aria-label="${esc(sz)} 無此尺寸"></label>`; const v=q[sz]||''; const p=sh?sh.m[sz]:null; const pct=sh?(p!=null?`<span class="pct" title="上季 ${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`:'<span class="pct na">–</span>'):''; return `<label class="sz"><span>${SZL(sz,it)}</span><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(sz)}" data-sz="${esc(sz)}" value="${v}" aria-label="${esc(it.en+' '+it.color+' '+sz)} 數量">${pct}</label>`; }).join('').replace((it.run==='U'?/(<label class="sz[^"]*"><span>M<small)/:/(?!)/),'<span class="szbr"></span>$1');
   const sizesBlock = S.chain ? matrixHTML(it,sh) : `<div class="sizes">${sizes}</div>`;
-  return `<article class="item ${tq?'has':''}" data-id="${esc(it.id)}">
+  return `<article class="item ${tq?'has':''}" data-id="${esc(it.id)}" data-unit="${esc(it.style)}">
     <div class="pic">${picHTML(it)}</div>
     <div class="info">
       <div class="t1">${fitOf(it)?`<span class="fitB">${esc(fitOf(it))}</span>`:''}${it.theme&&it.theme!=='CORE'?`<span class="thmB">${esc(it.theme)}</span>`:''}<h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
@@ -759,6 +768,43 @@ function itemHTML(it){
     </div>
   </article>`;
 }
+function rowHTML(it){
+  const tq=itemQty(it.id), sh=shareFor(it);
+  const sizes=fullSizes(it).map(sz=>{ if(!it.sizes.includes(sz)) return `<label class="sz na"><span>${SZL(sz,it)}</span><input disabled tabindex="-1" aria-label="${esc(sz)} 無此尺寸"></label>`; const v=(curQ()[it.id]||{})[sz]||''; return `<label class="sz"><span>${SZL(sz,it)}</span><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(sz)}" data-sz="${esc(sz)}" value="${v}" aria-label="${esc(it.en+' '+it.color+' '+sz)} 數量"></label>`; }).join('').replace((it.run==='U'?/(<label class="sz[^"]*"><span>M<small)/:/(?!)/),'<span class="szbr"></span>$1');
+  const sizesBlock=S.chain?matrixHTML(it,sh):`<div class="sizes">${sizes}</div>`;
+  return `<article class="item row ${tq?'has':''}" data-id="${esc(it.id)}">
+    <div class="pic">${picHTML(it)}</div>
+    <div class="info">
+      <div class="cn">${esc(it.color)}</div>
+      <div class="meta"><span class="tag c">${esc(it.cc||'')}</span>${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}</div>
+      <div class="code">${esc(it.sku||'')}</div>
+      ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
+    </div>
+    <div class="order">
+      <div class="ordtop"><div class="sub" data-sub>${subHTML(it)}</div></div>
+      ${sizesBlock}
+    </div>
+  </article>`;
+}
+function groupHTML(its){
+  const it=its[0], open=S.open.has(it.id), total=ITEMS.filter(x=>x.style===it.style).length;
+  const cnt=its.length<total?`同款 ${total} 色・顯示 ${its.length} 色`:`同款 ${total} 色`;
+  return `<div class="sgrp" data-unit="${esc(it.style)}">
+    <div class="sg-h" data-id="${esc(it.id)}">
+      <div class="t1">${fitOf(it)?`<span class="fitB">${esc(fitOf(it))}</span>`:''}${it.theme&&it.theme!=='CORE'?`<span class="thmB">${esc(it.theme)}</span>`:''}<h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
+      <div class="meta"><span class="tag sgn">${cnt}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${refBadge(it)}</div>
+      <div class="code">${esc(it.style||'')}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}・台灣定價待定・尺寸待更新（目前參考前季）${its.some(x=>!(x.photos||[]).length)?'・實體圖待更新':''}</div>
+      ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
+      ${(it.dt||it.tech||it.fab)?`<button class="more${open?' on':''}" data-more>${open?'收合':'看商品細節與材質'}</button>`:''}
+      ${open?`<div class="detail">${it.dt?`<div><h4>商品特色與機能</h4><p>${esc(it.dt)}</p></div>`:''}${it.fab?`<div><h4>材質與版型</h4><p>${esc(it.fab)}</p></div>`:''}</div>`:''}
+      ${refHTML(it)}
+    </div>
+    ${its.map(rowHTML).join('')}
+  </div>`;
+}
+function unitHTML(its){ return its.length>1?groupHTML(its):itemHTML(its[0]); }
+function unitsOf(items){ const m=new Map(); items.forEach(it=>{ if(!m.has(it.style)) m.set(it.style,[]); m.get(it.style).push(it); }); return [...m.values()]; }
+function rerenderUnit(style){ document.querySelectorAll(`#list [data-unit="${CSS.escape(style)}"]`).forEach(el=>{ const ids=el.matches('.item')?[el.dataset.id]:[...el.querySelectorAll('.item')].map(x=>x.dataset.id); el.outerHTML=unitHTML(ids.map(i=>BY[i])); }); }
 function filtered(){
   return ITEMS.filter(i=>{
     if(S.only){ if(!itemQty(i.id)) return false; }
@@ -851,14 +897,14 @@ function refHTML(it){
   }
   return `<div class="ref${open?' on':''}"><button type="button" class="ref-hd" data-ref aria-expanded="${open}"><span class="ref-h">過往參考</span><span class="ref-tier t-${esc(r.t)}">${REF_T[r.t]||esc(r.t)}</span><span class="ref-s">${sum}</span><i class="ar" aria-hidden="true"></i></button>${body}</div>`;
 }
-function refRerender(style){ document.querySelectorAll('#list .item').forEach(c=>{ const it=BY[c.dataset.id]; if(it&&(!style||it.style===style)&&(style||refOpen.has(it.style))) c.outerHTML=itemHTML(it); }); }
+function refRerender(style){ (style?[style]:[...refOpen]).forEach(rerenderUnit); }
 function renderList(){
   const arr=filtered();
   if(!arr.length){ $('#list').innerHTML=`<div class="empty">${S.only?'還沒有下單的商品。在各分頁的尺寸格輸入數量即可。':'沒有符合條件的商品。'}</div>`; return; }
   const groups=[]; let key=null;
   const ord=it=>(S.only?SHEETS.indexOf(it.sheet)*10:0)+CG_ORDER.indexOf(cgOf(it)); arr.sort((a,b)=>ord(a)-ord(b)||(S.hot?refScore(b)-refScore(a):0));
   for(const it of arr){ const k=(S.only?it.sheet+' · ':'')+cgOf(it); if(k!==key){ groups.push({k,sheet:it.sheet,items:[]}); key=k; } groups[groups.length-1].items.push(it); }
-  $('#list').innerHTML = seriesIntro() + groups.map(g=>{ const themes=[...new Set(g.items.map(i=>i.theme).filter(t=>t&&t!=='CORE'))]; return `<section class="group"><div class="ghead"><h2>${esc(g.k)}</h2><span>${g.items.length} 款色${themes.length?' ・ '+esc(themes.join('、')):''}</span></div><div class="list">${g.items.map(itemHTML).join('')}</div></section>`; }).join('');
+  $('#list').innerHTML = seriesIntro() + groups.map(g=>{ const themes=[...new Set(g.items.map(i=>i.theme).filter(t=>t&&t!=='CORE'))]; return `<section class="group"><div class="ghead"><h2>${esc(g.k)}</h2><span>${g.items.length} 款色${themes.length?' ・ '+esc(themes.join('、')):''}</span></div><div class="list">${unitsOf(g.items).map(unitHTML).join('')}</div></section>`; }).join('');
 }
 function renderTally(){
   const t=totals();
@@ -886,10 +932,10 @@ function renderTabsDots(){ const t=totals(); document.querySelectorAll('#tabs .t
 $('#list').addEventListener('click',e=>{
   const sx=e.target.closest('[data-sx]');
   if(sx){ $('#overlay').innerHTML=`<div class="zm-scrim" data-close><div class="zm sxz" role="dialog" aria-label="系列圖片"><button class="zm-x" data-close aria-label="關閉">×</button><img src="${sxName(sx.dataset.sx)}" alt=""><div class="zm-bar"><span class="nm">${esc(sx.dataset.cap||'')}</span></div></div></div>`; return; }
-  const card=e.target.closest('.item'); if(!card) return; const id=card.dataset.id;
+  const card=e.target.closest('.item,.sg-h'); if(!card) return; const id=card.dataset.id;
   const rg=e.target.closest('[data-refreg]'); if(rg){ refReg=rg.dataset.refreg; try{ sessionStorage.setItem('dstc-refreg',refReg); }catch(_){} refRerender(); return; }
   if(e.target.closest('[data-ref]')){ const st=BY[id].style; refOpen.has(st)?refOpen.delete(st):refOpen.add(st); refRerender(st); return; }
-  if(e.target.closest('[data-more]')){ S.open.has(id)?S.open.delete(id):S.open.add(id); card.outerHTML=itemHTML(BY[id]); return; }
+  if(e.target.closest('[data-more]')){ S.open.has(id)?S.open.delete(id):S.open.add(id); rerenderUnit(BY[id].style); return; }
   const p=e.target.closest('[data-pic]'); if(p){ openLB(id,p.dataset.pic,e); return; }
   if(e.target.closest('[data-zoom]')){ openLB(id,(BY[id].doll?'doll':'photo'),e); }
 });
