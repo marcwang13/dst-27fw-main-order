@@ -687,6 +687,8 @@ function applyPC(root){ (root||document).querySelectorAll('img[data-pc]:not([dat
 async function loadImgData(h){ try{ const r=await fetch(big(h)); if(r.ok){ const buf=await r.arrayBuffer(); const b=new Uint8Array(buf); let s=''; const n=0x8000; for(let i=0;i<b.length;i+=n) s+=String.fromCharCode(...b.subarray(i,i+n)); return 'data:image/jpeg;base64,'+btoa(s);} }catch(e){} return IMG[h]||null; }
 async function pcImg(it,h){ const d=await loadImgData(h); if(!d) return null; if(h===it.doll&&PC[it.id]){ const u=await pcCrop(d,PC[it.id]); if(u) return {k:h+'|'+it.id,d:u.split(',')[1]?u:d}; } return {k:h,d}; }
 const SHEETS = ['NEO-ARCHIVE','TRAINING','RUNNING','INSPIRED','SNOW','WOMENS SNOW','PREMIUM TECH ESSENTIAL','WOMENS','ACC 配件','FTW RUNNING','FTW MOVEWEAR'];
+// 網頁分頁顯示順序（只影響畫面；Excel 訂單本與交單彙整仍用 SHEETS）
+const TAB_ORDER = ['TRAINING','RUNNING','INSPIRED','SNOW','WOMENS SNOW','PREMIUM TECH ESSENTIAL','WOMENS','ACC 配件','NEO-ARCHIVE','FTW RUNNING','FTW MOVEWEAR'];
 const MONTH_ORDER = ['5月','6月','7月','8月','9月','10月','11月','12月'];
 const CG_ORDER=['上身','下身','配件','鞋類']; const GEN_ORDER=['男','女','中性'];
 function cgOf(i){ return i.div==='FTW'?'鞋類':i.div==='ACC'?'配件':i.part==='bottom'?'下身':'上身'; }
@@ -696,7 +698,7 @@ const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':
 
 // ---------- state ----------
 const DRAFT_KEY='dstc-27fw-draft-v1';
-let S = {sheet:'NEO-ARCHIVE', months:new Set(), cgs:new Set(), gens:new Set(), q:'', only:false, qty:{}, dealer:{store:'',contact:'',phone:'',email:'',note:''}, editing:null, admin:null, open:new Set(), pic:{}, chain:false, br:[], bq:{}, cur:null};
+let S = {sheet:'TRAINING', months:new Set(), cgs:new Set(), gens:new Set(), q:'', only:false, qty:{}, dealer:{store:'',contact:'',phone:'',email:'',note:''}, editing:null, admin:null, open:new Set(), pic:{}, chain:false, br:[], bq:{}, cur:null};
 try{ const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null'); if(d){ S.qty=d.qty||{}; S.dealer=Object.assign(S.dealer,d.dealer||{}); S.editing=d.editing||null; S.admin=d.admin||null; if(d.chain&&Array.isArray(d.br)&&d.br.length){ S.chain=true; S.br=d.br; S.bq=d.bq||{}; S.cur=S.br.some(b=>b.id===d.cur)?d.cur:S.br[0].id; } } }catch(e){}
 let saveT=null;
 function adminEditing(){ return !!(S.admin&&S.editing&&S.admin.oid===S.editing&&window.SDR_ADMIN?.on); }
@@ -733,11 +735,11 @@ function renderTabs(){
   $('#cgs').innerHTML = ct('','全部',gI.length,S.cgs.size===0)+CG_ORDER.map(g=>ct(g,g,gI.filter(i=>cgOf(i)===g).length,S.cgs.has(g))).join('');
   const isSub=s=>/^(ACC|FTW)/.test(s);
   const btn=(s,cls)=>{ const n=gI.filter(i=>i.sheet===s&&inCg(i)).length; const d=t.bySheet[s]; return `<button class="${cls}" data-s="${s}" aria-pressed="${S.sheet===s}"${n?'':' disabled'}>${s}<small>${n}</small>${d?`<span class="dot">${d}</span>`:''}</button>`; };
-  $('#tabs').innerHTML = SHEETS.map(s=>btn(s,'tab')).join('');
+  $('#tabs').innerHTML = TAB_ORDER.map(s=>btn(s,'tab')).join('');
 }
 // 性別／大類：上方膠囊列，單選；目前大類在新性別下沒有商品就回到全部大類，目前分頁沒有符合的就跳到第一個有的分頁
 function fixSel(){ const inG=i=>!S.gens.size||S.gens.has(i.gen); if(S.cgs.size&&!ITEMS.some(i=>inG(i)&&S.cgs.has(cgOf(i)))) S.cgs.clear();
-  const ok=x=>ITEMS.some(i=>i.sheet===x&&inG(i)&&(!S.cgs.size||S.cgs.has(cgOf(i)))); if(!ok(S.sheet)){ const s2=SHEETS.find(ok); if(s2) S.sheet=s2; } }
+  const ok=x=>ITEMS.some(i=>i.sheet===x&&inG(i)&&(!S.cgs.size||S.cgs.has(cgOf(i)))); if(!ok(S.sheet)){ const s2=TAB_ORDER.find(ok); if(s2) S.sheet=s2; } }
 const onSheet=e=>{ const b=e.target.closest('[data-s]'); if(!b||b.disabled) return; S.sheet=b.dataset.s; renderTabs(); renderList(); window.scrollTo({top:$('.rail').offsetTop-1}); };
 $('#tabs').addEventListener('click',onSheet); $('#subtabs').addEventListener('click',onSheet);
 // 大類：單選（上方膠囊列），切換後若目前分頁沒有該大類就跳到第一個有的分頁
@@ -961,7 +963,7 @@ function renderList(){
   const arr=filtered();
   if(!arr.length){ $('#list').innerHTML=`<div class="empty">${S.only?'還沒有下單的商品。在各分頁的尺寸格輸入數量即可。':'沒有符合條件的商品。'}</div>`; return; }
   const groups=[]; let key=null;
-  const ord=it=>(S.only?SHEETS.indexOf(it.sheet)*10:0)+CG_ORDER.indexOf(cgOf(it)); arr.sort((a,b)=>ord(a)-ord(b)||(S.hot?refScore(b)-refScore(a):0));
+  const ord=it=>(S.only?TAB_ORDER.indexOf(it.sheet)*10:0)+CG_ORDER.indexOf(cgOf(it)); arr.sort((a,b)=>ord(a)-ord(b)||(S.hot?refScore(b)-refScore(a):0));
   for(const it of arr){ const k=(S.only?it.sheet+' · ':'')+cgOf(it); if(k!==key){ groups.push({k,sheet:it.sheet,items:[]}); key=k; } groups[groups.length-1].items.push(it); }
   $('#list').innerHTML = seriesIntro() + groups.map(g=>{ const themes=[...new Set(g.items.map(i=>i.theme).filter(t=>t&&t!=='CORE'))]; return `<section class="group"><div class="ghead"><h2>${esc(g.k)}</h2><span>${g.items.length} 款色${themes.length?' ・ '+esc(themes.join('、')):''}</span></div><div class="list">${unitsOf(g.items).map(unitHTML).join('')}</div></section>`; }).join('');
 }
