@@ -18,6 +18,9 @@ APP 衣 316 款／ACC 配件 86 款／FTW 鞋 54 款，共 456 款、1,114 個�
 - `pc.js`：多色款式圖裁成單色的比例框（897／926），卡片「款式圖」顯示單色；「實體圖」只在有配色照時可按（目前 141 款色鞋款）。產生工具在 emers-whl-system `tools/dstc_percolor/`。
 - 詳細交接見 `ORDER_SYSTEMS_HANDOFF.md` 第 9 節。
 
+## 過往參考
+商品卡「過往參考」與「過往熱賣優先」排序用 `ref.js`，由 `tools/build_ref.py --whl ../emers-whl-system` 產生（直營＋雷根＋動力 POS，區域合計）。人工改對照：`tools/ref_override.json` 填 `{"27FW款號": ["舊款號"]}`，空陣列＝無對照。
+
 ## 其他
 - 與 Early Buy（`dst-27fw-order`）重複的 21 款保留，卡片標「Early Buy 已開訂」。
 - 原廠未附各色開放尺寸：衣服依性別全段開放、配件 F、鞋 220–300（女款限定色 220–260）。

@@ -223,6 +223,40 @@ main{padding-block:12px}
 .tag.c{font-family:var(--f-disp);font-weight:700;letter-spacing:.06em;font-size:13px}
 .tag.m{background:var(--acc-soft);color:var(--acc);font-weight:600}
 .tag.eb{background:#fff1d6;color:#8a5300;font-weight:600}
+.tag.hot{background:var(--acc);color:var(--acc-ink);font-weight:600}
+.tag.nref{background:transparent;color:var(--muted);border:1px dashed var(--line)}
+.ref{margin-top:6px;border:1px solid color-mix(in srgb,var(--acc) 35%,var(--line));border-radius:var(--r);background:var(--surface)}
+.ref.none{display:flex;gap:10px;align-items:center;padding:7px 10px;border-style:dashed;border-color:var(--line)}
+.ref-hd{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:7px 10px;text-align:left;cursor:pointer;flex-wrap:wrap}
+.ref-h{font-size:12px;font-weight:700;color:var(--acc);letter-spacing:.04em}
+.ref-tier{font-size:11px;padding:1px 7px;border-radius:4px;background:var(--sunk);color:var(--muted)}
+.ref-tier.t-L1{background:var(--acc-soft);color:var(--acc);font-weight:600}
+.ref-s{font-size:12px;color:var(--fg);font-variant-numeric:tabular-nums}
+.ref-hd .ar{margin-left:auto;width:7px;height:7px;border:solid var(--muted);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.ref.on .ref-hd .ar{transform:rotate(-135deg)}
+.ref-b{border-top:1px solid var(--line);padding:10px;display:grid;gap:10px}
+.ref-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.ref-tabs button{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:4px 12px;font-size:12px;cursor:pointer}
+.ref-tabs button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--acc-ink);font-weight:600}
+.ref-note{margin:0;font-size:12px;color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);border-radius:4px;padding:5px 8px}
+.ref-l{margin:0;padding:0;list-style:none;font-size:12px;display:grid;gap:3px}
+.ref-l span{font-family:var(--f-mono);color:var(--muted);margin-right:4px}.ref-l small{color:var(--muted)}
+.ref-m{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.ref-m div{background:var(--sunk);border-radius:4px;padding:6px 8px}
+.ref-m small{display:block;font-size:11px;color:var(--muted)}.ref-m b{font-size:16px;font-variant-numeric:tabular-nums}
+.ref-g{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px}
+.ref-g h5{margin:0 0 4px;font-size:11px;color:var(--muted);font-weight:500}.ref-g h5 small{font-size:10px;margin-left:4px}
+.ref-sz{display:flex;align-items:flex-end;gap:3px;height:74px}
+.ref-sz div{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ref-sz i{display:block;width:100%;background:var(--acc);border-radius:2px 2px 0 0;margin:2px 0}
+.ref-sz span{white-space:nowrap}
+.ref-c{display:grid;gap:5px;font-size:12px}
+.ref-c div{display:grid;grid-template-columns:44px 1fr 32px;gap:6px;align-items:center}
+.ref-c i{display:block;height:7px;border-radius:4px;background:var(--sunk);overflow:hidden}.ref-c i b{display:block;height:100%;background:color-mix(in srgb,var(--acc) 55%,transparent)}
+.ref-c em{font-style:normal;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.ref-empty{margin:0;font-size:12px;color:var(--muted)}
+@media (min-width:761px){.item>.pic{grid-row:1/span 2;align-self:start}.item>.order{grid-column:3;grid-row:1/span 2}.item>.ref{grid-column:2;grid-row:2;margin-top:-8px;align-self:start}}
+@media (max-width:760px){.item>.ref{grid-column:1/-1;margin-top:0}.ref-m{grid-template-columns:repeat(2,minmax(0,1fr))}.ref-g{grid-template-columns:1fr}}
 .fitB{display:inline-flex;align-items:baseline;gap:5px;align-self:center;background:var(--fg);color:var(--bg);border-radius:4px;padding:2px 9px;font-family:var(--f-body);font-size:14px;font-weight:700;line-height:1.35;letter-spacing:.02em}
 .fitB small{font-size:11px;font-weight:600;opacity:.75;letter-spacing:.04em}
 .thmB{display:inline-flex;align-items:center;align-self:center;background:var(--brand);color:var(--brand-ink);border-radius:4px;padding:2px 9px;font-family:var(--f-disp);font-size:15px;font-weight:700;line-height:1.35;letter-spacing:.06em;text-transform:uppercase}
@@ -464,6 +498,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
       <div class="row2">
         <input class="search" id="q" type="search" placeholder="搜尋品名、款號、色碼、顏色">
         <label class="toggle"><input type="checkbox" id="only"> 只看已下單</label>
+        <label class="toggle"><input type="checkbox" id="hotsort"> 過往熱賣優先</label>
       </div>
       <div class="crumb"><span id="crumbTx"></span><button type="button" id="crumbX" hidden>清除篩選</button></div>
       </div>
@@ -560,6 +595,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
 <script src="data.js?v=20261118c"></script>
 <script src="imgs.js?v=20261118e"></script>
 <script src="pc.js?v=20261118d"></script>
+<script src="ref.js?v=20261119r"></script>
 <script>
 (function(){
 const ITEMS = window.SDR_ITEMS || [];
@@ -647,6 +683,7 @@ $('#tabs').addEventListener('click',onSheet); $('#subtabs').addEventListener('cl
 // 大類：單選（上方膠囊列），切換後若目前分頁沒有該大類就跳到第一個有的分頁
 $('#cgs').addEventListener('click',e=>{ const b=e.target.closest('[data-cg]'); if(!b||b.disabled) return; const v=b.dataset.cg; S.cgs.clear(); if(v) S.cgs.add(v); fixSel(); renderTabs(); renderList(); });
 $('#gens').addEventListener('click',e=>{ const b=e.target.closest('[data-gn]'); if(!b||b.disabled) return; const v=b.dataset.gn; S.gens.clear(); if(v) S.gens.add(v); fixSel(); renderTabs(); renderList(); });
+$('#hotsort').addEventListener('change',e=>{ S.hot=e.target.checked; renderList(); });
 let qT=null; $('#q').addEventListener('input',e=>{ clearTimeout(qT); qT=setTimeout(()=>{ S.q=e.target.value.trim().toLowerCase(); renderList(); },150); });
 $('#only').addEventListener('change',e=>{ S.only=e.target.checked; renderList(); });
 
@@ -706,13 +743,14 @@ function itemHTML(it){
     <div class="pic">${picHTML(it)}</div>
     <div class="info">
       <div class="t1">${fitOf(it)?`<span class="fitB">${esc(fitOf(it))}</span>`:''}${it.theme&&it.theme!=='CORE'?`<span class="thmB">${esc(it.theme)}</span>`:''}<h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
-      <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}</div>
+      <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}${refBadge(it)}</div>
       <div class="code">${esc(it.style||'')}${it.sku?' ／ '+esc(it.sku):''}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}</div>
       ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
       ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
       ${(it.dt||it.tech||it.fab)?`<button class="more${open?' on':''}" data-more>${open?'收合':'看商品細節與材質'}</button>`:''}
       ${open?`<div class="detail">${it.dt?`<div><h4>商品特色與機能</h4><p>${esc(it.dt)}</p></div>`:''}${it.fab?`<div><h4>材質與版型</h4><p>${esc(it.fab)}</p></div>`:''}</div>`:''}
     </div>
+    ${refHTML(it)}
     <div class="order">
       <div class="ordtop"><div class="price"><small>台灣定價待定</small></div><div class="sub" data-sub>${subHTML(it)}</div></div>
       <div class="share">尺寸待更新（目前參考前季）${(it.photos||[]).length?'':'・實體圖待更新'}</div>
@@ -782,11 +820,43 @@ function seriesIntro(){
   return `<section class="sintro">${head}${grid}</section>`;
 }
 function fitOf(it){ const m=String(it.fab||'').match(/版型[：:]\s*([^\n]+)/); return m?m[1].trim():''; }
+const REF=window.DSTC_REF||{s:{},meta:{}};
+const REF_T={L1:'同款延續',L2:'同系列同品類',L3:'同品類同價格帶','人工指定':'人工指定'};
+const REF_REG=[['n','北部'],['c','中部'],['s','南部'],['a','綜合']];
+let refReg='a'; try{ refReg=sessionStorage.getItem('dstc-refreg')||'a'; }catch(e){}
+const refOpen=new Set();
+function refOf(it){ return REF.s[it.style]; }
+function refScore(it){ const r=refOf(it); return r&&r.t!=='none'&&r.R.a?r.R.a.m+(r.hot?100:0):-1; }
+function refBadge(it){ const r=refOf(it); if(!r) return ''; if(r.hot) return '<span class="tag hot">去年熱賣</span>'; if(r.t==='none') return '<span class="tag nref">新款無對照</span>'; return ''; }
+function refHTML(it){
+  const r=refOf(it); if(!r) return '';
+  if(r.t==='none') return `<div class="ref none"><span class="ref-h">過往參考</span><span class="ref-s">新款，沒有可對照的舊款</span></div>`;
+  const open=refOpen.has(it.style), A=r.R.a;
+  const sum=A?`綜合 售罄 ${A.st==null?'–':A.st+'%'}・店均月銷 ${A.m} 件`:'舊款銷量太少';
+  let body='';
+  if(open){
+    const d=r.R[refReg], note=(REF.meta.note||{})[refReg];
+    const tabs=REF_REG.map(([k,l])=>`<button type="button" data-refreg="${k}" aria-pressed="${k===refReg}">${l}</button>`).join('');
+    const refs=r.r.map(x=>`<li><span>${esc(x[0])}</span>${esc(x[1])} <small>${esc(x[2])}</small></li>`).join('');
+    let main='<p class="ref-empty">這個區域的舊款銷售太少，沒有參考數字。</p>';
+    if(d){
+      const m=[['店均月銷',d.m+' 件'],['售罄率',d.st==null?'–':d.st+'%'],['全價銷售比',d.fp+'%'],['參考店數',d.k+' 家']].map(([l,v])=>`<div><small>${l}</small><b>${v}</b></div>`).join('');
+      let sz='';
+      if(d.sz){ const keys=fullSizes(it).filter(z=>d.sz[z]!=null).concat(Object.keys(d.sz).filter(z=>!fullSizes(it).includes(z))); const mx=Math.max(...keys.map(z=>d.sz[z]),1);
+        const many=keys.length>10; sz=`<div><h5>尺寸分布${many?'<small>（滑鼠移到長條看比例）</small>':''}</h5><div class="ref-sz">${keys.map((z,i)=>`<div title="${esc(z)}：${d.sz[z]}%"><span>${many?'':d.sz[z]+'%'}</span><i style="height:${Math.max(2,Math.round(d.sz[z]/mx*46))}px"></i><span>${many&&i%2?'&nbsp;':esc(z)}</span></div>`).join('')}</div></div>`; }
+      const col=d.c?`<div><h5>熱賣色</h5><div class="ref-c">${d.c.map(([c,p])=>`<div><span>${esc(c)}</span><i><b style="width:${p}%"></b></i><em>${p}%</em></div>`).join('')}</div></div>`:'';
+      main=`<div class="ref-m">${m}</div>${(sz||col)?`<div class="ref-g">${sz||'<div></div>'}${col}</div>`:''}`;
+    }
+    body=`<div class="ref-b"><div class="ref-tabs" role="group" aria-label="區域">${tabs}</div>${note?`<p class="ref-note">${esc(note)}</p>`:''}<ul class="ref-l">${refs}</ul>${main}</div>`;
+  }
+  return `<div class="ref${open?' on':''}"><button type="button" class="ref-hd" data-ref aria-expanded="${open}"><span class="ref-h">過往參考</span><span class="ref-tier t-${esc(r.t)}">${REF_T[r.t]||esc(r.t)}</span><span class="ref-s">${sum}</span><i class="ar" aria-hidden="true"></i></button>${body}</div>`;
+}
+function refRerender(style){ document.querySelectorAll('#list .item').forEach(c=>{ const it=BY[c.dataset.id]; if(it&&(!style||it.style===style)&&(style||refOpen.has(it.style))) c.outerHTML=itemHTML(it); }); }
 function renderList(){
   const arr=filtered();
   if(!arr.length){ $('#list').innerHTML=`<div class="empty">${S.only?'還沒有下單的商品。在各分頁的尺寸格輸入數量即可。':'沒有符合條件的商品。'}</div>`; return; }
   const groups=[]; let key=null;
-  const ord=it=>(S.only?SHEETS.indexOf(it.sheet)*10:0)+CG_ORDER.indexOf(cgOf(it)); arr.sort((a,b)=>ord(a)-ord(b));
+  const ord=it=>(S.only?SHEETS.indexOf(it.sheet)*10:0)+CG_ORDER.indexOf(cgOf(it)); arr.sort((a,b)=>ord(a)-ord(b)||(S.hot?refScore(b)-refScore(a):0));
   for(const it of arr){ const k=(S.only?it.sheet+' · ':'')+cgOf(it); if(k!==key){ groups.push({k,sheet:it.sheet,items:[]}); key=k; } groups[groups.length-1].items.push(it); }
   $('#list').innerHTML = seriesIntro() + groups.map(g=>{ const themes=[...new Set(g.items.map(i=>i.theme).filter(t=>t&&t!=='CORE'))]; return `<section class="group"><div class="ghead"><h2>${esc(g.k)}</h2><span>${g.items.length} 款色${themes.length?' ・ '+esc(themes.join('、')):''}</span></div><div class="list">${g.items.map(itemHTML).join('')}</div></section>`; }).join('');
 }
@@ -817,6 +887,8 @@ $('#list').addEventListener('click',e=>{
   const sx=e.target.closest('[data-sx]');
   if(sx){ $('#overlay').innerHTML=`<div class="zm-scrim" data-close><div class="zm sxz" role="dialog" aria-label="系列圖片"><button class="zm-x" data-close aria-label="關閉">×</button><img src="${sxName(sx.dataset.sx)}" alt=""><div class="zm-bar"><span class="nm">${esc(sx.dataset.cap||'')}</span></div></div></div>`; return; }
   const card=e.target.closest('.item'); if(!card) return; const id=card.dataset.id;
+  const rg=e.target.closest('[data-refreg]'); if(rg){ refReg=rg.dataset.refreg; try{ sessionStorage.setItem('dstc-refreg',refReg); }catch(_){} refRerender(); return; }
+  if(e.target.closest('[data-ref]')){ const st=BY[id].style; refOpen.has(st)?refOpen.delete(st):refOpen.add(st); refRerender(st); return; }
   if(e.target.closest('[data-more]')){ S.open.has(id)?S.open.delete(id):S.open.add(id); card.outerHTML=itemHTML(BY[id]); return; }
   const p=e.target.closest('[data-pic]'); if(p){ openLB(id,p.dataset.pic,e); return; }
   if(e.target.closest('[data-zoom]')){ openLB(id,(BY[id].doll?'doll':'photo'),e); }
