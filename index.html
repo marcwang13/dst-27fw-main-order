@@ -27,6 +27,7 @@
 .lv+.lv{border-top:1px solid var(--line);padding-top:8px}
 .lv-l{flex:none;width:32px;font-size:11px;letter-spacing:.08em;color:var(--muted)}
 .lv-sr{align-items:flex-start}.lv-sr .lv-l{padding-top:6px}
+.lv-rg .lv-l{width:auto!important;white-space:nowrap}
 .seg{display:inline-flex;max-width:100%;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
 .seg .sg{border:0;border-right:1px solid var(--line);background:transparent;padding:5px 14px;font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:baseline;white-space:nowrap}
 .seg .sg:last-child{border-right:0}
@@ -265,7 +266,7 @@ main{padding-block:12px}
 .sgrp .item.row:last-child{border-bottom:0}
 .item.row .info{justify-content:center}
 .item.row .cn{font-size:15px;font-weight:700}
-@media (min-width:761px){.sgrp .item.row{grid-template-columns:96px minmax(0,1fr) auto}.sgrp .row .pic{width:96px}}
+@media (min-width:761px){.sgrp .item.row{grid-template-columns:132px minmax(0,1fr) auto}.sgrp .row .pic{width:132px}}
 @media (max-width:760px){.item>.ref{grid-column:1/-1;margin-top:0}.ref-m{grid-template-columns:repeat(2,minmax(0,1fr))}.ref-g{grid-template-columns:1fr}}
 .fitB{display:inline-flex;align-items:baseline;gap:5px;align-self:center;background:var(--fg);color:var(--bg);border-radius:4px;padding:2px 9px;font-family:var(--f-body);font-size:14px;font-weight:700;line-height:1.35;letter-spacing:.02em}
 .fitB small{font-size:11px;font-weight:600;opacity:.75;letter-spacing:.04em}
@@ -455,6 +456,38 @@ tfoot td{font-weight:700;background:var(--sunk)}
 }
 @media (min-width:761px){.ordtop{display:flex;flex-direction:column;align-items:flex-end;gap:2px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.dsum{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);font-size:13px}
+.dsum b{font-size:14px}.dsum span{color:var(--muted)}
+.dfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-bottom:10px}.dfoot .chaintg{padding-bottom:0}
+.btnrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px}.btnrow .more{margin-top:0}
+.more.ref-btn{background:var(--surface);color:var(--acc);border:1.5px solid var(--acc)}.more.ref-btn::after{border-color:var(--acc)}
+.ref-sum{font-size:12px;color:var(--fg);font-variant-numeric:tabular-nums;display:inline-flex;gap:6px;align-items:center}
+.tag.nc{background:transparent;color:var(--ok);border:1px solid color-mix(in srgb,var(--ok) 50%,var(--line));font-weight:600}
+.sz .pct,.mx thead th .pct{font-size:11px;font-weight:700}
+.sz .pct i,.mx .pct i{background:color-mix(in srgb,var(--acc) 45%,transparent)}
+.sz .pct.top,.mx .pct.top{background:var(--acc);color:var(--acc-ink)}.sz .pct.top i,.mx .pct.top i{display:none}
+@media (min-width:1100px){
+  #view-order>.wrap{max-width:1480px}
+  .shell{max-width:1480px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-left,0px)) 0;display:grid;grid-template-columns:250px minmax(0,1fr);gap:18px;align-items:start}
+  .shell>.rail{position:sticky;top:12px;max-height:calc(100vh - 100px);overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);backdrop-filter:none;scrollbar-width:thin}
+  .shell>.rail .wrap{padding:12px;max-width:none}
+  .shell>#list{max-width:none;padding:0}
+  .shell .lv{flex-direction:column;align-items:stretch;gap:5px}
+  .shell .lv-l{width:auto;padding-top:0!important}
+  .shell .seg{display:flex;flex-wrap:wrap}.shell .seg .sg{flex:1;justify-content:center;padding:5px 6px}
+  .shell .cgs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;overflow:visible}
+  .shell .ct{flex-direction:column;gap:1px;padding:5px 0;font-size:11.5px;border:1px solid var(--line);border-radius:6px}
+  .shell .ct svg{width:17px;height:17px}.shell .ct small{font-size:10px}
+  .shell .ct[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-soft)}
+  .shell .seg .sg small{display:none}
+  .shell .lv+.lv{padding-top:10px}
+  .shell #tabs .tab{padding:3px 8px;font-size:11px}
+  .shell .row2{flex-direction:column;align-items:stretch}.shell .row2 .search{width:100%}
+  .shell .crumb{font-size:12px;padding:6px 10px}.shell .crumb .crumb-l{display:none}
+  .shell .sbtools{border-top:1px solid var(--line);padding-top:10px;margin-top:2px}
+  .shell .xlbar{flex-direction:column;align-items:stretch;padding-bottom:6px}.shell .xlbar .btn{width:100%}
+  .shell .dnote{margin-top:4px}
+}
 </style>
 </head>
 <body>
@@ -476,6 +509,8 @@ tfoot td{font-weight:700;background:var(--sunk)}
     <div class="offbar" id="offbar" hidden><b>傳單下單</b><span>照常挑款、填數量，完成後按右下角「檢視並下載」。能下載就會存成 Excel 訂單本；不能下載時會改成「複製」，貼到 Excel 或 LINE 傳給 DESCENTE 業務即可。</span></div>
     <div class="aebar" id="aebar" hidden><b>業務編輯中</b><span id="ae-txt"></span><button class="btn sm" id="ae-cancel">取消編輯</button></div>
     <div class="acct" id="acct" hidden></div>
+    <div class="dsum" id="dsum" hidden></div>
+    <div id="dpanel">
     <div class="dealer">
       <div class="fld"><label for="d-store">經銷商／店名 <span class="req">*</span></label><input id="d-store" autocomplete="organization"></div>
       <div class="fld"><label for="d-contact">聯絡人 <span class="req">*</span></label><input id="d-contact" autocomplete="name"></div>
@@ -483,7 +518,10 @@ tfoot td{font-weight:700;background:var(--sunk)}
       <div class="fld"><label for="d-email">Email</label><input id="d-email" inputmode="email" autocomplete="email"></div>
       <div class="fld wide"><label for="d-note">訂單備註</label><textarea id="d-note" rows="1" placeholder="例如：分批出貨、指定門市"></textarea></div>
     </div>
-    <label class="chaintg"><input type="checkbox" id="chain"> 連鎖分店下單 <small>各店分開填數量，送出時合併成一張單</small></label>
+    <div class="dfoot"><label class="chaintg"><input type="checkbox" id="chain"> 連鎖分店下單 <small>各店分開填數量，送出時合併成一張單</small></label><button type="button" class="btn sm" id="d-done" hidden>完成，收合經銷資料</button></div>
+    </div>
+    <span id="toolsHome" hidden></span>
+    <div class="sbtools" id="sbtools">
     <div class="xlbar">
       <span>習慣用 Excel？</span>
       <button class="btn sm" id="x-export">下載 Excel 訂單本</button>
@@ -492,7 +530,9 @@ tfoot td{font-weight:700;background:var(--sunk)}
       <span class="xlhint" id="x-msg"></span>
     </div>
     <div class="dnote" id="dnote"></div>
+    </div>
   </div>
+  <div class="shell" id="shell">
   <div class="rail" id="rail">
     <div class="wrap">
       <div class="rail-bar">
@@ -505,6 +545,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
       <div class="lv lv-cg"><span class="lv-l">大類</span><div class="cgs" id="cgs" role="toolbar" aria-label="大類"></div></div>
       <div class="lv lv-sr"><span class="lv-l">系列</span><div class="tabs" id="tabs" role="toolbar" aria-label="系列"></div></div>
       <div id="subtabs" hidden></div>
+      <div class="lv lv-rg"><span class="lv-l">過往數據區域</span><div class="seg" id="rgs" role="toolbar" aria-label="過往數據區域"></div></div>
       <div class="row2">
         <input class="search" id="q" type="search" placeholder="搜尋品名、款號、色碼、顏色">
         <label class="toggle"><input type="checkbox" id="only"> 只看已下單</label>
@@ -515,6 +556,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
     </div>
   </div>
   <main class="wrap" id="list"></main>
+  </div>
 </section>
 
 <section id="view-mine" hidden><div class="wrap" id="mine" style="padding-block:18px"></div></section>
@@ -665,7 +707,7 @@ function itemQty(id){ const m=S.qty[id]; if(!m) return 0; let t=0; for(const k i
 function totals(){ let sty=0,qty=0,amt=0; const bySheet={}; for(const id in S.qty){ const q=itemQty(id); if(!q) continue; const it=BY[id]; if(!it) continue; sty++; qty+=q; amt+=q*(it.price||0); bySheet[it.sheet]=(bySheet[it.sheet]||0)+q; } return {sty,qty,amt,bySheet}; }
 
 // ---------- dealer fields ----------
-['store','contact','phone','email','note'].forEach(k=>{ const el=$('#d-'+k); el.value=S.dealer[k]||''; el.addEventListener('input',()=>{ S.dealer[k]=el.value; saveDraft(); }); });
+['store','contact','phone','email','note'].forEach(k=>{ const el=$('#d-'+k); el.value=S.dealer[k]||''; el.addEventListener('input',()=>{ S.dealer[k]=el.value; saveDraft(); renderDsum(); }); });
 
 // ---------- tabs & filters ----------
 document.getElementById('dnote').innerHTML='<details><summary>資料待更新說明（'+dataNotes(true).length+' 項，點開查看）</summary><ul>'+dataNotes(true).map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul></details>';
@@ -741,13 +783,14 @@ const REF_REG=[['n','北部'],['c','中部'],['s','南部'],['a','綜合']];
 let refReg='a'; try{ refReg=sessionStorage.getItem('dstc-refreg')||'a'; }catch(e){}
 const refOpen=new Set();
 function shareFor(it){ if(window.DST_SHARE_ON){ const k=SHARE_CAT[it.cat]; if(k) return {k,m:SHARE[k]}; } return refShare(it); }
+function pctHTML(sh,z){ if(!sh) return ''; const p=sh.m[z]; if(p==null) return '<span class="pct na">–</span>'; const mx=Math.max(...Object.values(sh.m)); return `<span class="pct${p===mx&&p>0?' top':''}" title="${sh.ref?'':'上季 '}${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`; }
 function refRegName(){ return (REF_REG.find(x=>x[0]===refReg)||[,'綜合'])[1]; }
 function refD(it){ const r=window.DSTC_REF&&DSTC_REF.s[it.style]; return r&&r.t!=='none'?r.R[refReg]:null; }
 function refShare(it){ const d=refD(it); if(!d||!d.sz) return null; const m={}; for(const z in d.sz) m[z]=d.sz[z]/100; return {k:'過往'+refRegName(),m,ref:1}; }
 function refColor(it){ const d=refD(it); if(!d||!d.c) return null; const hit=d.c.find(x=>x[0]===it.cc); return hit?hit[1]:null; }
-function refColorHTML(it){ const p=refColor(it); return p==null?'':`<span class="tag rc" title="過往對照款同色的銷售佔比（${refRegName()}）">過往${refRegName()} 此色 ${p}%</span>`; }
+function refColorHTML(it){ const p=refColor(it); if(p==null){ const d=refD(it); return d&&d.c?'<span class="tag nc" title="對照的舊款沒有這個顏色">此系列新色</span>':''; } return `<span class="tag rc" title="過往對照款同色的銷售佔比（${refRegName()}）">過往${refRegName()} 此色 ${p}%</span>`; }
 function matrixHTML(it,sh){
-  const head=fullSizes(it).map(z=>{ const p=sh?sh.m[z]:null; return `<th class="${it.sizes.includes(z)?'':'na'}"><span>${SZL(z,it)}</span>${sh?(p!=null?`<span class="pct" title="${sh.ref?'':'上季 '}${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`:'<span class="pct na">–</span>'):''}</th>`; }).join('');
+  const head=fullSizes(it).map(z=>{ const p=sh?sh.m[z]:null; return `<th class="${it.sizes.includes(z)?'':'na'}"><span>${SZL(z,it)}</span>${pctHTML(sh,z)}</th>`; }).join('');
   const rows=S.br.map(b=>{ const m=(S.bq[b.id]||{})[it.id]||{}; let t=0; const cells=fullSizes(it).map(z=>{ if(!it.sizes.includes(z)) return `<td><input class="na" disabled tabindex="-1" aria-label="無此尺寸"></td>`; const v=m[z]||''; t+=m[z]||0; return `<td><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(z)}-${b.id}" data-sz="${esc(z)}" data-brq="${b.id}" value="${v}" aria-label="${esc(b.name+' '+it.en+' '+it.color+' '+z)} 數量"></td>`; }).join(''); return `<tr><th class="bn" title="${esc(b.name)}">${esc(b.name)}</th>${cells}<td class="bt" data-bt="${b.id}">${t||''}</td></tr>`; }).join('');
   const colT=fullSizes(it).map(z=>{ let t=0; S.br.forEach(b=>{ t+=(((S.bq[b.id]||{})[it.id]||{})[z])||0; }); return `<td data-ct="${esc(z)}">${t||''}</td>`; }).join('');
   return `<div class="mx-wrap"><table class="mx"><thead><tr><th class="bn">分店</th>${head}<th>合計</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><th class="bn">合計</th>${colT}<td data-ctt>${itemQty(it.id)||''}</td></tr></tfoot></table></div>`;
@@ -757,7 +800,7 @@ function itemHTML(it){
   const q=curQ()[it.id]||{}; const tq=itemQty(it.id);
   const open=S.open.has(it.id);
   const sh=shareFor(it);
-  const sizes = fullSizes(it).map(sz=>{ if(!it.sizes.includes(sz)) return `<label class="sz na"><span>${SZL(sz,it)}</span><input disabled tabindex="-1" aria-label="${esc(sz)} 無此尺寸"></label>`; const v=q[sz]||''; const p=sh?sh.m[sz]:null; const pct=sh?(p!=null?`<span class="pct" title="${sh.ref?'':'上季 '}${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`:'<span class="pct na">–</span>'):''; return `<label class="sz"><span>${SZL(sz,it)}</span><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(sz)}" data-sz="${esc(sz)}" value="${v}" aria-label="${esc(it.en+' '+it.color+' '+sz)} 數量">${pct}</label>`; }).join('').replace((it.run==='U'?/(<label class="sz[^"]*"><span>M<small)/:/(?!)/),'<span class="szbr"></span>$1');
+  const sizes = fullSizes(it).map(sz=>{ if(!it.sizes.includes(sz)) return `<label class="sz na"><span>${SZL(sz,it)}</span><input disabled tabindex="-1" aria-label="${esc(sz)} 無此尺寸"></label>`; const v=q[sz]||''; const p=sh?sh.m[sz]:null; const pct=pctHTML(sh,sz); return `<label class="sz"><span>${SZL(sz,it)}</span><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(sz)}" data-sz="${esc(sz)}" value="${v}" aria-label="${esc(it.en+' '+it.color+' '+sz)} 數量">${pct}</label>`; }).join('').replace((it.run==='U'?/(<label class="sz[^"]*"><span>M<small)/:/(?!)/),'<span class="szbr"></span>$1');
   const sizesBlock = S.chain ? matrixHTML(it,sh) : `<div class="sizes">${sizes}</div>`;
   return `<article class="item ${tq?'has':''}" data-id="${esc(it.id)}" data-unit="${esc(it.style)}">
     <div class="pic">${picHTML(it)}</div>
@@ -767,7 +810,7 @@ function itemHTML(it){
       <div class="code">${esc(it.style||'')}${it.sku?' ／ '+esc(it.sku):''}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}</div>
       ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
       ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
-      ${(it.dt||it.tech||it.fab)?`<button class="more${open?' on':''}" data-more>${open?'收合':'看商品細節與材質'}</button>`:''}
+      <div class="btnrow">${(it.dt||it.tech||it.fab)?`<button class="more${open?' on':''}" data-more>${open?'收合':'看商品細節與材質'}</button>`:''}${refBtnHTML(it)}</div>
       ${open?`<div class="detail">${it.dt?`<div><h4>商品特色與機能</h4><p>${esc(it.dt)}</p></div>`:''}${it.fab?`<div><h4>材質與版型</h4><p>${esc(it.fab)}</p></div>`:''}</div>`:''}
     </div>
     ${refHTML(it)}
@@ -781,7 +824,7 @@ function itemHTML(it){
 }
 function rowHTML(it){
   const tq=itemQty(it.id), sh=shareFor(it);
-  const sizes=fullSizes(it).map(sz=>{ if(!it.sizes.includes(sz)) return `<label class="sz na"><span>${SZL(sz,it)}</span><input disabled tabindex="-1" aria-label="${esc(sz)} 無此尺寸"></label>`; const v=(curQ()[it.id]||{})[sz]||''; const p=sh?sh.m[sz]:null; const pct=sh?(p!=null?`<span class="pct" title="${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`:'<span class="pct na">–</span>'):''; return `<label class="sz"><span>${SZL(sz,it)}</span><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(sz)}" data-sz="${esc(sz)}" value="${v}" aria-label="${esc(it.en+' '+it.color+' '+sz)} 數量">${pct}</label>`; }).join('').replace((it.run==='U'?/(<label class="sz[^"]*"><span>M<small)/:/(?!)/),'<span class="szbr"></span>$1');
+  const sizes=fullSizes(it).map(sz=>{ if(!it.sizes.includes(sz)) return `<label class="sz na"><span>${SZL(sz,it)}</span><input disabled tabindex="-1" aria-label="${esc(sz)} 無此尺寸"></label>`; const v=(curQ()[it.id]||{})[sz]||''; const p=sh?sh.m[sz]:null; const pct=pctHTML(sh,sz); return `<label class="sz"><span>${SZL(sz,it)}</span><input class="${v?'on':''}" type="number" min="0" step="1" inputmode="numeric" id="q-${esc(it.id)}-${esc(sz)}" data-sz="${esc(sz)}" value="${v}" aria-label="${esc(it.en+' '+it.color+' '+sz)} 數量">${pct}</label>`; }).join('').replace((it.run==='U'?/(<label class="sz[^"]*"><span>M<small)/:/(?!)/),'<span class="szbr"></span>$1');
   const sizesBlock=S.chain?matrixHTML(it,sh):`<div class="sizes">${sizes}</div>`;
   return `<article class="item row ${tq?'has':''}" data-id="${esc(it.id)}">
     <div class="pic">${picHTML(it)}</div>
@@ -806,7 +849,7 @@ function groupHTML(its){
       <div class="meta"><span class="tag sgn">${cnt}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${refBadge(it)}</div>
       <div class="code">${esc(it.style||'')}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}・台灣定價待定・尺寸待更新（目前參考前季）${its.some(x=>!(x.photos||[]).length)?'・實體圖待更新':''}${refShare(it)?`・尺寸格下方 %＝${esc(refShare(it).k)}尺寸銷售佔比`:''}</div>
       ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
-      ${(it.dt||it.tech||it.fab)?`<button class="more${open?' on':''}" data-more>${open?'收合':'看商品細節與材質'}</button>`:''}
+      <div class="btnrow">${(it.dt||it.tech||it.fab)?`<button class="more${open?' on':''}" data-more>${open?'收合':'看商品細節與材質'}</button>`:''}${refBtnHTML(it)}</div>
       ${open?`<div class="detail">${it.dt?`<div><h4>商品特色與機能</h4><p>${esc(it.dt)}</p></div>`:''}${it.fab?`<div><h4>材質與版型</h4><p>${esc(it.fab)}</p></div>`:''}</div>`:''}
       ${refHTML(it)}
     </div>
@@ -880,29 +923,31 @@ function fitOf(it){ const m=String(it.fab||'').match(/版型[：:]\s*([^\n]+)/);
 function refOf(it){ return REF.s[it.style]; }
 function refScore(it){ const r=refOf(it); return r&&r.t!=='none'&&r.R.a?r.R.a.m+(r.hot?100:0):-1; }
 function refBadge(it){ const r=refOf(it); if(!r) return ''; if(r.hot) return '<span class="tag hot">去年熱賣</span>'; if(r.t==='none') return '<span class="tag nref">新款無對照</span>'; return ''; }
-function refHTML(it){
-  const r=refOf(it); if(!r) return '';
-  if(r.t==='none') return `<div class="ref none"><span class="ref-h">過往參考</span><span class="ref-s">新款，沒有可對照的舊款</span></div>`;
+function refBtnHTML(it){
+  const r=refOf(it); if(!r||r.t==='none') return '';
   const open=refOpen.has(it.style), A=r.R.a;
   const sum=A?`綜合 售罄 ${A.st==null?'–':A.st+'%'}・店均月銷 ${A.m} 件`:'舊款銷量太少';
-  let body='';
-  if(open){
-    const d=r.R[refReg];
-    const tabs=REF_REG.map(([k,l])=>`<button type="button" data-refreg="${k}" aria-pressed="${k===refReg}">${l}</button>`).join('');
-    const refs=r.r.map(x=>`<li><span>${esc(x[0])}</span>${esc(x[1])} <small>${esc(x[2])}</small></li>`).join('');
-    let main='<p class="ref-empty">這個區域的舊款銷售太少，沒有參考數字。</p>';
-    if(d){
-      const m=[['店均月銷',d.m+' 件'],['售罄率',d.st==null?'–':d.st+'%'],['全價銷售比',d.fp+'%'],['參考店數',d.k+' 家']].map(([l,v])=>`<div><small>${l}</small><b>${v}</b></div>`).join('');
-      let sz='';
-      if(d.sz){ const keys=fullSizes(it).filter(z=>d.sz[z]!=null).concat(Object.keys(d.sz).filter(z=>!fullSizes(it).includes(z))); const mx=Math.max(...keys.map(z=>d.sz[z]),1);
-        const many=keys.length>10; sz=`<div><h5>尺寸分布${many?'<small>（滑鼠移到長條看比例）</small>':''}</h5><div class="ref-sz">${keys.map((z,i)=>`<div title="${esc(z)}：${d.sz[z]}%"><span>${many?'':d.sz[z]+'%'}</span><i style="height:${Math.max(2,Math.round(d.sz[z]/mx*46))}px"></i><span>${many&&i%2?'&nbsp;':esc(z)}</span></div>`).join('')}</div></div>`; }
-      const col=d.c?`<div><h5>熱賣色</h5><div class="ref-c">${d.c.slice(0,3).map(([c,p])=>`<div><span>${esc(c)}</span><i><b style="width:${p}%"></b></i><em>${p}%</em></div>`).join('')}</div></div>`:'';
-      main=`<div class="ref-m">${m}</div>${(sz||col)?`<div class="ref-g">${sz||'<div></div>'}${col}</div>`:''}`;
-    }
-    body=`<div class="ref-b"><div class="ref-tabs" role="group" aria-label="區域">${tabs}</div><ul class="ref-l">${refs}</ul>${main}</div>`;
-  }
-  return `<div class="ref${open?' on':''}"><button type="button" class="ref-hd" data-ref aria-expanded="${open}"><span class="ref-h">過往參考</span><span class="ref-tier t-${esc(r.t)}">${REF_T[r.t]||esc(r.t)}</span><span class="ref-s">${sum}</span><i class="ar" aria-hidden="true"></i></button>${body}</div>`;
+  return `<button type="button" class="more ref-btn${open?' on':''}" data-ref aria-expanded="${open}">${open?'收合過往參考':'看過往參考'}</button><span class="ref-sum"><span class="ref-tier t-${esc(r.t)}">${REF_T[r.t]||esc(r.t)}</span>${sum}</span>`;
 }
+function refHTML(it){
+  const r=refOf(it); if(!r||r.t==='none'||!refOpen.has(it.style)) return '';
+  const d=r.R[refReg];
+  const tabs=REF_REG.map(([k,l])=>`<button type="button" data-refreg="${k}" aria-pressed="${k===refReg}">${l}</button>`).join('');
+  const refs=r.r.map(x=>`<li><span>${esc(x[0])}</span>${esc(x[1])} <small>${esc(x[2])}</small></li>`).join('');
+  let main='<p class="ref-empty">這個區域的舊款銷售太少，沒有參考數字。</p>';
+  if(d){
+    const m=[['店均月銷',d.m+' 件',''],['售罄率',d.st==null?'–':d.st+'%','賣出件數 ÷（賣出＋目前庫存）'],['原價售出比',d.fp+'%','以 95 折以上（沒打折）賣出的件數比例'],['參考店數',d.k+' 家','']].map(([l,v,t])=>`<div${t?` title="${t}"`:''}><small>${l}</small><b>${v}</b></div>`).join('');
+    let sz='';
+    if(d.sz){ const keys=fullSizes(it).filter(z=>d.sz[z]!=null).concat(Object.keys(d.sz).filter(z=>!fullSizes(it).includes(z))); const mx=Math.max(...keys.map(z=>d.sz[z]),1); const many=keys.length>10;
+      sz=`<div><h5>尺寸分布${many?'<small>（滑鼠移到長條看比例）</small>':''}</h5><div class="ref-sz">${keys.map((z,i)=>`<div title="${esc(z)}：${d.sz[z]}%"><span>${many?'':d.sz[z]+'%'}</span><i style="height:${Math.max(2,Math.round(d.sz[z]/mx*46))}px"></i><span>${many&&i%2?'&nbsp;':esc(z)}</span></div>`).join('')}</div></div>`; }
+    const col=d.c?`<div><h5>熱賣色</h5><div class="ref-c">${d.c.slice(0,3).map(([c,p])=>`<div><span>${esc(c)}</span><i><b style="width:${p}%"></b></i><em>${p}%</em></div>`).join('')}</div></div>`:'';
+    main=`<div class="ref-m">${m}</div>${(sz||col)?`<div class="ref-g">${sz||'<div></div>'}${col}</div>`:''}<p class="ref-empty">原價售出比＝以 95 折以上賣出的件數比例，越高代表不靠折扣也賣得動。</p>`;
+  }
+  return `<div class="ref on"><div class="ref-b" style="border-top:0"><div class="ref-tabs" role="group" aria-label="區域">${tabs}</div><ul class="ref-l">${refs}</ul>${main}</div></div>`;
+}
+function refRerenderAll(){ [...new Set([...document.querySelectorAll('#list [data-unit]')].map(x=>x.dataset.unit))].forEach(rerenderUnit); renderRgs(); }
+function setRefReg(k){ refReg=k; try{ sessionStorage.setItem('dstc-refreg',refReg); }catch(_){} refRerenderAll(); }
+function renderRgs(){ const el=document.getElementById('rgs'); if(el) el.innerHTML=REF_REG.map(([k,l])=>`<button class="sg" data-rg="${k}" aria-pressed="${k===refReg}">${l}</button>`).join(''); }
 function refRerender(style){ (style?[style]:[...refOpen]).forEach(rerenderUnit); }
 function renderList(){
   const arr=filtered();
@@ -939,7 +984,7 @@ $('#list').addEventListener('click',e=>{
   const sx=e.target.closest('[data-sx]');
   if(sx){ $('#overlay').innerHTML=`<div class="zm-scrim" data-close><div class="zm sxz" role="dialog" aria-label="系列圖片"><button class="zm-x" data-close aria-label="關閉">×</button><img src="${sxName(sx.dataset.sx)}" alt=""><div class="zm-bar"><span class="nm">${esc(sx.dataset.cap||'')}</span></div></div></div>`; return; }
   const card=e.target.closest('.item,.sg-h'); if(!card) return; const id=card.dataset.id;
-  const rg=e.target.closest('[data-refreg]'); if(rg){ refReg=rg.dataset.refreg; try{ sessionStorage.setItem('dstc-refreg',refReg); }catch(_){} [...new Set([...document.querySelectorAll('#list [data-unit]')].map(x=>x.dataset.unit))].forEach(rerenderUnit); return; }
+  const rg=e.target.closest('[data-refreg]'); if(rg){ setRefReg(rg.dataset.refreg); return; }
   if(e.target.closest('[data-ref]')){ const st=BY[id].style; refOpen.has(st)?refOpen.delete(st):refOpen.add(st); refRerender(st); return; }
   if(e.target.closest('[data-more]')){ S.open.has(id)?S.open.delete(id):S.open.add(id); rerenderUnit(BY[id].style); return; }
   const p=e.target.closest('[data-pic]'); if(p){ openLB(id,p.dataset.pic,e); return; }
@@ -1767,6 +1812,7 @@ function brDialog(title,val,onOk){ $('#overlay').innerHTML=`<div class="scrim"><
   $('#br-ok').onclick=go; inp.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); }); }
 function openBranchMgr(){ const rows=S.br.map(b=>{ const t=brStats(b); return `<tr><td>${esc(b.name)}</td><td class="r num">${t.qty}</td><td class="r"><button class="btn sm" data-brren="${b.id}">改名</button> <button class="btn sm" data-brdel="${b.id}" ${S.br.length<2?'disabled':''}>刪除</button></td></tr>`; }).join('');
   $('#overlay').innerHTML=`<div class="scrim"><div class="panel" style="height:auto;margin:auto;max-width:480px;border-radius:8px"><div class="phead"><h2>管理店點</h2><button class="btn sm x" data-close>關閉</button></div><div class="tbl"><table><thead><tr><th>店點</th><th class="r">件數</th><th></th></tr></thead><tbody>${rows}</tbody></table></div><div id="mgr-msg"></div><p style="margin:0;color:var(--muted);font-size:12px">刪除店點會一併刪除該店填的數量。至少要保留一個店點；不需要分店時，取消勾選「連鎖分店下單」即可。</p></div></div>`; }
+$('#chain').addEventListener('change',()=>setTimeout(renderDsum,0));
 $('#chain').addEventListener('change',e=>{
   if(e.target.checked){ const first={id:brId(),name:(S.dealer.store||'').trim()||'店點 1'}; S.chain=true; S.br=[first]; S.bq={[first.id]:JSON.parse(JSON.stringify(S.qty))}; S.cur=first.id; recalcAgg(); saveDraft(); renderAll(); brDialog('新增第二家店點','',v=>{ const b={id:brId(),name:v}; S.br.push(b); S.cur=b.id; }); return; }
   e.target.checked=true;
@@ -1780,7 +1826,21 @@ $('#overlay').addEventListener('click',e=>{ const r=e.target.closest('[data-brre
   if(r){ const b=S.br.find(x=>x.id===r.dataset.brren); brDialog('店點改名',b.name,v=>{ b.name=v; }); }
   if(d&&!d.disabled){ const id=d.dataset.brdel; const b=S.br.find(x=>x.id===id); if(d.dataset.sure!=='1'){ d.dataset.sure='1'; d.textContent='確定刪除'; msg('#mgr-msg','err',`再按一次「確定刪除」會刪除「${b.name}」和它的 ${brStats(b).qty} 件數量。`); return; }
     S.br=S.br.filter(x=>x.id!==id); delete S.bq[id]; if(S.cur===id) S.cur=S.br[0].id; recalcAgg(); saveDraft(); renderAll(); openBranchMgr(); } });
-function renderAll(){ renderBranchBar(); renderTabs(); renderList(); renderTally(); }
+function renderAll(){ renderBranchBar(); renderTabs(); renderList(); renderTally(); renderDsum(); renderRgs(); }
+let dealerFold=null;
+function renderDsum(){
+  const d=S.dealer, ok=!!(d.store.trim()&&d.contact.trim());
+  if(dealerFold===null) dealerFold=ok;
+  const fold=dealerFold&&ok;
+  $('#dsum').hidden=!fold; $('#dpanel').hidden=fold; $('#d-done').hidden=!ok;
+  if(fold) $('#dsum').innerHTML=`<b>${esc(d.store)}</b><span>聯絡人 ${esc(d.contact)}${d.phone?'・'+esc(d.phone):''}${S.chain?'・連鎖分店 '+S.br.length+' 家':''}${d.note?'・備註：'+esc(d.note):''}</span><button type="button" class="btn sm" id="d-edit">編輯經銷資料</button>`;
+}
+$('#dsum').addEventListener('click',e=>{ if(e.target.closest('#d-edit')){ dealerFold=false; renderDsum(); $('#d-store').focus(); } });
+$('#d-done').addEventListener('click',()=>{ dealerFold=true; renderDsum(); });
+document.getElementById('rgs').addEventListener('click',e=>{ const b=e.target.closest('[data-rg]'); if(b) setRefReg(b.dataset.rg); });
+(function(){ const tools=$('#sbtools'), home=$('#toolsHome'), body=$('#railBody'), mq=window.matchMedia('(min-width:1100px)');
+  function place(){ if(mq.matches){ if(tools.parentNode!==body) body.appendChild(tools); } else if(tools.previousSibling!==home){ home.after(tools); } }
+  (mq.addEventListener?mq.addEventListener('change',place):mq.addListener(place)); place(); })();
 renderAll();
 })();
 </script>
