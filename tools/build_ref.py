@@ -7,7 +7,7 @@
 資料來源（emers-whl-system）：
   dealer/data/chain_leigen_*.json、chain_dongli_*.json、internal/data/direct_chain_*.json
 只算 DESCENTE（不含 DESCENTE GOLF），排除 OUTLET、特賣、倉庫。
-對照三層：L1 同款延續（同款號去掉年份碼，或英文品名相同）、L2 同系列同品類（系列碼＋品類碼＋性別，FW，價格 ±20%）、
+對照三層：L1 同款延續（FW 舊款；同款號去掉年份碼且特徵字相近，或英文品名相同且同品類碼）、L2 同系列同品類（系列碼＋品類碼＋性別，FW，價格 ±20%）、
 L3 同品類同價格帶（品類碼＋性別，FW，價格 ±10%；男女不互配，只有中性可跟男／女互配）。
 ref_override.json 可人工指定：{"SS321TJK91": ["SQ321TJK91"], "SS999XXX99": []}（空陣列＝無對照）。
 """
@@ -41,7 +41,7 @@ def color_of(key):
 
 def is_fw(code):
     t = code[8]
-    return t in '789'
+    return t in '789O'  # O＝秋冬後段（如 SQ423SDJO3）
 
 
 def region_of(src, sid, store):
@@ -197,15 +197,37 @@ def main():
         a_, b_ = set(norm_name(x).split()) - STOP, set(norm_name(y).split()) - STOP
         return len(a_ & b_) / len(a_ | b_) if a_ and b_ else 0
 
+    # 通用字（品類、版型、袖長、常見材質）不算「同一款」的證據；剩下的特徵字才拿來比
+    GENERIC = STOP | {'short', 'sleeve', 'long', 'tee', 'polo', 'pants', 'pant', 'shorts', 'jacket', 'vest', 'cap',
+                      'ball', 'beanie', 'fit', 'regular', 'over', 'wide', 'straight', 'top', 'bra', 'leggings', 'woven',
+                      'brushed', 'uni', 'standard', 'basic', 'training', 'd', 'hooded', 'hoodie', 'sweatshirt'}
+    COLLAB = {'swiss', 'spain', 'f360', 'navi', 'tough'}  # 聯名／子線字，兩邊都有卻不同＝不同款
+
+    def feat(x):
+        return set(norm_name(x).split()) - GENERIC
+
+    def same_item(a, b):
+        fa, fb = feat(a), feat(b)
+        ca, cb = fa & COLLAB, fb & COLLAB
+        if ca and cb and ca != cb:
+            return False
+        if not fa or not fb:
+            return False
+        return len(fa & fb) / len(fa | fb) >= 0.34
+
     def l1(n):
+        # 只認秋冬舊款；同款號（去年份碼）要特徵字相近，品名完全相同要同品類碼，品名太通用時還要同系列碼
         hits = []
         o = by_code.get(n['style'][0] + n['style'][2:])
-        if o and sim(n['en'], o['en']) >= 0.4:  # 同款號還要品名相近才算延續（韓國款號會跨年重用）
+        if o and o['fw'] and same_item(n['en'], o['en']):
             hits.append(o)
         for o in by_name.get(norm_name(n['en']), []):
-            if o not in hits:
-                hits.append(o)
-        hits.sort(key=lambda o: (-o['fw'], -o['yr'], -o['qty']))
+            if o in hits or not o['fw'] or o['it2'] != n['style'][6:8]:
+                continue
+            if not feat(n['en']) and o['line'] != n['style'][5]:
+                continue
+            hits.append(o)
+        hits.sort(key=lambda o: (-o['yr'], -o['qty']))
         return hits[:2]
 
     # 價格換算：用 L1 配對算 台幣定價 / 韓幣
@@ -234,7 +256,9 @@ def main():
         line, it2 = s[5], s[6:8]
         c = [o for o in pool if o['fw'] and o['line'] == line and o['it2'] == it2 and gmatch(n, o)]
         if c:
-            return 'L2', closest(n, c, 0.2) or closest(n, c, 0)[:2]  # 價差 ±20%，都沒有才不限價取最接近 2 款
+            r = closest(n, c, 0.2)  # 價差 ±20%，沒有就往 L3
+            if r:
+                return 'L2', r
         # L3：同品類、價差 ±10%；性別要一樣，只有中性可以跟男／女互配（男女不互配）
         c = [o for o in pool if o['fw'] and o['it2'] == it2 and gmatch(n, o)]
         r = closest(n, c, 0.1)
