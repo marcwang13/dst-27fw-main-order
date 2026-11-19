@@ -53,8 +53,10 @@
 .st[aria-pressed="true"]{color:var(--fg);border-bottom-color:var(--acc);font-weight:600}
 .st[disabled]{opacity:.4;cursor:default}
 .st .dot{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--acc);color:var(--acc-ink);font-size:11px;font-family:var(--f-mono);display:inline-grid;place-items:center}
-.crumb{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-left:44px;font-size:12px;color:var(--muted)}
-.crumb button{border:0;background:transparent;color:var(--acc);font-size:12px;padding:2px 0}
+.crumb{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;color:var(--fg);background:var(--acc-soft);border-left:4px solid var(--acc);border-radius:4px;padding:8px 12px}
+.crumb-l{display:inline-block;background:var(--acc);color:var(--acc-ink);border-radius:3px;padding:1px 8px;margin-right:10px;font-size:12.5px;font-weight:700;letter-spacing:.06em}
+.crumb b{font-weight:700}
+.crumb button{border:0;background:transparent;color:var(--acc);font-size:13px;font-weight:600;padding:2px 0}
 @media (max-width:760px){
   .lv{gap:8px}.lv-l{width:26px;font-size:10.5px}
   .seg .sg{padding:6px 11px}
@@ -224,10 +226,10 @@ main{padding-block:12px}
 .fitB{display:inline-flex;align-items:baseline;gap:5px;align-self:center;background:var(--fg);color:var(--bg);border-radius:4px;padding:2px 9px;font-family:var(--f-body);font-size:14px;font-weight:700;line-height:1.35;letter-spacing:.02em}
 .fitB small{font-size:11px;font-weight:600;opacity:.75;letter-spacing:.04em}
 .thmB{display:inline-flex;align-items:center;align-self:center;background:var(--brand);color:var(--brand-ink);border-radius:4px;padding:2px 9px;font-family:var(--f-disp);font-size:15px;font-weight:700;line-height:1.35;letter-spacing:.06em;text-transform:uppercase}
-.sintro{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:var(--r);padding:16px 18px 14px;margin:0 0 20px}
+.sintro{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:var(--r);padding:14px 18px 14px;margin:0 0 20px}
 .sintro h2{margin:0 0 10px;font-family:var(--f-disp);font-weight:700;font-size:30px;letter-spacing:.05em;text-transform:uppercase}
 .sintro h2 span{font-family:var(--f-body);font-size:13px;font-weight:400;letter-spacing:0;color:var(--muted);text-transform:none;margin-left:10px}
-.sintro p{margin:0;font-size:16.5px;line-height:1.85}
+.sintro p{margin:0;font-size:16px;line-height:1.8;max-width:62em}
 .skey{display:flex;gap:10px;align-items:baseline;margin-top:12px;font-size:15.5px;line-height:1.7}
 .skey b{flex:none;background:var(--brand);color:var(--brand-ink);border-radius:3px;padding:1px 9px;font-size:13px;font-weight:700;letter-spacing:.06em}
 .sthemes{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;margin-top:18px}
@@ -242,12 +244,12 @@ main{padding-block:12px}
 .shero{display:block;width:100%;padding:0;border:1px solid var(--line);border-radius:4px;background:#fff;cursor:zoom-in;overflow:hidden}
 .shero img{display:block;width:100%;height:auto}
 .sintro-l .sthemes{grid-template-columns:1fr;margin-top:12px}
-.sthm{display:flex;gap:6px;margin-top:8px}
-.sthm.wide{margin-top:16px}
-.sthm.wide .sthi{max-width:900px}
-.sthi{flex:1;min-width:0;padding:0;border:1px solid var(--line);border-radius:3px;background:#fff;cursor:zoom-in;overflow:hidden}
-.sthi img{display:block;width:100%;height:auto}
-.sthcap{font-size:12.5px;color:var(--muted);margin-top:3px}
+.sthm{display:flex;gap:8px;margin-top:10px;align-items:flex-end;flex-wrap:wrap}
+.sthm.top{margin-top:14px}
+.sthi{flex:none;height:96px;padding:0;border:1px solid var(--line);border-radius:3px;background:#fff;cursor:zoom-in;overflow:hidden}
+.sthi:hover{border-color:var(--brand)}
+.sthi img{display:block;height:100%;width:auto}
+.sthcap{font-size:12px;line-height:1.4;color:var(--muted)}
 .sxz{max-width:min(96vw,1500px);max-height:94vh;background:#fff;padding:0}
 .sxz img{display:block;max-width:100%;max-height:calc(94vh - 44px);width:auto;height:auto;margin:0 auto}
 .sxz .zm-bar{padding:8px 14px;font-size:13px}
@@ -458,7 +460,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
       <div class="lv lv-gen"><span class="lv-l">性別</span><div class="seg" id="gens" role="toolbar" aria-label="性別"></div></div>
       <div class="lv lv-cg"><span class="lv-l">大類</span><div class="cgs" id="cgs" role="toolbar" aria-label="大類"></div></div>
       <div class="lv lv-sr"><span class="lv-l">系列</span><div class="tabs" id="tabs" role="toolbar" aria-label="系列"></div></div>
-      <div class="lv lv-sub" id="subLv"><span class="lv-l">小類</span><div class="subs" id="subtabs" role="toolbar" aria-label="小類"></div></div>
+      <div id="subtabs" hidden></div>
       <div class="row2">
         <input class="search" id="q" type="search" placeholder="搜尋品名、款號、色碼、顏色">
         <label class="toggle"><input type="checkbox" id="only"> 只看已下單</label>
@@ -637,8 +639,7 @@ function renderTabs(){
   $('#cgs').innerHTML = ct('','全部',gI.length,S.cgs.size===0)+CG_ORDER.map(g=>ct(g,g,gI.filter(i=>cgOf(i)===g).length,S.cgs.has(g))).join('');
   const isSub=s=>/^(ACC|FTW)/.test(s);
   const btn=(s,cls)=>{ const n=gI.filter(i=>i.sheet===s&&inCg(i)).length; const d=t.bySheet[s]; return `<button class="${cls}" data-s="${s}" aria-pressed="${S.sheet===s}"${n?'':' disabled'}>${s}<small>${n}</small>${d?`<span class="dot">${d}</span>`:''}</button>`; };
-  $('#tabs').innerHTML = SHEETS.filter(s=>!isSub(s)).map(s=>btn(s,'tab')).join('');
-  $('#subtabs').innerHTML = SHEETS.filter(isSub).map(s=>btn(s,'st')).join('');
+  $('#tabs').innerHTML = SHEETS.map(s=>btn(s,'tab')).join('');
 }
 // 性別／大類：上方膠囊列，單選；目前大類在新性別下沒有商品就回到全部大類，目前分頁沒有符合的就跳到第一個有的分頁
 function fixSel(){ const inG=i=>!S.gens.size||S.gens.has(i.gen); if(S.cgs.size&&!ITEMS.some(i=>inG(i)&&S.cgs.has(cgOf(i)))) S.cgs.clear();
@@ -771,15 +772,16 @@ function seriesIntro(){
   });
   let si=SHEET_INTRO[S.sheet];
   const hero=SERIES_HERO[S.sheet];
-  const thumbs=(e,wide)=>e.imgs.length?`<div class="sthm${wide?' wide':''}">${e.imgs.map((n,i)=>`<button class="sthi" data-sx="${n}" data-cap="${esc(S.sheet+'・'+e.k+' 款式總覽'+(e.imgs.length>1?'（'+(i+1)+'/'+e.imgs.length+'）':''))}"><img src="${sxName(n)}" alt="${esc(e.k)} 款式總覽" loading="lazy" decoding="async"></button>`).join('')}</div><div class="sthcap">款式總覽，點圖放大</div>`:'';
+  const tb=(n,cap,alt)=>`<button class="sthi" data-sx="${n}" data-cap="${esc(cap)}"><img src="${sxName(n)}" alt="${esc(alt)}" loading="lazy" decoding="async"></button>`;
+  const thumbs=e=>e.imgs.length?`<div class="sthm">${e.imgs.map((n,i)=>tb(n,S.sheet+'・'+e.k+' 款式總覽'+(e.imgs.length>1?'（'+(i+1)+'/'+e.imgs.length+'）':''),e.k+' 款式總覽')).join('')}<span class="sthcap">款式總覽<br>點圖放大</span></div>`:'';
   const keyH=k=>k?`<div class="skey"><b>主打</b><span>${esc(k)}</span></div>`:'';
-  let cards=ents, wideImgs='';
-  if(!si && ents.length===1){ const e=ents[0]; si={t:e.body,k:e.key}; wideImgs=thumbs(e,true); cards=[]; }
-  const heroH=hero?`<button class="shero" data-sx="${hero}" data-cap="${esc(S.sheet+' 系列形象圖')}"><img src="${sxName(hero)}" alt="${esc(S.sheet)} 系列形象圖" loading="lazy" decoding="async"></button>`:'';
-  const head=`<h2>${esc(S.sheet)}<span>系列介紹（原廠 27Q3Q4 Convention Sheet）</span></h2>${si?`<p>${esc(si.t)}</p>${keyH(si.k)}`:''}`;
-  const grid=cards.length?`<div class="sthemes">${cards.map(e=>`<div class="sth"><h3>${esc(e.k)}<span>${e.n} 款色</span></h3><p>${esc(e.body)}</p>${keyH(e.key)}${thumbs(e,false)}</div>`).join('')}</div>`:'';
-  const top=hero?`<div class="sintro-top"><div class="sintro-l">${head}</div>${heroH}</div>`:head;
-  return `<section class="sintro">${top}${wideImgs}${grid}</section>`;
+  let cards=ents, extra=[];
+  if(!si && ents.length===1){ const e=ents[0]; si={t:e.body,k:e.key}; extra=e.imgs.map((n,i)=>tb(n,S.sheet+'・'+e.k+' 款式總覽',e.k+' 款式總覽')); cards=[]; }
+  const media=(hero?[tb(hero,S.sheet+' 系列形象圖',S.sheet+' 系列形象圖')]:[]).concat(extra);
+  const mediaH=media.length?`<div class="sthm top">${media.join('')}<span class="sthcap">原廠簡報圖<br>點圖放大</span></div>`:'';
+  const head=`<h2>${esc(S.sheet)}<span>系列介紹（原廠 27Q3Q4 Convention Sheet）</span></h2>${si?`<p>${esc(si.t)}</p>${keyH(si.k)}`:''}${mediaH}`;
+  const grid=cards.length?`<div class="sthemes">${cards.map(e=>`<div class="sth"><h3>${esc(e.k)}<span>${e.n} 款色</span></h3><p>${esc(e.body)}</p>${keyH(e.key)}${thumbs(e)}</div>`).join('')}</div>`:'';
+  return `<section class="sintro">${head}${grid}</section>`;
 }
 function fitOf(it){ const m=String(it.fab||'').match(/版型[：:]\s*([^\n]+)/); return m?m[1].trim():''; }
 function renderList(){
@@ -1673,7 +1675,7 @@ renderAll();
     var n=document.querySelectorAll('#list .item').length;
     var qv=q&&q.value.trim(); var l1=path.join(' › ')||'全部', l2=n+' 款色'+(qv?'・搜尋「'+qv+'」':'');
     sumEl.innerHTML='<b>'+esc(l1)+'</b>'+esc(l2);
-    if(crumb) crumb.textContent='目前：'+l1+'・共 '+n+' 款色'+(qv?'・搜尋「'+qv+'」':'');
+    if(crumb) crumb.innerHTML='<span class="crumb-l">目前篩選</span><b>'+esc(l1)+'</b>・共 '+n+' 款色'+(qv?'・搜尋「'+esc(qv)+'」':'');
     if(crumbX) crumbX.hidden=!filtered;
   }
   var tmr=null; function later(){ clearTimeout(tmr); tmr=setTimeout(update,40); }
