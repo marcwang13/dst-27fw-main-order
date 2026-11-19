@@ -615,7 +615,7 @@ function itemHTML(it){
   return `<article class="item ${tq?'has':''}" data-id="${esc(it.id)}">
     <div class="pic">${picHTML(it)}</div>
     <div class="info">
-      <div class="t1">${fitOf(it)?`<span class="fitB"><small>版型</small>${esc(fitOf(it))}</span>`:''}<h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
+      <div class="t1">${fitOf(it)?`<span class="fitB">${esc(fitOf(it))}</span>`:''}<h3>${esc(it.zh||it.en)}</h3><span class="en">${esc(it.en)}</span></div>
       <div class="meta"><span class="tag c">${esc(it.color)}${it.cc?' · '+esc(it.cc):''}</span>${it.cat?`<span class="tag">${esc(it.cat)}</span>`:''}${it.gen?`<span class="tag">${esc(it.gen)}</span>`:''}${it.icon?`<span class="tag">${esc(it.icon)}</span>`:''}${it.eb?`<span class="tag eb">${esc(it.eb===1?'Early Buy 已開訂':it.eb)}</span>`:''}</div>
       <div class="code">${esc(it.style||'')}${it.sku?' ／ '+esc(it.sku):''}${it.theme&&it.theme!=='CORE'?' ／ '+esc(it.theme)+(it.drop?' '+esc(it.drop):''):''}</div>
       ${it.ov?`<p class="ov">${esc(it.ov)}</p>`:''}
