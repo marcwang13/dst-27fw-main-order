@@ -268,7 +268,7 @@ Excel 訂單本「總表」有同樣的分頁、大類、系列（款色數、�
 
 **部署方式**：這個 repo 用 GH_TOKEN_WHL `git push` 會 403，所以改檔後放在 box 的 `/workspace/upl2/`、`/workspace/upl3/dst-27fw-main-order/`，由 Marc（或 Grok 的瀏覽器）在 GitHub 網頁「Add file → Upload files」上傳。已上線：ac245f3（pc.js 418 款色）；之後本機 commit fa2d052（pc.js 897）、c01980d 與本輪（拿掉 ETA、三排篩選、實體圖、待更新說明、韓幣 MSRP 欄）待上傳。
 
-**過往參考（2026-11-19，Claude）**：`ref.js`（`window.DSTC_REF`）由 `tools/build_ref.py` 從 emers-whl-system 的 `dealer/data/chain_*`、`internal/data/direct_chain_*` 算出。區域：直營依主檔 region；動力新竹巨城、中和環球＝北部，其餘門市＝中部；雷根大甲＝中部、其餘＝南部（天王暫列南部，待 Marc 確認）。雷根、動力目前沒有 25FW 整季資料，中部、南部畫面會掛提醒（文字在 meta.note，自動帶期間）。每月 POS 匯入後重跑：`python3 tools/build_ref.py --whl ../emers-whl-system --xlsx 對照表.xlsx`，再更新 index.html 的 `ref.js?v=`。
+**過往參考（2026-11-19，Claude）**：`ref.js`（`window.DSTC_REF`）由 `tools/build_ref.py` 從 emers-whl-system 的 `dealer/data/chain_*`、`internal/data/direct_chain_*` 算出。區域：直營依主檔 region；動力新竹巨城、中和環球＝北部，其餘門市＝中部；雷根大甲＝中部、其餘＝南部（天王暫列南部，待 Marc 確認）。雷根、動力目前沒有 25FW 整季資料，中部、南部畫面不顯示資料期間提醒（Marc 11/19 要求拿掉），ref.js 也不放體系名稱與期間。每月 POS 匯入後重跑：`python3 tools/build_ref.py --whl ../emers-whl-system --xlsx 對照表.xlsx`，再更新 index.html 的 `ref.js?v=`。
 
 ### 入口網站串接（規劃中）
 Marc 要把四套系統（含後台、管理頁）串進另一個入口網站。可行做法：
@@ -305,6 +305,7 @@ Marc 要把四套系統（含後台、管理頁）串進另一個入口網站。
 
 | 日期 | AI | 系統 | 內容 | commit |
 |---|---|---|---|---|
+| 2026-11-19 | Claude | DSTC | 過往參考拿掉中部／南部「資料期間較短」提醒，ref.js 不再放體系名稱與期間 | （本次） |
 | 2026-11-19 | Claude | DSTC | 商品卡加「過往參考」：27FW 每款自動對照 25FW／26FW 舊款（同款延續／同系列同品類／同品類同價格帶／無對照），北部／中部／南部／綜合切換，顯示店均月銷、售罄率、全價銷售比、參考店數、尺寸分布、熱賣色（直營＋雷根＋動力，只給區域合計，不放店名與金額，排除 OUTLET／特賣／倉庫）。列表加「過往熱賣優先」排序、卡片加「去年熱賣」「新款無對照」標籤。資料由 `tools/build_ref.py --whl ../emers-whl-system` 產生 `ref.js`；人工改對照填 `tools/ref_override.json`。只同步這份文件，其他三個 repo 的副本待同步 | （本次） |
 | 2026-11-02 | Grok | DST | 訂單彙整加下單分析：依大類（上衣／外套／背心／長褲）、分頁、系列（產品線｜主題）、經銷商統計款色數／尺寸數／件數／金額與佔比，可切換單一經銷商，展開訂單看該單。作廢排除，對不到商品標「找不到商品」。Excel 訂單本總表用公式同步。Apps Script 不用重新部署 | （本次） |
 | 2026-11-02 | Grok | SDR | 訂單彙整加下單分析（範本，已併入 main）：依大類（服裝／配件／鞋款）、分頁、系列、經銷商。Excel 總表用公式 | fe901f0 |

@@ -595,7 +595,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
 <script src="data.js?v=20261118c"></script>
 <script src="imgs.js?v=20261118e"></script>
 <script src="pc.js?v=20261118d"></script>
-<script src="ref.js?v=20261119r"></script>
+<script src="ref.js?v=20261119s"></script>
 <script>
 (function(){
 const ITEMS = window.SDR_ITEMS || [];
@@ -835,7 +835,7 @@ function refHTML(it){
   const sum=A?`綜合 售罄 ${A.st==null?'–':A.st+'%'}・店均月銷 ${A.m} 件`:'舊款銷量太少';
   let body='';
   if(open){
-    const d=r.R[refReg], note=(REF.meta.note||{})[refReg];
+    const d=r.R[refReg];
     const tabs=REF_REG.map(([k,l])=>`<button type="button" data-refreg="${k}" aria-pressed="${k===refReg}">${l}</button>`).join('');
     const refs=r.r.map(x=>`<li><span>${esc(x[0])}</span>${esc(x[1])} <small>${esc(x[2])}</small></li>`).join('');
     let main='<p class="ref-empty">這個區域的舊款銷售太少，沒有參考數字。</p>';
@@ -847,7 +847,7 @@ function refHTML(it){
       const col=d.c?`<div><h5>熱賣色</h5><div class="ref-c">${d.c.map(([c,p])=>`<div><span>${esc(c)}</span><i><b style="width:${p}%"></b></i><em>${p}%</em></div>`).join('')}</div></div>`:'';
       main=`<div class="ref-m">${m}</div>${(sz||col)?`<div class="ref-g">${sz||'<div></div>'}${col}</div>`:''}`;
     }
-    body=`<div class="ref-b"><div class="ref-tabs" role="group" aria-label="區域">${tabs}</div>${note?`<p class="ref-note">${esc(note)}</p>`:''}<ul class="ref-l">${refs}</ul>${main}</div>`;
+    body=`<div class="ref-b"><div class="ref-tabs" role="group" aria-label="區域">${tabs}</div><ul class="ref-l">${refs}</ul>${main}</div>`;
   }
   return `<div class="ref${open?' on':''}"><button type="button" class="ref-hd" data-ref aria-expanded="${open}"><span class="ref-h">過往參考</span><span class="ref-tier t-${esc(r.t)}">${REF_T[r.t]||esc(r.t)}</span><span class="ref-s">${sum}</span><i class="ar" aria-hidden="true"></i></button>${body}</div>`;
 }

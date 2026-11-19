@@ -312,9 +312,10 @@ def main():
         },
         'hotCut': cut,
     }
+    pub = {'built': meta['built'], 'hotCut': cut}  # 公開檔不放體系名稱、期間與提醒文字
     with open(os.path.join(a.repo, 'ref.js'), 'w', encoding='utf-8') as f:
         f.write('// 過往銷售參考（tools/build_ref.py 產生，勿手改）。區域合計，不含店名與金額。\n')
-        f.write('window.DSTC_REF=' + json.dumps({'meta': meta, 's': out}, ensure_ascii=False, separators=(',', ':')) + ';\n')
+        f.write('window.DSTC_REF=' + json.dumps({'meta': pub, 's': out}, ensure_ascii=False, separators=(',', ':')) + ';\n')
     cnt = collections.Counter(v['t'] for v in out.values())
     print('對照結果', dict(cnt), '熱賣', sum(v['hot'] for v in out.values()), '門檻', cut)
 
