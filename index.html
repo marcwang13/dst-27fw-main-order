@@ -488,6 +488,14 @@ tfoot td{font-weight:700;background:var(--sunk)}
   .shell .xlbar{flex-direction:column;align-items:stretch;padding-bottom:6px}.shell .xlbar .btn{width:100%}
   .shell .dnote{margin-top:4px}
 }
+
+:root{--heat:#0b57c2;--btn-pri:#0b57c2;--btn-sec-bg:#eef4fd;--btn-sec-bd:#0b57c2;--btn-sec-fg:#0b57c2}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--heat:#3f7fd9;--btn-pri:#1f5bb5;--btn-sec-bg:#16294a;--btn-sec-bd:#3f7fd9;--btn-sec-fg:#cfe0fb}}
+:root[data-theme="dark"]{--heat:#3f7fd9;--btn-pri:#1f5bb5;--btn-sec-bg:#16294a;--btn-sec-bd:#3f7fd9;--btn-sec-fg:#cfe0fb}
+.more{background:var(--btn-pri);border:1.5px solid var(--btn-pri);font-weight:600;padding:5px 14px}
+.more.ref-btn{background:var(--btn-sec-bg);color:var(--btn-sec-fg);border:1.5px solid var(--btn-sec-bd)}.more.ref-btn::after{border-color:var(--btn-sec-fg)}
+.sz .pct.heat,.mx thead th .pct.heat{font-weight:600}
+.pct.heat b{font-weight:600}
 </style>
 </head>
 <body>
@@ -783,7 +791,7 @@ const REF_REG=[['n','北部'],['c','中部'],['s','南部'],['a','綜合']];
 let refReg='a'; try{ refReg=sessionStorage.getItem('dstc-refreg')||'a'; }catch(e){}
 const refOpen=new Set();
 function shareFor(it){ if(window.DST_SHARE_ON){ const k=SHARE_CAT[it.cat]; if(k) return {k,m:SHARE[k]}; } return refShare(it); }
-function pctHTML(sh,z){ if(!sh) return ''; const p=sh.m[z]; if(p==null) return '<span class="pct na">–</span>'; const mx=Math.max(...Object.values(sh.m)); return `<span class="pct${p===mx&&p>0?' top':''}" title="${sh.ref?'':'上季 '}${esc(sh.k)} 尺寸銷售佔比"><i style="width:${Math.round(p*100)}%"></i><b>${Math.round(p*100)}%</b></span>`; }
+function pctHTML(sh,z){ if(!sh) return ''; const p=sh.m[z]; if(p==null) return '<span class="pct na">–</span>'; const mx=Math.max(...Object.values(sh.m))||1, t=p/mx, mixv=Math.round(12+76*t), fg=t>=.55?'#fff':t>=.25?'var(--fg)':'var(--muted)'; return `<span class="pct heat" style="background:color-mix(in srgb,var(--heat) ${mixv}%,var(--sunk));color:${fg}" title="${sh.ref?'':'上季 '}${esc(sh.k)} 尺寸銷售佔比"><b>${Math.round(p*100)}%</b></span>`; }
 function refRegName(){ return (REF_REG.find(x=>x[0]===refReg)||[,'綜合'])[1]; }
 function refD(it){ const r=window.DSTC_REF&&DSTC_REF.s[it.style]; return r&&r.t!=='none'?r.R[refReg]:null; }
 function refShare(it){ const d=refD(it); if(!d||!d.sz) return null; const m={}; for(const z in d.sz) m[z]=d.sz[z]/100; return {k:'過往'+refRegName(),m,ref:1}; }
