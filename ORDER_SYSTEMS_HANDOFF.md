@@ -305,6 +305,7 @@ Marc 要把四套系統（含後台、管理頁）串進另一個入口網站。
 
 | 日期 | AI | 系統 | 內容 | commit |
 |---|---|---|---|---|
+| 2026-11-19 | Claude | DSTC | 同款多色列款式圖改固定 160px 正方形、上下置中（不再跟列高變大變小） | （本次） |
 | 2026-11-19 | Claude | DSTC | 同款多色列的款式圖改成跟該列高度一樣（正方形、最小 120px），跟尺寸段對齊 | （本次） |
 | 2026-11-19 | Claude | DSTC | 卡片標籤「Early Buy 已開訂」改顯示「Early Buy 已訂購款」（`ebLabel`，data.js 與 Excel 不動） | （本次） |
 | 2026-11-19 | Claude | DSTC | 網頁分頁順序 NEO-ARCHIVE 移到 ACC 配件之後、鞋類之前（新增 `TAB_ORDER`，預設分頁改 TRAINING）；`SHEETS` 不動，Excel 訂單本與交單彙整順序不變 | （本次） |
