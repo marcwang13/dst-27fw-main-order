@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}
+<style>:root{color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}
 /* rail: mobile fold bar (all order sites share this block) */
 .rail-bar{display:none}
 .rail-body{display:flex;flex-direction:column;gap:8px}
@@ -1352,6 +1352,12 @@ function fullSizes(it){ const all=RUNS[it.run]||SZ_ORDER; const extra=it.sizes.f
 function sheetSizes(sh){ const u=new Set(); ITEMS.filter(i=>i.sheet===sh).forEach(i=>(RUNS[i.run]||i.sizes).forEach(z=>u.add(z))); if(u.size) return SZ_ORDER.filter(z=>u.has(z)).concat([...u].filter(z=>!SZ_ORDER.includes(z))); const used=new Set(); ITEMS.filter(i=>i.sheet===sh).forEach(i=>i.sizes.forEach(z=>used.add(z))); const base=(SIZE_COLS[sh]||[]).filter(z=>used.has(z)); used.forEach(z=>{ if(!base.includes(z)) base.push(z); }); return base; }
 let ejP=null;
 function loadExcelJS(){ if(window.ExcelJS) return Promise.resolve(window.ExcelJS); if(!ejP) ejP=new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'; s.onload=()=>res(window.ExcelJS); s.onerror=()=>{ ejP=null; rej(new Error('Excel 元件載入失敗，請檢查網路後再試一次。')); }; document.head.appendChild(s); }); return ejP; }
+const XIMG=new Map();
+function shrinkImg(d,maxSide){ return new Promise(res=>{ const im=new Image(); im.onload=()=>{ try{ const W=im.naturalWidth||1,H=im.naturalHeight||1, s=Math.min(1,maxSide/Math.max(W,H)), w=Math.max(1,Math.round(W*s)), h=Math.max(1,Math.round(H*s)); const c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,w,h); g.drawImage(im,0,0,w,h); res({d:c.toDataURL('image/jpeg',.78),w,h}); }catch(e){ res({d,w:1,h:1}); } }; im.onerror=()=>res(null); im.src=d; }); }
+// 訂單本用的圖：縮到約 2 倍格子大小（原本整張原圖塞進去，檔案 28MB、手機產檔超過 30 秒就被判定沒回應）
+function xlImg(it,h){ const key=h+'|'+((h===it.doll&&PC[it.id])?it.id:''); if(!XIMG.has(key)) XIMG.set(key,(async()=>{ const pi=await pcImg(it,h); if(!pi) return null; const r=await shrinkImg(pi.d,320); return r?{k:pi.k,...r}:null; })()); return XIMG.get(key); }
+async function prefetchXlImgs(its,onProg){ const jobs=[]; for(const it of its) for(const h of [it.doll,(it.photos||[])[0]]) if(h&&IMG[h]) jobs.push([it,h]); let i=0,done=0; const N=Math.max(1,jobs.length); const worker=async()=>{ while(i<jobs.length){ const [it,h]=jobs[i++]; try{ await xlImg(it,h); }catch(e){} done++; if(onProg&&done%20===0) onProg(Math.round(done/N*100)); } }; await Promise.all(Array.from({length:6},worker)); }
+const xlProg=p=>document.querySelectorAll('#x-export:disabled,#b-xls:disabled,#b-submit:disabled').forEach(b=>{ b.textContent='產生中… '+p+'%'; });
 const imgDims=src=>new Promise(r=>{ const im=new Image(); im.onload=()=>r([im.naturalWidth,im.naturalHeight]); im.onerror=()=>r([1,1]); im.src=src; });
 const colL=n=>{ let s=''; while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); } return s; };
 const FIXED=['KEY','No.','款式圖','實體圖','主題','Drop','品類','性別','款號','中文品名','英文品名','顏色','色號','色碼 SKU','Icon','布料','系列／尺寸','商品概述','商品細節','材質與科技','備註','韓幣 MSRP(₩)'];
@@ -1364,6 +1370,7 @@ async function buildBook(qty, meta){
   const sum=wb.addWorksheet('總表',{views:[{showGridLines:false}]});
   const totals={};
   const imgCache={};
+  if(meta.images!==false) await prefetchXlImgs(ITEMS,xlProg);
   for(const sh of SHEETS){
     const its=ITEMS.filter(i=>i.sheet===sh); if(!its.length) continue;
     const sizes=sheetSizes(sh);
@@ -1394,8 +1401,8 @@ async function buildBook(qty, meta){
       row.getCell(cSer).value=anSeries(it);
       row.getCell(cSzN).value={formula:`COUNTIF(${colL(cS0)}${r}:${colL(cS1)}${r},">0")`};
       row.height=120;
-      if(meta.images!==false){ for(const [col,h] of [[2,it.doll],[3,(it.photos||[])[0]]]){ if(!h||!IMG[h]) continue; const pi=await pcImg(it,h); const ck=pi.k;
-        if(!imgCache[ck]) imgCache[ck]={id:wb.addImage({base64:pi.d,extension:'jpeg'}),dims:await imgDims(pi.d)};
+      if(meta.images!==false){ for(const [col,h] of [[2,it.doll],[3,(it.photos||[])[0]]]){ if(!h||!IMG[h]) continue; const pi=await xlImg(it,h); if(!pi) continue; const ck=pi.k;
+        if(!imgCache[ck]) imgCache[ck]={id:wb.addImage({base64:pi.d,extension:'jpeg'}),dims:[pi.w,pi.h]};
         const [w,hh]=imgCache[ck].dims; const BW=103, BH=160; const sc=Math.min((BW-8)/w,(BH-8)/hh); const W=Math.round(w*sc), H=Math.round(hh*sc);
         ws.addImage(imgCache[ck].id,{tl:{col:col+(BW-W)/2/BW,row:r-1+(BH-H)/2/BH},ext:{width:W,height:H},editAs:'oneCell'}); } }
       r++;
@@ -1618,7 +1625,7 @@ async function exportBook(qty, meta){
   const dl=await withTimeout(window.claude?.use ? claude.use('downloads') : Promise.resolve(null), 4000, null);
   if(!dl){ openCopyPanel(qty,meta); return false; }
   let buf;
-  try{ buf=await withTimeout((async()=>{ const wb=await buildBook(qty,meta); return await wb.xlsx.writeBuffer(); })(), 30000, null); }catch(e){ buf=null; }
+  try{ buf=await withTimeout((async()=>{ const wb=await buildBook(qty,meta); return await wb.xlsx.writeBuffer(); })(), 180000, null); }catch(e){ buf=null; }
   if(!buf){ openCopyPanel(qty,meta,true); return false; }
   const name=`DESCENTE_27Q3Q4_訂單本${meta._mode==='chain'?'_連鎖':''}_${(meta.store||'經銷商').replace(/[\\/:*?"<>|]/g,'')}_${meta.oid||new Date().toISOString().slice(0,10)}.xlsx`;
   try{ const r=await withTimeout(dl.save({filename:name,data:new Blob([buf])}), 12000, '__timeout'); if(r==='__timeout'){ openCopyPanel(qty,meta,true); return false; } return true; }
