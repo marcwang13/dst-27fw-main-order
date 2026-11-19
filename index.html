@@ -166,27 +166,29 @@ main{padding-block:12px}
 .fitB{display:inline-flex;align-items:baseline;gap:5px;align-self:center;background:var(--fg);color:var(--bg);border-radius:4px;padding:2px 9px;font-family:var(--f-body);font-size:14px;font-weight:700;line-height:1.35;letter-spacing:.02em}
 .fitB small{font-size:11px;font-weight:600;opacity:.75;letter-spacing:.04em}
 .sintro{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:var(--r);padding:16px 18px 14px;margin:0 0 20px}
-.sintro h2{margin:0 0 6px;font-family:var(--f-disp);font-weight:700;font-size:26px;letter-spacing:.05em;text-transform:uppercase}
+.sintro h2{margin:0 0 10px;font-family:var(--f-disp);font-weight:700;font-size:30px;letter-spacing:.05em;text-transform:uppercase}
 .sintro h2 span{font-family:var(--f-body);font-size:13px;font-weight:400;letter-spacing:0;color:var(--muted);text-transform:none;margin-left:10px}
-.sintro p{margin:0;font-size:14px;line-height:1.75}
-.skey{display:flex;gap:8px;align-items:baseline;margin-top:8px;font-size:13.5px;line-height:1.6}
-.skey b{flex:none;background:var(--brand);color:var(--brand-ink);border-radius:3px;padding:1px 8px;font-size:12px;font-weight:700;letter-spacing:.06em}
-.sthemes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-top:14px}
+.sintro p{margin:0;font-size:16.5px;line-height:1.85}
+.skey{display:flex;gap:10px;align-items:baseline;margin-top:12px;font-size:15.5px;line-height:1.7}
+.skey b{flex:none;background:var(--brand);color:var(--brand-ink);border-radius:3px;padding:1px 9px;font-size:13px;font-weight:700;letter-spacing:.06em}
+.sthemes{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;margin-top:18px}
 .sintro .sthemes:first-child{margin-top:0}
-.sth{background:var(--sunk);border-radius:4px;padding:10px 12px}
-.sth h3{margin:0 0 4px;font-family:var(--f-disp);font-weight:700;font-size:18px;letter-spacing:.05em;text-transform:uppercase}
-.sth h3 span{font-family:var(--f-body);font-size:12px;font-weight:400;letter-spacing:0;color:var(--muted);text-transform:none;margin-left:8px}
-.sth p{font-size:13px;line-height:1.7}
-.sth .skey{font-size:12.5px;margin-top:6px}
-.sintro-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,46%);gap:20px;align-items:start}
+.sth{background:var(--sunk);border-radius:4px;padding:14px 16px}
+.sth h3{margin:0 0 6px;font-family:var(--f-disp);font-weight:700;font-size:22px;letter-spacing:.05em;text-transform:uppercase}
+.sth h3 span{font-family:var(--f-body);font-size:13px;font-weight:400;letter-spacing:0;color:var(--muted);text-transform:none;margin-left:8px}
+.sth p{font-size:15px;line-height:1.8}
+.sth .skey{font-size:14.5px;margin-top:8px}
+.sintro-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,42%);gap:24px;align-items:start}
 .sintro-top.nohero{display:block}
 .shero{display:block;width:100%;padding:0;border:1px solid var(--line);border-radius:4px;background:#fff;cursor:zoom-in;overflow:hidden}
 .shero img{display:block;width:100%;height:auto}
 .sintro-l .sthemes{grid-template-columns:1fr;margin-top:12px}
 .sthm{display:flex;gap:6px;margin-top:8px}
+.sthm.wide{margin-top:16px}
+.sthm.wide .sthi{max-width:900px}
 .sthi{flex:1;min-width:0;padding:0;border:1px solid var(--line);border-radius:3px;background:#fff;cursor:zoom-in;overflow:hidden}
 .sthi img{display:block;width:100%;height:auto}
-.sthcap{font-size:11.5px;color:var(--muted);margin-top:3px}
+.sthcap{font-size:12.5px;color:var(--muted);margin-top:3px}
 .sxz{max-width:min(96vw,1500px);max-height:94vh;background:#fff;padding:0}
 .sxz img{display:block;max-width:100%;max-height:calc(94vh - 44px);width:auto;height:auto;margin:0 auto}
 .sxz .zm-bar{padding:8px 14px;font-size:13px}
@@ -685,22 +687,23 @@ function seriesIntro(){
   const th=new Map();
   for(const it of ITEMS){ if(it.sheet!==S.sheet||!it.theme||it.theme==='CORE') continue; if(!th.has(it.theme)) th.set(it.theme,{n:0,tech:it.tech||''}); }
   its.forEach(it=>{ const o=th.get(it.theme); if(o) o.n++; });
-  const si=SHEET_INTRO[S.sheet];
-  const blocks=[...th.entries()].filter(([k,o])=>o.n).map(([k,o])=>{
+  const ents=[...th.entries()].filter(([k,o])=>o.n).map(([k,o])=>{
     let body=o.tech.replace(/^[^：]*：/,''), key=THEME_KEY[S.sheet+'|'+k]||'';
     const m=body.match(/主打：(.*)$/); if(m){ key=key||m[1]; body=body.slice(0,m.index).trim(); }
     const imgs=(SERIES_IMG[S.sheet+'|'+k]||[]).map(n=>'s'+String(n).padStart(2,'0'));
-    const thumbs=imgs.length?`<div class="sthm">${imgs.map((n,i)=>`<button class="sthi" data-sx="${n}" data-cap="${esc(S.sheet+'・'+k+' 款式總覽'+(imgs.length>1?'（'+(i+1)+'/'+imgs.length+'）':''))}"><img src="${sxName(n)}" alt="${esc(k)} 款式總覽" loading="lazy" decoding="async"></button>`).join('')}</div><div class="sthcap">款式總覽，點圖放大</div>`:'';
-    return `<div class="sth"><h3>${esc(k)}<span>${o.n} 款色</span></h3><p>${esc(body)}</p>${key?`<div class="skey"><b>主打</b><span>${esc(key)}</span></div>`:''}${thumbs}</div>`;
+    return {k,n:o.n,body,key,imgs};
   });
-  if(!si&&!blocks.length) return '';
+  let si=SHEET_INTRO[S.sheet];
   const hero=SERIES_HERO[S.sheet];
+  const thumbs=(e,wide)=>e.imgs.length?`<div class="sthm${wide?' wide':''}">${e.imgs.map((n,i)=>`<button class="sthi" data-sx="${n}" data-cap="${esc(S.sheet+'・'+e.k+' 款式總覽'+(e.imgs.length>1?'（'+(i+1)+'/'+e.imgs.length+'）':''))}"><img src="${sxName(n)}" alt="${esc(e.k)} 款式總覽" loading="lazy" decoding="async"></button>`).join('')}</div><div class="sthcap">款式總覽，點圖放大</div>`:'';
+  const keyH=k=>k?`<div class="skey"><b>主打</b><span>${esc(k)}</span></div>`:'';
+  let cards=ents, wideImgs='';
+  if(!si && ents.length===1){ const e=ents[0]; si={t:e.body,k:e.key}; wideImgs=thumbs(e,true); cards=[]; }
   const heroH=hero?`<button class="shero" data-sx="${hero}" data-cap="${esc(S.sheet+' 系列形象圖')}"><img src="${sxName(hero)}" alt="${esc(S.sheet)} 系列形象圖" loading="lazy" decoding="async"></button>`:'';
-  const head=`<h2>${esc(S.sheet)}<span>系列介紹（原廠 27Q3Q4 Convention Sheet）</span></h2>${si?`<p>${esc(si.t)}</p>${si.k?`<div class="skey"><b>主打</b><span>${esc(si.k)}</span></div>`:''}`:''}`;
-  const grid=blocks.length?`<div class="sthemes">${blocks.join('')}</div>`:'';
-  if(hero&&!si) return `<section class="sintro"><div class="sintro-top"><div class="sintro-l">${head}${grid}</div>${heroH}</div></section>`;
-  if(hero) return `<section class="sintro"><div class="sintro-top"><div class="sintro-l">${head}</div>${heroH}</div>${grid}</section>`;
-  return `<section class="sintro">${head}${grid}</section>`;
+  const head=`<h2>${esc(S.sheet)}<span>系列介紹（原廠 27Q3Q4 Convention Sheet）</span></h2>${si?`<p>${esc(si.t)}</p>${keyH(si.k)}`:''}`;
+  const grid=cards.length?`<div class="sthemes">${cards.map(e=>`<div class="sth"><h3>${esc(e.k)}<span>${e.n} 款色</span></h3><p>${esc(e.body)}</p>${keyH(e.key)}${thumbs(e,false)}</div>`).join('')}</div>`:'';
+  const top=hero?`<div class="sintro-top"><div class="sintro-l">${head}</div>${heroH}</div>`:head;
+  return `<section class="sintro">${top}${wideImgs}${grid}</section>`;
 }
 function fitOf(it){ const m=String(it.fab||'').match(/版型[：:]\s*([^\n]+)/); return m?m[1].trim():''; }
 function renderList(){
