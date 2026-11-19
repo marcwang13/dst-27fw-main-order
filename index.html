@@ -178,6 +178,19 @@ main{padding-block:12px}
 .sth h3 span{font-family:var(--f-body);font-size:12px;font-weight:400;letter-spacing:0;color:var(--muted);text-transform:none;margin-left:8px}
 .sth p{font-size:13px;line-height:1.7}
 .sth .skey{font-size:12.5px;margin-top:6px}
+.sintro-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,46%);gap:20px;align-items:start}
+.sintro-top.nohero{display:block}
+.shero{display:block;width:100%;padding:0;border:1px solid var(--line);border-radius:4px;background:#fff;cursor:zoom-in;overflow:hidden}
+.shero img{display:block;width:100%;height:auto}
+.sintro-l .sthemes{grid-template-columns:1fr;margin-top:12px}
+.sthm{display:flex;gap:6px;margin-top:8px}
+.sthi{flex:1;min-width:0;padding:0;border:1px solid var(--line);border-radius:3px;background:#fff;cursor:zoom-in;overflow:hidden}
+.sthi img{display:block;width:100%;height:auto}
+.sthcap{font-size:11.5px;color:var(--muted);margin-top:3px}
+.sxz{max-width:min(96vw,1500px);max-height:94vh;background:#fff;padding:0}
+.sxz img{display:block;max-width:100%;max-height:calc(94vh - 44px);width:auto;height:auto;margin:0 auto}
+.sxz .zm-bar{padding:8px 14px;font-size:13px}
+@media (max-width:760px){.sintro-top{grid-template-columns:1fr}}
 .code{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .ov{font-size:13px;color:var(--muted);margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .note{font-size:12px;color:var(--warn)}
@@ -652,6 +665,20 @@ const THEME_KEY={
  'PREMIUM TECH ESSENTIAL|D-ESSENTIAL':'針織套裝（FTP／HT／HD／KP）、經典 Puffer 羽絨（DJ／DV）、無內裡梭織套裝（WB／PT／HP）',
  'PREMIUM TECH ESSENTIAL|TOUGH':'招牌正規版 T 恤（TS／TL）、機能 POLO（PS／PL）、寬版／女款短版 T 恤（TS）'
 };
+const SERIES_HERO={'NEO-ARCHIVE':'h06','TRAINING':'h09','RUNNING':'h16','INSPIRED':'h22','SNOW':'h26','WOMENS SNOW':'h54','PREMIUM TECH ESSENTIAL':'h33','WOMENS':'h47'};
+const SERIES_IMG={
+ 'NEO-ARCHIVE|GORE-TEX':[7],
+ 'TRAINING|COOLING':[10],'TRAINING|SORONA':[10],'TRAINING|F-360':[11],'TRAINING|GIANT':[12],
+ 'RUNNING|HYPER-ENGINEERED RUN':[17],'RUNNING|DAWN CHASER V2':[18],'RUNNING|DAILY RUN':[19],'RUNNING|DELTA PRO':[19],
+ 'INSPIRED|WELSH TRIATHLON':[23],
+ 'SNOW|DE:LIGHT':[27],'SNOW|POLARTEC POWER DRY':[27],'SNOW|POLARTEC MICRO FLEECE':[27],'SNOW|SWISS SKI':[28],'SNOW|CANON':[29],'SNOW|SKI ESSENTIAL':[29],
+ 'WOMENS SNOW|NEW CONTOUR':[55],
+ 'PREMIUM TECH ESSENTIAL|D-TECH':[34,43,44],'PREMIUM TECH ESSENTIAL|D-ESSENTIAL':[35,36,37],'PREMIUM TECH ESSENTIAL|TOUGH':[39],
+ 'WOMENS|GYM FIT':[48],'WOMENS|ALL DAY FIT':[49,50],'WOMENS|RUN FIT':[51],
+ 'ACC 配件|PREMIUM TECH ESSENTIAL':[40,41,42,45],'ACC 配件|WOMENS':[52],'ACC 配件|RUNNING':[20],'ACC 配件|TRAINING':[14],'ACC 配件|INSPIRED (WELSH)':[24],'ACC 配件|SNOW (SWISS SKI)':[31],"ACC 配件|W's SNOW":[56],'ACC 配件|SNOW (PERTEX)':[30]
+};
+const SXV='20261119a';
+const sxName=n=>'series/'+n+'.jpg?v='+SXV;
 function seriesIntro(){
   if(S.only) return '';
   const its=filtered(); if(!its.length) return '';
@@ -662,10 +689,18 @@ function seriesIntro(){
   const blocks=[...th.entries()].filter(([k,o])=>o.n).map(([k,o])=>{
     let body=o.tech.replace(/^[^：]*：/,''), key=THEME_KEY[S.sheet+'|'+k]||'';
     const m=body.match(/主打：(.*)$/); if(m){ key=key||m[1]; body=body.slice(0,m.index).trim(); }
-    return `<div class="sth"><h3>${esc(k)}<span>${o.n} 款色</span></h3><p>${esc(body)}</p>${key?`<div class="skey"><b>主打</b><span>${esc(key)}</span></div>`:''}</div>`;
+    const imgs=(SERIES_IMG[S.sheet+'|'+k]||[]).map(n=>'s'+String(n).padStart(2,'0'));
+    const thumbs=imgs.length?`<div class="sthm">${imgs.map((n,i)=>`<button class="sthi" data-sx="${n}" data-cap="${esc(S.sheet+'・'+k+' 款式總覽'+(imgs.length>1?'（'+(i+1)+'/'+imgs.length+'）':''))}"><img src="${sxName(n)}" alt="${esc(k)} 款式總覽" loading="lazy" decoding="async"></button>`).join('')}</div><div class="sthcap">款式總覽，點圖放大</div>`:'';
+    return `<div class="sth"><h3>${esc(k)}<span>${o.n} 款色</span></h3><p>${esc(body)}</p>${key?`<div class="skey"><b>主打</b><span>${esc(key)}</span></div>`:''}${thumbs}</div>`;
   });
   if(!si&&!blocks.length) return '';
-  return `<section class="sintro"><h2>${esc(S.sheet)}<span>系列介紹（原廠 27Q3Q4 Convention Sheet）</span></h2>${si?`<p>${esc(si.t)}</p>${si.k?`<div class="skey"><b>主打</b><span>${esc(si.k)}</span></div>`:''}`:''}${blocks.length?`<div class="sthemes">${blocks.join('')}</div>`:''}</section>`;
+  const hero=SERIES_HERO[S.sheet];
+  const heroH=hero?`<button class="shero" data-sx="${hero}" data-cap="${esc(S.sheet+' 系列形象圖')}"><img src="${sxName(hero)}" alt="${esc(S.sheet)} 系列形象圖" loading="lazy" decoding="async"></button>`:'';
+  const head=`<h2>${esc(S.sheet)}<span>系列介紹（原廠 27Q3Q4 Convention Sheet）</span></h2>${si?`<p>${esc(si.t)}</p>${si.k?`<div class="skey"><b>主打</b><span>${esc(si.k)}</span></div>`:''}`:''}`;
+  const grid=blocks.length?`<div class="sthemes">${blocks.join('')}</div>`:'';
+  if(hero&&!si) return `<section class="sintro"><div class="sintro-top"><div class="sintro-l">${head}${grid}</div>${heroH}</div></section>`;
+  if(hero) return `<section class="sintro"><div class="sintro-top"><div class="sintro-l">${head}</div>${heroH}</div>${grid}</section>`;
+  return `<section class="sintro">${head}${grid}</section>`;
 }
 function fitOf(it){ const m=String(it.fab||'').match(/版型[：:]\s*([^\n]+)/); return m?m[1].trim():''; }
 function renderList(){
@@ -700,6 +735,8 @@ $('#list').addEventListener('input',e=>{
 });
 function renderTabsDots(){ const t=totals(); document.querySelectorAll('#tabs .tab').forEach(b=>{ const d=t.bySheet[b.dataset.s]; let dot=b.querySelector('.dot'); if(d){ if(!dot){ dot=document.createElement('span'); dot.className='dot'; b.appendChild(dot);} dot.textContent=d; } else if(dot) dot.remove(); }); }
 $('#list').addEventListener('click',e=>{
+  const sx=e.target.closest('[data-sx]');
+  if(sx){ $('#overlay').innerHTML=`<div class="zm-scrim" data-close><div class="zm sxz" role="dialog" aria-label="系列圖片"><button class="zm-x" data-close aria-label="關閉">×</button><img src="${sxName(sx.dataset.sx)}" alt=""><div class="zm-bar"><span class="nm">${esc(sx.dataset.cap||'')}</span></div></div></div>`; return; }
   const card=e.target.closest('.item'); if(!card) return; const id=card.dataset.id;
   if(e.target.closest('[data-more]')){ S.open.has(id)?S.open.delete(id):S.open.add(id); card.outerHTML=itemHTML(BY[id]); return; }
   const p=e.target.closest('[data-pic]'); if(p){ openLB(id,p.dataset.pic,e); return; }
