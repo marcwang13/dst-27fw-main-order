@@ -1,0 +1,24 @@
+# DSTC 27FW 實體圖匯入紀錄（2026-11-20，Grok Bot）
+
+來源：Marc 提供的 4 本 Google 相簿（韓國門市實拍，拍照順序＝標牌（品號）→ 正面 → 反面）
+- a1 https://photos.app.goo.gl/2ANoAdSwyPz6MDzWA （133 張）
+- a2 https://photos.app.goo.gl/tctTJ5EZFnSq3ETW9 （105 張）
+- a3 https://photos.app.goo.gl/UbtFbirPW4BxAEdj7 （176 張）
+- a4 https://photos.app.goo.gl/KuDDkQdepXbmyNhC9 （236 張）
+
+## 流程
+1. 相簿頁解析出每張照片的 URL，用 `=d` 下載原檔（全部 3472×4624 或 4624×3472，手機原圖）。
+2. 標牌照：RapidOCR 讀品號，再對 data.js 款號（0/O 互換容錯）；人工看接觸表分組（標牌照＋後面的正面／反面）。共 218 組。
+3. 每組人工對照：實物照 vs `big/` 款式圖＋`pc.js` 單色裁切 vs 色名，判定色號，結果見 `groups_decisions.txt`。
+   - 單色：第 1 張＝實體正面、第 2 張＝實體反面。
+   - 同框多色（同一張照片裡有該款好幾個顏色）：照片掛到照片中出現、且能對到系統色號的每個款色，說明寫「同框多色：A/B」。
+   - `A=031;B=032`：兩張照片各是不同顏色，分別掛。
+   - 品號、品項或顏色任一不確定 → `?` 待確認，不上線（見 `pending.csv`）。
+4. 畫質：每張正反面在 2000px 上線尺寸算 Laplacian variance（整張與最清楚 5 格），低分的逐張 100% 放大目視；失焦／晃動的不上線，列入 `pending.csv`「畫質待確認」。沒有過曝（≥250 亮度 >5% 的 0 張）。
+5. 上線檔：EXIF 轉正 → Lanczos 縮到長邊 2000px（不放大）→ JPEG q90（11 張 q90 超過 1MB 的改 q87–89 以符合上傳限制）→ `big/rp_<相簿>_<序號>.jpg`。
+6. `rp.js`：`DSTC_RP`（圖檔鍵→[寬,高]）、`DSTC_RPI`（款色 id→[[圖檔鍵,說明]]）。index.html 載入後合併進 `it.photos`／`it.phcap`。
+
+## 檔案
+- `match.csv`：每個上線款色與照片（含原圖／上線解析度、清晰度分數）
+- `pending.csv`：比對待確認 29 組、畫質待確認 4 張
+- `groups_decisions.txt`：218 組逐組判定
