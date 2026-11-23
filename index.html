@@ -26,7 +26,7 @@
 .lv{display:flex;align-items:center;gap:12px;min-width:0}
 .lv+.lv{border-top:1px solid var(--line);padding-top:8px}
 .lv-l{flex:none;width:32px;font-size:11px;letter-spacing:.08em;color:var(--muted)}
-.lv-sr{align-items:flex-start}.lv-sr .lv-l{padding-top:6px}
+.lv-sr{align-items:flex-start}.lv-sr .lv-l{padding-top:9px}
 .lv-rg .lv-l{width:auto!important;white-space:nowrap}
 .seg{display:inline-flex;max-width:100%;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
 .seg .sg{border:0;border-right:1px solid var(--line);background:transparent;padding:5px 14px;font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:baseline;white-space:nowrap}
@@ -43,8 +43,9 @@
 .ct[aria-pressed="true"]{color:var(--fg);border-bottom-color:var(--acc)}
 .ct[aria-pressed="true"] svg{color:var(--acc)}
 .ct[disabled]{opacity:.4;cursor:default}
-#tabs.tabs{flex-wrap:wrap;overflow:visible;gap:6px;min-width:0}
-#tabs .tab{border-radius:6px;border-width:1px;padding:4px 11px;font-size:12px;font-weight:600;letter-spacing:.04em}
+#tabs.tabs{flex-wrap:wrap;overflow:visible;gap:8px;min-width:0}
+#tabs .tab{border-radius:6px;border-width:1px;padding:7px 14px;font-size:14px;font-weight:600;letter-spacing:.04em}
+#tabs .tab small{font-size:12px}
 #tabs .tab[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
 .subs{display:flex;flex-wrap:wrap;gap:2px 18px;min-width:0}
 .st{border:0;border-bottom:2px solid transparent;background:transparent;padding:3px 0;font-size:12.5px;color:var(--muted);display:inline-flex;gap:5px;align-items:center}
@@ -357,6 +358,20 @@ main{padding-block:12px}
 .panel>*{flex:none}
 .panel h2{margin:0;font-family:var(--f-disp);font-size:24px;letter-spacing:.05em;text-transform:uppercase}
 .phead{display:flex;align-items:center;gap:10px}
+.story h3{margin:18px 0 6px;font-family:var(--f-disp);font-size:18px;letter-spacing:.05em;font-weight:700}
+.story .lead{margin:0;font-size:14px;line-height:1.7}
+.story .snote{margin:0 0 8px;font-size:12px;color:var(--muted)}
+.story .tbl{overflow-x:auto}
+.story table{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--surface)}
+.story th,.story td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.story th{background:var(--sunk);font-weight:600;white-space:nowrap}
+.story td:first-child{white-space:nowrap}
+.story .scards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.story .scard{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:10px 12px}
+.story .scard h4{margin:0 0 4px;font-size:13px;color:var(--acc)}
+.story .scard ul{margin:0;padding-left:16px;font-size:12.5px;line-height:1.6}
+.story .sfoot{margin:16px 0 0;font-size:12px;color:var(--muted)}
+@media (max-width:640px){.story .scards{grid-template-columns:1fr}}
 .phead .x{margin-left:auto}
 .tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
 table{border-collapse:collapse;width:100%;font-size:13px}
@@ -490,7 +505,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
   .shell .ct[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-soft)}
   .shell .seg .sg small{display:none}
   .shell .lv+.lv{padding-top:10px}
-  .shell #tabs .tab{padding:3px 8px;font-size:11px}
+  .shell #tabs .tab{padding:6px 11px;font-size:13px}
   .shell .row2{flex-direction:column;align-items:stretch}.shell .row2 .search{width:100%}
   .shell .crumb{font-size:12px;padding:6px 10px}.shell .crumb .crumb-l{display:none}
   .shell .sbtools{border-top:1px solid var(--line);padding-top:10px;margin-top:2px}
@@ -517,6 +532,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
       <button id="v-order" aria-pressed="true">下單</button>
       <button id="v-mine" aria-pressed="false">我的訂單</button>
       <button id="v-admin" aria-pressed="false" hidden>訂單彙整</button>
+      <button id="v-story" type="button">季節商品資訊</button>
     </nav>
   </div>
 </header>
@@ -675,6 +691,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
 <script src="pc.js?v=20261118d"></script>
 <script src="rp.js?v=20261123b"></script>
 <script src="ref.js?v=20261119u"></script>
+<script src="story.js?v=20261123a"></script>
 <script>
 (function(){
 const ITEMS = window.SDR_ITEMS || [];
@@ -720,7 +737,7 @@ async function loadImgData(h){ try{ const r=await fetch(big(h)); if(r.ok){ const
 async function pcImg(it,h){ const d=await loadImgData(h); if(!d) return null; if(h===it.doll&&PC[it.id]){ const u=await pcCrop(d,PC[it.id]); if(u) return {k:h+'|'+it.id,d:u.split(',')[1]?u:d}; } return {k:h,d}; }
 const SHEETS = ['NEO-ARCHIVE','TRAINING','RUNNING','INSPIRED','SNOW','WOMENS SNOW','PREMIUM TECH ESSENTIAL','WOMENS','ACC 配件','FTW RUNNING','FTW MOVEWEAR'];
 // 網頁分頁顯示順序（只影響畫面；Excel 訂單本與交單彙整仍用 SHEETS）
-const TAB_ORDER = ['TRAINING','RUNNING','INSPIRED','SNOW','WOMENS SNOW','PREMIUM TECH ESSENTIAL','WOMENS','ACC 配件','NEO-ARCHIVE','FTW RUNNING','FTW MOVEWEAR'];
+const TAB_ORDER = ['RUNNING','INSPIRED','TRAINING','SNOW','WOMENS SNOW','PREMIUM TECH ESSENTIAL','WOMENS','ACC 配件','NEO-ARCHIVE','FTW RUNNING','FTW MOVEWEAR'];
 const MONTH_ORDER = ['5月','6月','7月','8月','9月','10月','11月','12月'];
 const CG_ORDER=['上身','下身','配件','鞋類']; const GEN_ORDER=['男','女','中性'];
 function cgOf(i){ return i.div==='FTW'?'鞋類':i.div==='ACC'?'配件':i.part==='bottom'?'下身':'上身'; }
@@ -1300,6 +1317,13 @@ async function adminSubmit(){
 const VIEWS=['order','mine','admin'];
 function setView(v){ VIEWS.forEach(x=>{ $('#view-'+x).hidden=x!==v; $('#v-'+x).setAttribute('aria-pressed',x===v); }); $('#tally').hidden=v!=='order'; document.body.style.paddingBottom=v==='order'?'':'24px'; if(v==='mine') startMine(); if(v==='admin') startAdmin(); window.scrollTo({top:0}); }
 VIEWS.forEach(v=>$('#v-'+v).addEventListener('click',()=>setView(v)));
+function storyHTML(){
+  const D=(window.DST_STORY&&window.DST_STORY.season)||null; if(!D) return '<p>季節商品資訊整理中。</p>';
+  const tbl=t=>`<div class="tbl"><table><thead><tr>${t.head.map(x=>`<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${t.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  return `<div class="story"><p class="lead">${esc(D.lead)}</p>${D.sections.map(sec=>`<h3>${esc(sec.h)}</h3>${sec.note?`<p class="snote">${esc(sec.note)}</p>`:''}${sec.table?tbl(sec.table):''}${sec.cards?`<div class="scards">${sec.cards.map(c=>`<div class="scard"><h4>${esc(c.t)}</h4><ul>${c.b.map(l=>`<li>${esc(l)}</li>`).join('')}</ul></div>`).join('')}</div>`:''}`).join('')}<p class="sfoot">${esc(D.foot||'')}</p></div>`;
+}
+function openStory(){ $('#overlay').innerHTML=`<div class="scrim"><div class="panel" role="dialog" aria-label="季節商品資訊"><div class="phead"><h2>${esc((window.DST_STORY&&window.DST_STORY.season.title)||'季節商品資訊')}</h2><button class="btn sm x" data-close>關閉</button></div>${storyHTML()}</div></div>`; }
+$('#v-story').addEventListener('click',openStory);
 
 // my orders
 let mineUnsub=null, mineDocs=[];

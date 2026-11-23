@@ -10,6 +10,7 @@
 - 溝通：繁體中文（台灣），直接講重點，文字不要有 AI 腔。
 - 早期四套系統（SDR、DST Early Buy、BY 27SS、BY 27FW）**程式碼幾乎一樣**，只差商品資料、品牌色、名稱字串和 localStorage key。後來又加了 DSTC、鞋類站、WAAC 現貨站，規則仍以 SDR 範本為準，但各站有自己的例外（見第 9 節）。後端 `Code.gs` 早期四套之間約差 20 行（品牌色、Excel 檔名、寄件名稱，另有健康檢查文字、訂單頁標題、信件主旨與內文中的品牌名）；複製新品牌時以 `diff` 比對範本逐行改。
 - 範本是 SUN DAY RED FW27（`sdr-fw27-order`）。新功能先在範本做，再同步到其他三套。
+- **每套訂貨站都要有「季節商品資訊」**（Marc 2026-11-23 定）：右上檢視列的按鈕，點開是側邊面板，內容放 `story.js`（BY 用 `window.BY_STORY`、DSTC 用 `window.DST_STORY`），結構一樣：lead＋sections（table／cards）＋foot。只放商品資訊（材質、機能、版型、搭配、上市月份），不放價格、款數、銷售目標、售罄率。新品牌建站時一起做，沒有原廠中文資料就從 data.js 的系列說明整理。
 - 不要做的事：不輸入任何登入密碼、不幫人建帳號、不在網站或給客戶的檔案放供貨價或外幣價。需要授權、建 repo、驗證碼的步驟交給 Marc 本人。
 
 ## 0.5 多個 AI 輪流維護（同步規則，一定要照做）
@@ -338,6 +339,7 @@ Excel 訂單本「總表」有同樣的分頁、大類、系列（款色數、�
 
 | 日期 | AI | 系統 | 內容 | commit |
 |---|---|---|---|---|
+| 2026-11-23 | Claude | DSTC | 系列分頁順序改成 RUNNING、INSPIRED、TRAINING…（TRAINING 移到第三，預設選取不變）；系列篩選按鈕放大（桌機 14px、手機／側欄 13px）；新增右上「季節商品資訊」面板（`story.js`，比照 BY 27FW：上市節奏表＋服裝／配件／鞋款系列卡），handoff 第 0 節加「每套訂貨站都要有季節商品資訊」 | （本次） |
 | 2026-11-23 | Claude | DSTC | 待確認組盡量上線：DSTC_RPN 11 款色（不一定正確）、DSTC_RPS 26 款同款樣品照，借圖新增 6 款色；index.html 套用與黃字顯示；rp.js?v=20261123b | （本次） |
 | 2026-11-23 | Claude | DSTC | 實體圖第二批：原廠補拍 841 張比對後新增 270 款色／516 張（rp_b*，LINE 原檔不重壓），rp.js 合併 DSTC_RP／DSTC_RPI，DSTC_RPB 重算 143→276；待確認 16 組 pending_b.csv。寄信附檔 Excel 改分級（300px→220px→不放實體圖）避免超過 15MB；rp.js 版本參數改 20261123a | e09ea4e＋（本次） |
 | 2026-11-23 | Grok Bot | 2XU | 開通收單：系統帳號試算表「2XU H2-27 正式訂貨 線上訂單」（ID `1uG5_S6ga0fLiHiL4U_5OB-zYVQyy_yQmaKRqTVMpJnc`，分享給 marc_wang@emers.com 可編輯）＋ Apps Script「2XU H2-27 正式訂貨 收單」v1（執行身分：我、存取：任何人；不設指令碼屬性，SSO 走 SSO_PROXY_URL，與 DSTC 相同）。前台 config.js 已接 SUBMIT_URL。repo main：a20cacb、066385a、f38a8f1（另有重複 commit 50ba526）。WHL 內部站改回一般收單卡片（v=20261123141612）。未完成：Claude 每日排程步驟 4 需加讀 2XU 試算表（`訂單!A1:Z500`＋分頁清單 → `--rows 2xu-h227=… --tabs 2xu-h227=…`）；一鍵統整交單 5 折沿用 DSTC（`HO_DISC=0.5`），尚未向 Marc 確認。 | a20cacb／066385a／f38a8f1 |
