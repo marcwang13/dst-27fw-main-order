@@ -381,7 +381,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
 .zm-note,.zm-bar{flex:none}
 .zm-nav{position:absolute;inset:0;pointer-events:none;z-index:2}.zm-nav .zm-arrow{pointer-events:auto}
 .zm-cap{color:#0a3f94;font-weight:600;white-space:nowrap}
-.zm-note{padding:6px 12px;border-top:1px solid #e6e6e6;background:#fff8e1;color:#7a4b00;font-size:12px;line-height:1.4}
+.zm-note{padding:6px 12px;border-top:1px solid #e6e6e6;background:#fff8e1;color:#7a4b00;font-size:12px;line-height:1.4;white-space:pre-line}
 .zm-img .none{position:absolute;inset:0;display:grid;place-items:center;color:#888}
 .zm-x{position:absolute;top:8px;right:8px;z-index:2;border:0;width:32px;height:32px;border-radius:50%;background:rgb(0 0 0 / .55);color:#fff;font-size:18px;line-height:1}
 .zm-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid #e6e6e6;color:#222;font-size:12px}
@@ -673,7 +673,7 @@ tfoot td{font-weight:700;background:var(--sunk)}
 <script src="data.js?v=20261118c"></script>
 <script src="imgs.js?v=20261118e"></script>
 <script src="pc.js?v=20261118d"></script>
-<script src="rp.js?v=20261123a"></script>
+<script src="rp.js?v=20261123b"></script>
 <script src="ref.js?v=20261119u"></script>
 <script>
 (function(){
@@ -682,10 +682,15 @@ const IMG = window.SDR_IMG || {};
 // 實體圖（rp.js）：DSTC_RPI 款色 id → [[圖檔鍵, 說明]]，圖檔在 big/<鍵>.jpg（長邊 2000px）；RP 記寬高。放大檢視圖框與娃娃圖相同，照片限制在娃娃圖顯示範圍內 contain
 const RP = window.DSTC_RP || {}, RPI = window.DSTC_RPI || {};
 // 已有原廠配色照的款色：單色實拍排最前（Excel 實體圖欄取第一張），同框多色實拍排在原廠配色照之後
+ITEMS.forEach(i=>{ i.ph0=(i.photos||[]).slice(); });
 ITEMS.forEach(i=>{ const r=RPI[i.id]; if(r&&r.length){ const old=i.photos||[], oc=old.map(()=>'原廠配色照'), rp=r.map(x=>x[0]), rc=r.map(x=>x[1]), solo=!/同框/.test(rc[0]); i.photos=solo?[...rp,...old]:[...old,...rp]; i.phcap=solo?[...rc,...oc]:[...oc,...rc]; i.hasRP=true; } });
 // 同款借圖（rp.js DSTC_RPB）：沒有自己實拍的款色，借同款有實拍顏色的正反面（排在原廠配色照後面），說明照 WHL build_imgref 寫法；卡片按鈕寫「同款實體圖」
-const RPB = window.DSTC_RPB || {};
-ITEMS.forEach(i=>{ const b=RPB[i.id], r=b&&RPI[b[0]]; if(!r||i.hasRP) return; const old=i.photos||[]; i.photos=[...old,...r.map(x=>x[0])]; i.phcap=[...old.map(()=>'原廠配色照'),...r.map(x=>x[1].replace(/^實體/,'同款實體'))]; i.rpBorrow=b[1]; i.rpBorrowOnly=!old.length; });
+const RPB = window.DSTC_RPB || {}, RPN = window.DSTC_RPN || {}, RPS = window.DSTC_RPS || {};
+ITEMS.forEach(i=>{ const b=RPB[i.id], r=b&&RPI[b[0]]; if(!r||i.hasRP) return; const old=i.photos||[]; i.photos=[...old,...r.map(x=>x[0])]; i.phcap=[...old.map(()=>'原廠配色照'),...r.map(x=>x[1].replace(/^實體/,'同款實體'))]; i.rpBorrow=b[1]+(RPN[b[0]]?'；此款照片不一定正確':''); i.rpBorrowOnly=!old.length; });
+// 不一定正確的自己實拍（rp.js DSTC_RPN）：黃字說明；同款樣品照（DSTC_RPS）：顏色不在系統、色號拿不準或品項存疑的實拍，沒有自己實拍的款色顯示。pri 1 取代同款借圖，0 接在借圖後面（2026-11-23）
+ITEMS.forEach(i=>{ if(i.hasRP&&RPN[i.id]) i.rpNote=RPN[i.id]; const s=RPS[i.style]; if(!s||i.hasRP) return; const note=s.n.replace('{色}',`${i.color}(${i.cc})`);
+  if(s.pri||!i.rpBorrow){ const old=i.ph0||[]; i.photos=[...old,...s.p.map(x=>x[0])]; i.phcap=[...old.map(()=>'原廠配色照'),...s.p.map(x=>x[1])]; i.rpBorrow=note; i.rpBorrowOnly=!old.length; }
+  else { i.photos=[...i.photos,...s.p.map(x=>x[0])]; i.phcap=[...i.phcap,...s.p.map(x=>x[1])]; i.rpBorrow+='\n另附同款樣品照：'+note; } });
 const hasImg = h=>!!(h&&(IMG[h]||RP[h]));
 const BY = Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 // 單色款式圖：有裁切框的款色，款式圖（卡片、放大、Excel）只顯示該色。it.photos 只放實體圖（配色照），沒有就顯示「實體圖待更新」
@@ -781,7 +786,7 @@ function picHTML(it){
   const ph=it.photos||[];
   const h = it.doll||ph[0];
   const src = h && IMG[h];
-  const sw = `<div class="sw">${it.doll?'<button data-pic="doll">款式圖</button>':''}<button data-pic="photo"${ph.length?'':' disabled title="實體圖待更新"'}${it.rpBorrow?` title="${esc(it.rpBorrow)}"`:''}>${it.rpBorrowOnly?'同款實體圖':'實體圖'}${ph.length>1?' '+ph.length:''}</button></div>`;
+  const sw = `<div class="sw">${it.doll?'<button data-pic="doll">款式圖</button>':''}<button data-pic="photo"${ph.length?'':' disabled title="實體圖待更新"'}${(it.rpBorrow||it.rpNote)?` title="${esc(it.rpBorrow||it.rpNote)}"`:''}>${it.rpBorrowOnly?'同款實體圖':'實體圖'}${ph.length>1?' '+ph.length:''}</button></div>`;
   if(!h&&!src) return `<span class="none">圖片待補</span>`;
   const pc=(PC[it.id]&&h&&h===it.doll)?` data-pc="${esc(it.id)}"`:'';
   const fb=src?` onerror="this.onerror=null;this.src='${src}'"`:'';
@@ -814,7 +819,7 @@ function renderLB(anim){
   const style=(anim&&LB.ox!=null)?` style="transform-origin:${LB.ox}px ${LB.oy}px"`:'';
   const existing=document.querySelector('#overlay .zm');
   if(existing && !anim){ existing.className='zm '+(isP?'photo':'doll'); const zi=existing.querySelector('.zm-img'); zi.innerHTML=img; existing.querySelector('.zm-nav').innerHTML=arrows; existing.querySelector('.zm-bar').innerHTML=`<span class="nm">${esc(it.zh||it.en)} ・ ${esc(it.color)}</span>${cap}${cnt}${tabs}`; fitPhoto(); return; }
-  $('#overlay').innerHTML=`<div class="zm-scrim" data-close><div class="zm ${isP?'photo':'doll'}" role="dialog" aria-label="商品圖片"${style}><button class="zm-x" data-close aria-label="關閉">×</button><div class="zm-img">${img}</div><div class="zm-nav">${arrows}</div>${it.rpBorrow?`<div class="zm-note">${esc(it.rpBorrow)}</div>`:''}<div class="zm-bar"><span class="nm">${esc(it.zh||it.en)} ・ ${esc(it.color)}</span>${cap}${cnt}${tabs}</div></div></div>`;
+  $('#overlay').innerHTML=`<div class="zm-scrim" data-close><div class="zm ${isP?'photo':'doll'}" role="dialog" aria-label="商品圖片"${style}><button class="zm-x" data-close aria-label="關閉">×</button><div class="zm-img">${img}</div><div class="zm-nav">${arrows}</div>${(it.rpBorrow||it.rpNote)?`<div class="zm-note">${esc(it.rpBorrow||it.rpNote)}</div>`:''}<div class="zm-bar"><span class="nm">${esc(it.zh||it.en)} ・ ${esc(it.color)}</span>${cap}${cnt}${tabs}</div></div></div>`;
   fitPhoto();
   if(anim&&LB.ox!=null){ const z=$('#overlay .zm'); const r=z.getBoundingClientRect(); z.style.transformOrigin=`${LB.ox-r.left}px ${LB.oy-r.top}px`; }
 }
@@ -1560,7 +1565,7 @@ async function buildBook(qty, meta){
     let r=5;
     for(const it of its){
       const row=ws.getRow(r); const q=qty[it.id]||{};
-      const vals=[it.id,it.no||'',null,null,it.theme||'',it.drop||'',it.cat||'',it.gen||'',it.style||'',it.zh||'',it.en,it.color,it.cc||'',it.sku||'',it.icon||'',it.fab||'',it.series||'',it.ov||'',it.dt||'',it.tech||'',[it.note,it.rpBorrow?'【同款實體圖】'+it.rpBorrow:''].filter(Boolean).join('\n'),it.price||null];
+      const vals=[it.id,it.no||'',null,null,it.theme||'',it.drop||'',it.cat||'',it.gen||'',it.style||'',it.zh||'',it.en,it.color,it.cc||'',it.sku||'',it.icon||'',it.fab||'',it.series||'',it.ov||'',it.dt||'',it.tech||'',[it.note,it.rpBorrow?'【同款實體圖】'+it.rpBorrow:'',it.rpNote?'【實體圖】'+it.rpNote:''].filter(Boolean).join('\n'),it.price||null];
       vals.forEach((v,k)=>{ const c=row.getCell(k+1); c.value=v; c.font=F; c.border=border; c.alignment={vertical:k>=15&&k<=20?'top':'middle',wrapText:k>=4}; });
       row.getCell(cPrice).numFmt='#,##0';
       sizes.forEach((z,j)=>{ const c=row.getCell(cS0+j); c.border=border; c.alignment={horizontal:'center',vertical:'middle'}; c.font={...F,bold:true};
