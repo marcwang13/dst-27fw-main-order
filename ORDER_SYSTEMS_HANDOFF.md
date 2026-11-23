@@ -2,7 +2,7 @@
 
 > **這份文件是唯一正本**，只維護在 `marcwang13/dst-27fw-main-order` 的 `ORDER_SYSTEMS_HANDOFF.md`。其他訂貨 repo（SDR、DST Early Buy、BY 27SS、BY 27FW，以及後來的 WAAC）裡的同名檔只指向這裡，不要再各寫一份完整副本。
 > 給接手的 AI：這份文件描述艾盟仕（EMERS GROUP）批發事業處各套經銷線上訂貨系統的完整現況。讀完這份，再讀範本 repo 的程式碼，就能接手維護、修改或複製新品牌。
-> 文件更新：2026-11-20（Asia/Taipei，Grok Bot；DSTC 實體圖）。以 GitHub 本 repo 最新 commit 為準；文件和程式碼衝突時，相信程式碼，並回報差異。
+> 文件更新：2026-11-23（Asia/Taipei，Grok Bot；新增 2XU H2-27，本機建置、尚未建 repo／部署）。以 GitHub 本 repo 最新 commit 為準；文件和程式碼衝突時，相信程式碼，並回報差異。
 
 ## 0. 先知道這些
 
@@ -31,6 +31,7 @@ Marc 同時用 Claude 和 Grok Bot 維護這些訂貨系統，一次只會有一
 | DST | DESCENTE 27FW Early Buy | 上線收單中 | https://marcwang13.github.io/dst-27fw-order/ | marcwang13/dst-27fw-order | 69／23 | `DST27-` | `#0a3f94` 藍 | `dst-` |
 | DSTC | DESCENTE 27FW 正式訂貨（27Q3Q4 Convention） | 建置中（台灣定價待定；網頁不顯示價格，Excel 附韓幣 MSRP） | https://marcwang13.github.io/dst-27fw-main-order/ | marcwang13/dst-27fw-main-order | 1,114／456 | `DSTC27-` | `#0a3f94` 藍 | `dstc-` |
 | WAAC | WAAC FW26 現貨（現有庫存接單） | 上線收單中（2026-11-19） | https://marcwang13.github.io/waac-fw26-stock-order/ | marcwang13/waac-fw26-stock-order | 19／11（25 個尺寸 SKU，168 件） | `WAAC26S-` | `#141414` 黑＋`#c8102e` 紅 | `waac-` |
+| 2XU | 2XU H2-27 正式訂貨 | 建置中（本機 `/workspace/orderrepos/2xu-h227-order`，已 git init 未建 GitHub repo、未部署；傳單模式；經銷商下單截止 2026/11/26） | （未上線） | （待 Marc 建 `marcwang13/2xu-h227-order`） | 503／149 | `2XU27-` | `#111111` 黑 | `2xu-` |
 | BYS | BLACK YAK 27SS | 未完成（已上線，未正式開放） | https://marcwang13.github.io/by-27ss-order/ | marcwang13/by-27ss-order | 747／349 | `BYS27-` | `#141414` 黑 | `bys-` |
 | BYF | BLACK YAK 27FW | 未完成（已上線，未正式開放） | https://marcwang13.github.io/by-27fw-order/ | marcwang13/by-27fw-order | 680 款色（2026-11-13 變更紀錄；舊表寫的 150／148 已過時） | `BYF27-` | `#141414` 黑 | `byf-` |
 
@@ -320,6 +321,8 @@ Excel 訂單本「總表」有同樣的分頁、大類、系列（款色數、�
 
 ## 10. 開新品牌（照範本複製）
 
+> **2026-11-23 起（Marc 指示「以後都是」）：新品牌的線上訂單＋Excel 訂單本一律比照 DSTC（`dst-27fw-main-order`）架構**——卡片＝一款、同款多色列、性別／大類／系列篩選、尺寸格、下單總覽、Excel 訂單本（含款式圖／實體圖）匯出匯入、Apps Script 收單、金色 EMERS-WHL TW logo 在品牌名左邊、換品牌色。第一個照做的是 2XU H2-27（`2xu-h227-order`）：`tools/adapt_from_dstc.py` 是把 DSTC `index.html` 逐條改成新品牌的腳本（失敗會停在那一條），`tools/build_data.py` 從原廠訂單表＋型錄 PDF 產資料與圖，可當下一個品牌的起點。下面 1～6 步的流程照舊，第 3 步的「範本」改成 DSTC。
+
 1. **收資料**：品牌訂單本 Excel（款號、品名、色號、色碼 SKU、尺寸、零售價、月份／交期、主題、商品說明）、尺寸表、娃娃圖或 CAD 圖、實體圖、前季尺寸銷售佔比、主題色。缺零售價、交期年份錯、整列標黃的先列給 Marc 確認；原表反黃＝不建議下單，品名加註。
 2. **Marc 建 repo**：`marcwang13/<brand>-<season>-order`，開 GitHub Pages（main／root），給 AI 的 GitHub 帳號或 App 寫入權限。
 3. **複製範本**：把 `sdr-fw27-order` 全部檔案複製過去，重產 `data.js`、`imgs.js`、`big/`；改第 3 節「字串差異」表的每一項、CSS `--brand` 色、`SHEETS`、`MONTH_ORDER`、`SIZE_COLS`、`SHARE`、訂單編號前綴；`NOTIFY_TO` 用固定名單。
@@ -331,6 +334,7 @@ Excel 訂單本「總表」有同樣的分頁、大類、系列（款色數、�
 
 | 日期 | AI | 系統 | 內容 | commit |
 |---|---|---|---|---|
+| 2026-11-23 | Grok Bot | 2XU | 新建 2XU H2-27 正式訂貨（本機 repo `2xu-h227-order`，照 DSTC 架構；未推 GitHub、未部署）：503 款色／149 款／2,619 尺寸，分頁＝原廠 Story 13 個，網頁顯示台灣建議售價 NT$；款式圖＝原廠訂單表內嵌圖（503 款色，8 款色借同款標示），實體圖＝型錄照（296 款色自有、32 借同款；長邊<220px 與漸層遮罩不用）；Drop 只顯示 Drop 1／2／3，不放月份（Marc 11/23）；原廠每色 20 件為全台灣合計，網站與 Excel 不寫；經銷商截止 2026/11/26；Code.gs 由 DSTC 版改品牌字串／Drop／NT$，要新開試算表＋Apps Script。第 10 節加「以後新品牌比照 DSTC」 | （本次） |
 | 2026-11-20 | Grok Bot | DSTC | 實體圖放大改「填滿圖片區高度＋視窗寬度貼合照片」（不再限制不超過娃娃圖；手機改縮高度貼合；標題列可換行） | （本次） |
 | 2026-11-20 | Grok Bot | DSTC | 實體圖改版（Marc 看完後）：放大檢視實體圖與娃娃圖同圖框、照片限制在娃娃圖顯示範圍內 contain（拿掉「原尺寸」）；Excel 實體圖顯示框同款式圖；同款借圖 143 款色（rp.js DSTC_RPB，說明在放大檢視與 Excel 備註，卡片「同款實體圖」） | （本次） |
 | 2026-11-20 | Grok Bot | DSTC | 實體圖上線：4 本韓國門市實拍相簿比對後 259 款色、375 張（big/rp_*.jpg 長邊 2000px q90、rp.js 對照表、放大檢視加說明（「原尺寸」按鈕同日已拿掉）、Excel 實拍 400px）；待確認 29 組、畫質待確認 4 張見 tools/realphoto/ | （本次） |
