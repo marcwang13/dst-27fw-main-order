@@ -170,6 +170,7 @@ button{cursor:pointer}
 .offbar span{flex:1;min-width:220px}
 .xlbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-bottom:14px;font-size:13px;color:var(--muted)}
 .xlhint{font-size:12px}
+.imgbar{margin-top:-6px}
 
 /* filter rail */
 #list{overflow-anchor:none}
@@ -561,6 +562,12 @@ tfoot td{font-weight:700;background:var(--sunk)}
       <button class="btn sm" id="x-import">匯入 Excel 訂單本</button>
       <input type="file" id="x-file" accept=".xlsx" hidden>
       <span class="xlhint" id="x-msg"></span>
+    </div>
+    <div class="xlbar imgbar">
+      <span>商品圖</span>
+      <button class="btn sm" id="i-series">下載本系列商品圖</button>
+      <button class="btn sm" id="i-all">一鍵下載全部商品圖</button>
+      <span class="xlhint" id="i-msg">高清原圖，檔名＝品號；依系列／男女中性分資料夾（ZIP）</span>
     </div>
     <div class="dnote" id="refnote"><details><summary>過往參考對照標準（點開查看）</summary><ol class="rn">
       <li><b>同款延續（L1）</b>：只找秋冬舊款，符合其中一種才算。<ul>
@@ -1039,6 +1046,7 @@ function setRefReg(k,unitEl){ refReg=k; try{ sessionStorage.setItem('dstc-refreg
 function renderRgs(){ const el=document.getElementById('rgs'); if(el) el.innerHTML=REF_REG.map(([k,l])=>`<button class="sg" data-rg="${k}" aria-pressed="${k===refReg}">${l}</button>`).join(''); }
 function refRerender(style){ (style?[style]:[...refOpen]).forEach(rerenderUnit); }
 function renderList(){
+  { const ib=document.getElementById('i-series'); if(ib&&!ib.disabled) ib.textContent=S.only?'下載本系列商品圖':`下載「${S.sheet}」商品圖`; }
   const arr=filtered();
   if(!arr.length){ $('#list').innerHTML=`<div class="empty">${S.only?'還沒有下單的商品。在各分頁的尺寸格輸入數量即可。':'沒有符合條件的商品。'}</div>`; return; }
   const groups=[]; let key=null;
@@ -1894,6 +1902,36 @@ async function importBook(file){
 
 $('#x-export').addEventListener('click',async()=>{ const b=$('#x-export'); b.disabled=true; b.textContent='產生中…'; $('#x-msg').textContent=''; try{ const ok=await exportBook(S.qty,{...S.dealer,oid:S.editing,branches:branchesForExport()}); if(ok) $('#x-msg').textContent=totals().qty?'已含目前填的數量。':'目前沒有數量，下載的是空白訂單本。'; }catch(e){ if(e?.code!=='declined'&&e?.code!=='cancelled') $('#x-msg').textContent=e.message||'下載未完成'; } b.disabled=false; b.textContent='下載 Excel 訂單本'; });
 $('#x-import').addEventListener('click',()=>$('#x-file').click());
+// 商品圖下載（2026-11-24）：big/ 高清原圖打包 ZIP。檔名＝品號（sku）；款式圖有單色裁切框就裁成該色（原解析度、JPEG 0.95）。
+// 本系列：<系列>/<男|女|中性>/；全部：DST 27FW Main Order/<系列>/<男|女|中性>/。
+// 同一品號多張：品號.jpg＝款式圖、品號_配色照.jpg＝原廠配色照、品號_實拍1.jpg…＝自己的韓國門市實拍。借同款／同款樣品照是別的顏色，不放。
+const IMG_ROOT='DST 27FW Main Order';
+const fsName=s=>String(s||'').replace(/[\\/:*?"<>|]+/g,'_').trim()||'未分類';
+function imgFilesOf(it){ const out=[], base=fsName(it.sku||it.id); if(it.doll) out.push({n:base+'.jpg',h:it.doll,pc:PC[it.id]||null});
+  (it.ph0||[]).forEach((h,k,a)=>out.push({n:base+'_配色照'+(a.length>1?k+1:'')+'.jpg',h}));
+  (RPI[it.id]||[]).forEach((x,k)=>out.push({n:base+'_實拍'+(k+1)+'.jpg',h:x[0]})); return out; }
+async function imgBytes(f){ const r=await fetch(big(f.h)); if(!r.ok) throw new Error('圖檔讀取失敗'); const bl=await r.blob();
+  if(!f.pc) return bl; try{ const bm=await createImageBitmap(bl), W=bm.width, H=bm.height, b=f.pc, x=b[0]*W, y=b[1]*H, w=Math.max(1,(b[2]-b[0])*W), h=Math.max(1,(b[3]-b[1])*H);
+    const c=document.createElement('canvas'); c.width=Math.round(w); c.height=Math.round(h); const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(bm,x,y,w,h,0,0,c.width,c.height); bm.close&&bm.close();
+    const o=await new Promise(res=>c.toBlob(res,'image/jpeg',.95)); return o||bl; }catch(e){ return bl; } }
+let czP=null; const loadCZ=()=>czP||(czP=import('./vendor/client-zip.js').catch(e=>{ czP=null; throw new Error('壓縮元件載入失敗，請檢查網路後再試一次。'); }));
+async function downloadImgs(items,root,zipName,btn){ const msg=$('#i-msg'), lab=btn.textContent; document.querySelectorAll('#i-series,#i-all').forEach(b=>b.disabled=true);
+  const jobs=[]; const seen=new Set(); const go=GEN_ORDER;
+  const its=items.slice().sort((a,b)=>TAB_ORDER.indexOf(a.sheet)-TAB_ORDER.indexOf(b.sheet)||go.indexOf(a.gen)-go.indexOf(b.gen)||String(a.sku).localeCompare(String(b.sku)));
+  for(const it of its) for(const f of imgFilesOf(it)){ const name=[root,fsName(it.sheet),fsName(it.gen||'中性'),f.n].filter(Boolean).join('/'); if(seen.has(name)) continue; seen.add(name); jobs.push({...f,name}); }
+  let done=0, fail=0; const N=jobs.length; const prog=()=>{ btn.textContent=`打包中… ${done}/${N}`; };
+  try{ const {downloadZip}=await loadCZ(); let fh=null;
+    if(window.showSaveFilePicker){ try{ fh=await showSaveFilePicker({suggestedName:zipName,types:[{description:'ZIP',accept:{'application/zip':['.zip']}}]}); }catch(e){ if(e&&e.name==='AbortError'){ return; } fh=null; } }
+    prog(); const P=6, q=[]; let k=0; const pull=()=>{ while(q.length<P&&k<N){ const j=jobs[k++]; q.push(imgBytes(j).then(b=>({j,b}),()=>({j,b:null}))); } };
+    async function* gen(){ pull(); while(q.length){ const {j,b}=await q.shift(); pull(); done++; if(done%10===0||done===N) prog(); if(!b){ fail++; continue; } yield {name:j.name,input:b,lastModified:new Date()}; } }
+    const resp=downloadZip(gen());
+    if(fh){ const ws=await fh.createWritable(); await resp.body.pipeTo(ws); }
+    else { const blob=await resp.blob(); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=zipName; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); }
+    msg.textContent=`已下載 ${N-fail} 張（${its.length} 款色）`+(fail?`，${fail} 張讀取失敗`:'');
+  }catch(e){ msg.textContent=e.message||'下載未完成'; }
+  finally{ document.querySelectorAll('#i-series,#i-all').forEach(b=>b.disabled=false); btn.textContent=lab; } }
+$('#i-series').addEventListener('click',e=>{ const sh=S.sheet; const its=ITEMS.filter(i=>i.sheet===sh); if(!its.length) return; downloadImgs(its,'',`DST 27FW ${fsName(sh)} 商品圖.zip`,e.currentTarget); });
+$('#i-all').addEventListener('click',e=>{ const n=ITEMS.length; if(!confirm(`全部 ${n} 款色的高清圖約 630MB，下載要幾分鐘，建議用電腦。要開始嗎？`)) return; downloadImgs(ITEMS,IMG_ROOT,IMG_ROOT+'.zip',e.currentTarget); });
 $('#x-file').addEventListener('change',async e=>{ const f=e.target.files[0]; e.target.value=''; if(!f) return; $('#x-msg').textContent='讀取中…';
   try{ const res=await importBook(f); $('#x-msg').textContent='';
     const n=Object.keys(res.qty).length; let q=0; for(const id in res.qty) for(const z in res.qty[id]) q+=res.qty[id][z];
